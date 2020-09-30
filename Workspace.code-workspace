@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "Blue Pill Hardware Demo"
+		},
+		{
+			"path": "Nano Hardware Demo"
+		},
+		{
+			"path": "..\\..\\Arduino\\libraries\\liblamb"
+		}
+	],
+	"settings": {}
+}
