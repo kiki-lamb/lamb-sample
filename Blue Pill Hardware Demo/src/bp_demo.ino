@@ -20,8 +20,8 @@ int16_t  sample;
 int16_t  capture[8];
 int32_t  avg_sample = 0;
 double   pct;
-uint32_t delayMs    = 1;
-uint32_t oldDelayMs = delayMs;
+uint32_t delay_ms    = 1;
+uint32_t oldDelayMs = delay_ms;
 
 void setup() {
   pinMode(PA0, INPUT);
@@ -63,55 +63,54 @@ void graph() {
   col %= col_max; 
 }
 
+size_t sample_ix = 0;
+
 void audio() {  
-  for (uint16_t ii=0;ii<4;ii++){
-    for (size_t i=0;i<NUM_ELEMENTS;i++){
-      delayMicroseconds(delayMs);
-      
-      if (((i % (1 << text_ratio)) == 0) && 
-          (oldDelayMs != delayMs)) {
-        draw_text();
-      }
-      
-      if ((i % (1 << capture_ratio)) == 0) {
-        avg_sample >>= capture_ratio;
-
-        graph();
-
-        avg_sample = 0;
-      }
-      
-      if ((i % (1 << (ctl_ratio))) == 0) {
-        uint16_t tmp0 = knob0;
-        knob0 <<= 4;
-        knob0 -= tmp0;
-        knob0 += analogRead(PA0);
-        knob0 >>= 4;
-        pct = knob0 / 4092.0;
-
-        oldDelayMs = delayMs;
-        uint16_t tmp1 = knob1;
-        knob1 <<= 3;
-        knob1 -= tmp1;
-        knob1 += analogRead(PA1);
-        knob1 >>= 3;
-        delayMs = knob1 >> 6;
-      }
-    
-      sample = pct * data[i];      
-      avg_sample += sample;
- 
-      lData = sample;
-      hData = sample;
-      hData >>= 8;
-      
-      digitalWrite(I2S_WS, LOW);
-      SPI.transfer(hData);
-      SPI.transfer(lData);
-      
-      digitalWrite(I2S_WS, HIGH);
-    }
+  if (((sample_ix % (1 << text_ratio)) == 0) && 
+      (oldDelayMs != delay_ms)) {
+    draw_text();
   }
+  
+  if ((sample_ix % (1 << capture_ratio)) == 0) {
+    avg_sample >>= capture_ratio;
+
+    graph();
+
+    avg_sample = 0;
+  }
+  
+  if ((sample_ix % (1 << (ctl_ratio))) == 0) {
+    uint16_t tmp0 = knob0;
+    knob0 <<= 4;
+    knob0 -= tmp0;
+    knob0 += analogRead(PA0);
+    knob0 >>= 4;
+    pct = knob0 / 4092.0;
+
+    oldDelayMs = delay_ms;
+    uint16_t tmp1 = knob1;
+    knob1 <<= 3;
+    knob1 -= tmp1;
+    knob1 += analogRead(PA1);
+    knob1 >>= 3;
+    delay_ms = knob1 >> 6;
+  }
+  
+  sample = pct * data[sample_ix];      
+  avg_sample += sample;
+ 
+  lData = sample;
+  hData = sample;
+  hData >>= 8;
+  
+  digitalWrite(I2S_WS, LOW);
+  SPI.transfer(hData);
+  SPI.transfer(lData);
+  
+  digitalWrite(I2S_WS, HIGH);
+
+  sample_ix ++;
+  sample_ix %= NUM_ELEMENTS;
 }
 
 void draw_text() {
@@ -122,8 +121,6 @@ void draw_text() {
   tft.println(pct);
   tft.setCursor(10, 50);
   tft.println(knob1);
-  tft.setCursor(10, 70);
-  tft.println(delayMs);
 }
 
 void loop(void) {
