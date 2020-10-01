@@ -13,7 +13,8 @@ const uint32_t capture_ratio = 3;
 
 HardwareTimer
          timer_1(1),
-         timer_2(2);
+         timer_2(2),
+         timer_3(3);
 Adafruit_ILI9341_STM_SPI2
          tft = Adafruit_ILI9341_STM_SPI2(TFT_CS, TFT_DC);  
 uint16_t hData,
@@ -22,7 +23,8 @@ uint16_t hData,
          knob1;
 int16_t  sample;
 int32_t  avg_sample;
-size_t   sample_ix;
+size_t   sample_ix,
+         total_samples;
 double   pct;
 
 void setup() {
@@ -45,6 +47,22 @@ void setup() {
   
   lamb::MapleTimer::setup(timer_1, SRATE, srate);
   lamb::MapleTimer::setup(timer_2, KRATE, krate);
+
+  timer_3.pause();
+  timer_3.setPeriod(1000000);
+  timer_3.setChannel1Mode(TIMER_OUTPUT_COMPARE);
+  timer_3.setCompare(TIMER_CH1, 0);
+  timer_3.attachCompare1Interrupt(lrate);
+  timer_3.refresh();    
+  timer_3.resume();
+}
+
+void lrate() {
+  static uint32_t count = 0;
+  Serial.print(++count);
+  Serial.print(": ");
+  Serial.println(total_samples);
+  total_samples = 0;
 }
 
 void graph() {
@@ -93,7 +111,10 @@ void srate() {
     avg_sample >>= capture_ratio;
     // graph();
     avg_sample = 0;
+  // Serial.println("GO");
   }
+  // else
+  //  Serial.println(".");
 
   sample = pct * data[sample_ix];      
   avg_sample += sample;
@@ -108,6 +129,7 @@ void srate() {
   
   digitalWrite(I2S_WS, HIGH);
 
+  total_samples ++;
   sample_ix ++;
   sample_ix %= NUM_ELEMENTS;
 }
@@ -123,7 +145,7 @@ void draw_text() {
 }
 
 void loop(void) {
-  Serial.print("Prescale: ");
-  Serial.println(lamb::MapleTimer::prescale_from_frequency(22050));
+  // Serial.print("Prescale: ");
+  // Serial.println(lamb::MapleTimer::prescale_from_frequency(22050));
   delay(1000);
 }
