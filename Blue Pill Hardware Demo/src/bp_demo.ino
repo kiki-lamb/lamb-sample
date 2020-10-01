@@ -31,11 +31,12 @@ lamb::Device::PT8211 pt8211(I2S_WS);
 lamb::RingBuffer<int16_t, 256>
          drawbuff;
 
-lamb::oneshot<int16_t> bd(data+block_size*0, block_size);
-lamb::oneshot<int16_t> lt(data+block_size*1, block_size);
-lamb::oneshot<int16_t> sd(data+block_size*2, block_size);
-lamb::oneshot<int16_t> sy(data+block_size*3, block_size);
+typedef lamb::oneshot_plus sample_t;
 
+sample_t bd(data+block_size*0, block_size);
+sample_t lt(data+block_size*1, block_size);
+sample_t sd(data+block_size*2, block_size);
+sample_t sy(data+block_size*3, block_size);
 
 void setup() {
 #ifdef ENABLE_SERIAL
@@ -68,43 +69,54 @@ void setup() {
 
 uint32_t lrate_ix;
 
-lamb::oneshot<int16_t> * steps[] = {
-  &bd, NULL, NULL, NULL,
-  &bd, &lt,  NULL, &lt,
-  &bd, NULL, NULL, NULL,
-  &bd, NULL, NULL, NULL, 
+uint8_t bd_track[] = {
+  0xFF, 0xC0, 0x00, 0xC0,
+  0xFF, 0x00, 0x00, 0x00,
+  0xFF, 0x00, 0x00, 0x00,
+  0xFF, 0x40, 0x80, 0xC0
 };
 
-lamb::oneshot<int16_t> * steps2[] = {
-  NULL, NULL, NULL, NULL, 
-  &sd,  NULL, NULL, NULL,
-  NULL, NULL, NULL, NULL,
-  &sd,  NULL, NULL, NULL, 
+uint8_t sd_track[] = {
+  0x00, 0x00, 0x00, 0x00,
+  0xC0, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00,
+  0xC0, 0x00, 0x00, 0x60
 };
 
-// lamb::oneshot<int16_t> * steps3[] = {
-//   &sy,  NULL, &sy,  &sy,
-//   NULL, &sy,  &sy,  NULL,
-//   &sy,  &sy,  NULL, &sy,
-//   &sy,  NULL, &sy,  NULL
-// };
+uint8_t sy_track[] = {
+  0x00, 0x00, 0xFF, 0xFF,
+  0x00, 0x00, 0xFF, 0x00,
+  0x00, 0x00, 0xFF, 0xFF,
+  0x00, 0x00, 0xFF, 0x00
+};
 
-lamb::oneshot<int16_t> * steps3[] = {
-  NULL, NULL, &sy, NULL,
-  NULL, NULL, &sy, &sy,
-  NULL, NULL, &sy, NULL,
-  NULL, NULL, &sy, NULL
+uint8_t lt_track[] = {
+  0x00, 0x00, 0xFF, 0x00,
+  0x00, 0x00, 0x00, 0xC0,
+  0x00, 0x00, 0x00, 0x00,
+  0x00, 0xFF, 0x00, 0x00
 };
 
 void lrate() {
-  if (steps[lrate_ix] != NULL)
-    steps[lrate_ix]->trigger = true;
-  
-  if (steps2[lrate_ix] != NULL)
-    steps2[lrate_ix]->trigger = true;
-  
-  if (steps3[lrate_ix] != NULL)
-    steps3[lrate_ix]->trigger = true;
+  if (bd_track[lrate_ix] > 0) {
+    bd.trigger = true;
+    bd.amplitude = bd_track[lrate_ix];
+  }
+
+  if (sd_track[lrate_ix] > 0) {
+    sd.trigger = true;
+    sd.amplitude = sd_track[lrate_ix];
+  }
+
+  if (sy_track[lrate_ix] > 0) {
+    sy.trigger = true;
+    sy.amplitude = sy_track[lrate_ix];
+  }
+
+  if (lt_track[lrate_ix] > 0) {
+    lt.trigger = true;
+    lt.amplitude = lt_track[lrate_ix];
+  }
   
   static uint32_t count = 0;
   
@@ -173,14 +185,11 @@ void srate() {
 
     if (drawbuff.writable()) {
       drawbuff.write(avg_sample);
-//       Serial.print("Write ");
-//       Serial.println(avg_sample);
     }
     
     avg_sample = 0;
   }
 
-//  sample = pct * data[sample_ix];
   sample = pct * (
     (bd.play() >> 1) +
     (sd.play() >> 1) +
