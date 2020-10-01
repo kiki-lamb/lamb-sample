@@ -11,6 +11,8 @@ const uint32_t I2S_BCK       = PA5;
 const uint32_t I2S_DATA      = PA7;
 const uint32_t capture_ratio = 3;
 
+lamb::RingBuffer<int16_t, size_t, 256>
+         drawbuff;
 HardwareTimer
          timer_1(1),
          timer_2(2),
@@ -75,7 +77,13 @@ void graph() {
   tft.drawPixel(tmp_col, tmp_knob0, ILI9341_GREEN);
   tft.drawPixel(tmp_col, 239-tmp_knob0, ILI9341_GREEN);
 
-  int16_t tmp_sample = map(avg_sample, -32768, 32767, -120, 119);
+  int16_t tmp = drawbuff.read();
+  int16_t tmp_sample = map(tmp, -32768, 32767, -120, 119);
+  Serial.print("Read ");
+  Serial.print(tmp);
+  Serial.print(" of ");
+  Serial.println(drawbuff.count());
+
   
   if (tmp_sample > 0)
     tft.drawFastVLine(
@@ -109,12 +117,15 @@ void krate() {
 void srate() {
   if ((sample_ix % (1 << capture_ratio)) == 0) {
     avg_sample >>= capture_ratio;
-    // graph();
+
+    if (drawbuff.writable()) {
+      drawbuff.write(avg_sample);
+      Serial.print("Write ");
+      Serial.println(avg_sample);
+    }
+    
     avg_sample = 0;
-  // Serial.println("GO");
   }
-  // else
-  //  Serial.println(".");
 
   sample = pct * data[sample_ix];      
   avg_sample += sample;
@@ -145,7 +156,7 @@ void draw_text() {
 }
 
 void loop(void) {
-  // Serial.print("Prescale: ");
-  // Serial.println(lamb::MapleTimer::prescale_from_frequency(22050));
-  delay(1000);
+  if (drawbuff.readable()) {
+      graph();
+  }
 }
