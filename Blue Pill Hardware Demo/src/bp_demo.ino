@@ -11,6 +11,8 @@ const uint32_t I2S_BCK       = PA5;
 const uint32_t I2S_DATA      = PA7;
 const uint32_t capture_ratio = 3;
 
+lamb::Device::PT8211 pt8211(I2S_WS);
+
 lamb::RingBuffer<int16_t, size_t, 256>
          drawbuff;
 HardwareTimer
@@ -19,9 +21,7 @@ HardwareTimer
          timer_3(3);
 Adafruit_ILI9341_STM_SPI2
          tft = Adafruit_ILI9341_STM_SPI2(TFT_CS, TFT_DC);  
-uint16_t hData,
-         lData,
-         knob0,
+uint16_t knob0,
          knob1;
 int16_t  sample;
 int32_t  avg_sample;
@@ -43,11 +43,8 @@ void setup() {
   tft.fillScreen(ILI9341_BLACK);
         
   SPI.begin();
-  SPI.setBitOrder(MSBFIRST);
-  SPI.setDataMode(SPI_MODE0);
-  SPI.setClockDivider(SPI_CLOCK_DIV2);
 
-  pinMode(I2S_WS, OUTPUT);
+  pt8211.begin(&SPI);
   
   lamb::MapleTimer::setup(timer_1, SRATE, srate);
   lamb::MapleTimer::setup(timer_2, KRATE, krate);
@@ -124,7 +121,7 @@ void srate() {
     avg_sample >>= capture_ratio;
 
     if (drawbuff.writable()) {
-      drawbuff.write(avg_sample);oo
+      drawbuff.write(avg_sample);
       Serial.print("Write ");
       Serial.println(avg_sample);
     }
@@ -134,17 +131,9 @@ void srate() {
 
   sample = pct * data[sample_ix];      
   avg_sample += sample;
- 
-  lData = sample;
-  hData = sample;
-  hData >>= 8;
-  
-  digitalWrite(I2S_WS, LOW);
-  SPI.transfer(hData);
-  SPI.transfer(lData);
-  
-  digitalWrite(I2S_WS, HIGH);
 
+  pt8211.write_mono(sample);
+  
   total_samples ++;
   sample_ix ++;
   sample_ix %= NUM_ELEMENTS;
