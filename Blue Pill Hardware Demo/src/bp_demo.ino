@@ -9,7 +9,7 @@ const uint32_t TFT_CS        = PB12;
 const uint32_t I2S_WS        = PA3;
 const uint32_t I2S_BCK       = PA5;
 const uint32_t I2S_DATA      = PA7;
-const uint32_t capture_ratio = 4;
+const uint32_t capture_ratio = 3;
 
 HardwareTimer
          timer_1(1),
