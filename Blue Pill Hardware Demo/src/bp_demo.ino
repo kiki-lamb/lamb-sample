@@ -11,10 +11,11 @@ const uint32_t I2S_BCK       = PA5;
 const uint32_t I2S_DATA      = PA7;
 const uint32_t capture_ratio = 3;
 const size_t   block_size    = (NUM_ELEMENTS >> 2);
+const size_t   VOICE_COUNT   = 4;
 
 uint16_t knob0,
          knob1;
-int16_t  sample;
+int32_t  sample;
 int32_t  avg_sample;
 size_t   sample_ix,
          total_samples;
@@ -33,12 +34,12 @@ lamb::RingBuffer<int16_t, 256>
 
 typedef lamb::oneshot_plus sample_t;
 
-sample_t bd(data+block_size*0, block_size);
-sample_t lt(data+block_size*1, block_size);
-sample_t sd(data+block_size*2, block_size);
-sample_t sy(data+block_size*3, block_size);
-
+sample_t * voices[4];
 void setup() {
+  for (size_t ix = 0; ix < VOICE_COUNT; ix++) {
+   voices[ix] = new sample_t(data+block_size*ix, block_size);
+  }
+  
 #ifdef ENABLE_SERIAL
   Serial.begin(115200);
 #endif
@@ -66,291 +67,61 @@ void setup() {
   timer_3.refresh();    
   timer_3.resume();
 }
-
+ 
 uint32_t lrate_ix;
 
-uint8_t bd_track[] = {
-  0,    0,    0,    0, // 0
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0,
+const size_t TRACK_LENGTH = 32;
 
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0,
+uint8_t tracks[TRACK_LENGTH][VOICE_COUNT][2] = {
+  { { 0xCF, 0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+  { { 0,    0 },   { 0, 1 },   { 0,    0 },  { 0,    0 } },
+  { { 0,    0 },   { 0, 1 },   { 0,    0 },  { 0xFF, 0 } },
+  { { 0,    0 },   { 0, 1 },   { 0,    0 },  { 0,    0 } },
+  { { 0xCF, 0 },   { 0, 0 },   { 0x7F, 0 },  { 0,    0 } },
+  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0xFF, 0 } },
+  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0xFF, 0 } },
 
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0x40, 
-  0x40, 0,    0x40, 0,
-  
-  0x80, 0,    0,    0, // 4
-  0x80, 0,    0,    0,
-  0x80, 0,    0,    0,
-  0x80, 0,    0,    0,
+  { { 0xCF, 0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0xFF, 0 } },
+  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+  { { 0xCF, 0 },   { 0, 0 },   { 0x7F, 0 },  { 0,    0 } },
+  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0xFF, 0 } },
+  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0xFF, 1 } },
 
-  0x80, 0,    0,    0, 
-  0x80, 0,    0,    0,
-  0x80, 0,    0,    0,
-  0x80, 0,    0,    0x40,
+  { { 0xCF, 0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+  { { 0,    0 },   { 0, 1 },   { 0,    0 },  { 0,    0 } },
+  { { 0,    0 },   { 0, 1 },   { 0,    0 },  { 0xFF, 1 } },
+  { { 0,    0 },   { 0, 1 },   { 0,    0 },  { 0,    0 } },
+  { { 0xCF, 0 },   { 0, 0 },   { 0x7F, 0 },  { 0xFF, 0 } },
+  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0xFF, 0 } },
+  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0xFF, 0 } },
 
-  0x80, 0,    0,    0,
-  0x80, 0,    0,    0,
-  0x80, 0,    0,    0,
-  0x80, 0,    0,    0,
-
-  0x80, 0,    0,    0,
-  0x80, 0,    0,    0,
-  0x80, 0,    0,    0,
-  0x80, 0,    0x40, 0,
-
-  0x80, 0,    0,    0, //8
-  0x80, 0,    0,    0,
-  0x80, 0,    0,    0,
-  0x80, 0,    0,    0,
-
-  0x80, 0,    0,    0,
-  0x80, 0,    0,    0,
-  0x80, 0,    0,    0,
-  0x80, 0,    0,    0x40,
-
-  0x80, 0,    0,    0,
-  0x80, 0,    0,    0,
-  0x80, 0,    0,    0,
-  0x80, 0,    0,    0,
-
-  0x80, 0,    0,    0,
-  0x80, 0,    0,    0,
-  0x80, 0,    0,    0,
-  0x80, 0,    0x40, 0,
-
-  0x80, 0,    0,    0, // 12
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0, 
-
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0
+  { { 0xCF, 0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0xFF, 0 } },
+  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+  { { 0xCF, 0 },   { 0, 0 },   { 0x7F, 0 },  { 0,    0 } },
+  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+  { { 0xCF, 0 },   { 0, 0 },   { 0,    0 },  { 0xFF, 0 } },
+  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0xFF, 1 } },
 };
 
-uint8_t sd_track[] = {
-  0,    0,    0,    0, // 0
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0x20, 
-  0x20, 0,    0x20, 0,
-  
-  0,    0,    0,    0, // 4
-  0x20, 0,    0,    0,
-  0,    0,    0,    0,
-  0x20, 0,    0,    0,
-
-  0,    0,    0,    0, 
-  0x20, 0,    0,    0,
-  0,    0,    0,    0,
-  0x20, 0,    0,    0,
-
-  0,    0,    0,    0, 
-  0x20, 0,    0,    0,
-  0,    0,    0,    0,
-  0x20, 0,    0,    0,
-
-  0,    0,    0,    0, 
-  0x20, 0,    0,    0,
-  0,    0,    0,    0,
-  0x20, 0,    0,    0,
-
-  0,    0,    0,    0, // 8
-  0x20, 0,    0,    0,
-  0,    0,    0,    0,
-  0x20, 0,    0,    0,
-
-  0,    0,    0,    0, 
-  0x20, 0,    0,    0,
-  0,    0,    0,    0,
-  0x20, 0,    0,    0,
-
-  0,    0,    0,    0, 
-  0x20, 0,    0,    0,
-  0,    0,    0,    0,
-  0x20, 0,    0,    0,
-
-  0,    0,    0,    0, 
-  0x20, 0,    0,    0,
-  0,    0,    0,    0,
-  0x20, 0,    0,    0,
-
-  0,    0,    0,    0, // 12
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0, 
-
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0,
-  0,    0,    0,    0
-};
-
-uint8_t sy_track[] = {
-  0x80, 0x80, 0x80, 0x80, // 0
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80, 
-
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80, 
-
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80, 
-
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80, 
-
-  0x80, 0x80, 0x80, 0x80, // 4
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80, 
-
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80, 
-
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80, 
-
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80, 
-
-  0x80, 0x80, 0x80, 0x80, // 8
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80, 
-
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80, 
-
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80, 
-
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80, 
-
-  0x80, 0x80, 0x80, 0x80, // 12
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80, 
-
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80, 
-
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80, 
-
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80,
-  0x80, 0x80, 0x80, 0x80
-};
-
-uint8_t sy_shift[] = {
-  0, 0, 1, 1,
-  0, 0, 1, 1,
-  0, 0, 1, 1,
-  0, 0, 1, 2
-};
-
-uint8_t lt_track[] = { 
-  0,    0,    0xC0, 0,
-  0,    0,    0,    0,   
-  0,    0,    0,    0,   
-  0,    0x80, 0,    0
-};
+volatile bool draw_flag = false;
 
 void lrate() {
-  if (bd_track[lrate_ix % 256] > 0) {
-    bd.trigger = true;
-    bd.amplitude = bd_track[lrate_ix % 256];
-  }
+  for (size_t ix = 0; ix < VOICE_COUNT; ix++) {
+    if (tracks[lrate_ix % TRACK_LENGTH][ix][0] > 0) {
+      voices[ix]->trigger = true;
+      voices[ix]->amplitude   = tracks[lrate_ix % TRACK_LENGTH][ix][0];
+      voices[ix]->phase_shift = tracks[lrate_ix % TRACK_LENGTH][ix][1];
+    }
 
-  if (sd_track[lrate_ix % 256] > 0) {
-    sd.trigger = true;
-    sd.amplitude = sd_track[lrate_ix % 256];
+    draw_flag = true;
   }
-
-  if (sy_track[lrate_ix % 256] > 0) {
-    sy.trigger = true;
-    sy.amplitude = sy_track[lrate_ix % 256];
-  }
-  
-  sy.phase_shift = sy_shift[lrate_ix % 16];
-  
-//  if (lt_track[lrate_ix % 16] > 0) {
-//    lt.trigger = true;
-//    lt.amplitude = lt_track[lrate_ix % 16];
-//  }
   
   static uint32_t count = 0;
   
@@ -364,7 +135,34 @@ void lrate() {
   lrate_ix ++;
 }
 
+const uint32_t v_spacing = 48;
+
 void graph() {
+  if (draw_flag) {
+    for (size_t ix = 0; ix < VOICE_COUNT; ix++) {
+      if (voices[ix]->state) {
+        tft.fillRect(
+          36,
+          v_spacing*ix+(v_spacing >> 1),
+          v_spacing-10,
+          v_spacing-10,
+          ILI9341_RED
+        );
+      }
+      else {
+        tft.fillRect(
+          36,
+          v_spacing*ix+(v_spacing >> 1),
+          v_spacing-10,
+          v_spacing-10,
+          ILI9341_BLACK
+        );
+      }
+    }
+
+    draw_flag = false;
+  }            
+  
   static uint16_t col = 0;
   static const uint16_t col_max = 200; // real max 320
   uint16_t tmp_col = col+120;
@@ -376,12 +174,6 @@ void graph() {
 
   int16_t tmp = drawbuff.read();
   int16_t tmp_sample = map(tmp, -32768, 32767, -120, 119);
-// #ifdef ENABLE_SERIAL
-//   Serial.print("Read ");
-//   Serial.print(tmp);
-//   Serial.print(" of ");
-//   Serial.println(drawbuff.count());
-// #endif
   
   if (tmp_sample > 0)
     tft.drawFastVLine(
@@ -422,13 +214,16 @@ void srate() {
     
     avg_sample = 0;
   }
+  
+  sample = 0;
+  
+  for (size_t ix = 0; ix < VOICE_COUNT; ix++) {
+    sample += voices[ix]->play();
+  }
 
-  sample = pct * (
-    (bd.play() >> 1) +
-    (sd.play() >> 1) +
-    (lt.play() >> 1) +
-    (sy.play() >> 1) 
-  );
+  sample >>= 1;
+
+  sample *= pct;
   
   avg_sample += sample;
 
@@ -451,6 +246,6 @@ void draw_text() {
 
 void loop(void) {
   if (drawbuff.readable()) {
-      graph();
+    graph();
   }
 }
