@@ -30,7 +30,9 @@ size_t   sample_ix,
 double   pct;
 
 void setup() {
+#ifdef ENABLE_SERIAL
   Serial.begin(115200);
+#endif
   
   pinMode(PA0, INPUT);
  
@@ -61,9 +63,11 @@ void setup() {
 
 void lrate() {
   static uint32_t count = 0;
+#ifdef ENABLE_SERIAL
   Serial.print(++count);
   Serial.print(": ");
   Serial.println(total_samples);
+#endif
   total_samples = 0;
 }
 
@@ -79,11 +83,12 @@ void graph() {
 
   int16_t tmp = drawbuff.read();
   int16_t tmp_sample = map(tmp, -32768, 32767, -120, 119);
+#ifdef ENABLE_SERIAL
   Serial.print("Read ");
   Serial.print(tmp);
   Serial.print(" of ");
   Serial.println(drawbuff.count());
-
+#endif
   
   if (tmp_sample > 0)
     tft.drawFastVLine(
@@ -119,7 +124,7 @@ void srate() {
     avg_sample >>= capture_ratio;
 
     if (drawbuff.writable()) {
-      drawbuff.write(avg_sample);
+      drawbuff.write(avg_sample);oo
       Serial.print("Write ");
       Serial.println(avg_sample);
     }
