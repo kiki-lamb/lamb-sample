@@ -2,6 +2,7 @@
 #include "lamb.h"
 #include "samples.h"
 
+const uint32_t SRATE         = 22050;
 const uint32_t TFT_DC        = PA8;
 const uint32_t TFT_CS        = PB12;
 const uint32_t I2S_WS        = PA3;
@@ -11,19 +12,21 @@ const uint32_t capture_ratio = 3;
 const uint32_t ctl_ratio     = 10;
 const uint32_t text_ratio    = 10;
 
+HardwareTimer
+         timer(1);
 Adafruit_ILI9341_STM_SPI2
          tft = Adafruit_ILI9341_STM_SPI2(TFT_CS, TFT_DC);  
-uint16_t hData, lData;
-uint16_t knob0;
-uint16_t knob1;
+uint16_t hData,
+         lData,
+         knob0,
+         knob1;
 int16_t  sample;
-int16_t  capture[8];
-int32_t  avg_sample = 0;
+int32_t  avg_sample;
 double   pct;
-uint32_t delay_ms    = 1;
-uint32_t oldDelayMs = delay_ms;
 
 void setup() {
+  Serial.begin(115200);
+  
   pinMode(PA0, INPUT);
  
   tft.begin();
@@ -38,6 +41,19 @@ void setup() {
   SPI.setClockDivider(SPI_CLOCK_DIV2);
 
   pinMode(I2S_WS, OUTPUT);
+  
+  if (true) {
+    lamb::MapleTimer::setup(timer, 22050, srate);
+  }
+  else {   
+    timer.pause();
+    timer.setPrescaleFactor(816);
+    timer.setOverflow(1);
+    timer.setCompare(TIMER_CH1, 0);
+    timer.attachCompare1Interrupt(srate);
+    timer.refresh();
+    timer.resume();
+  }
 }
 
 void graph() {
@@ -65,17 +81,10 @@ void graph() {
 
 size_t sample_ix = 0;
 
-void audio() {  
-  if (((sample_ix % (1 << text_ratio)) == 0) && 
-      (oldDelayMs != delay_ms)) {
-    draw_text();
-  }
-  
+void srate() {  
   if ((sample_ix % (1 << capture_ratio)) == 0) {
     avg_sample >>= capture_ratio;
-
     graph();
-
     avg_sample = 0;
   }
   
@@ -86,14 +95,6 @@ void audio() {
     knob0 += analogRead(PA0);
     knob0 >>= 4;
     pct = knob0 / 4092.0;
-
-    oldDelayMs = delay_ms;
-    uint16_t tmp1 = knob1;
-    knob1 <<= 3;
-    knob1 -= tmp1;
-    knob1 += analogRead(PA1);
-    knob1 >>= 3;
-    delay_ms = knob1 >> 6;
   }
   
   sample = pct * data[sample_ix];      
@@ -124,5 +125,7 @@ void draw_text() {
 }
 
 void loop(void) {
-  audio();
+  Serial.print("Prescale: ");
+  Serial.println(lamb::MapleTimer::prescale_from_frequency(22050));
+  delay(1000);
 }
