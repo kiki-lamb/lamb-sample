@@ -2,18 +2,18 @@
 #include "lamb.h"
 #include "samples.h"
 
+const uint32_t KRATE         = 100;
 const uint32_t SRATE         = 22050;
 const uint32_t TFT_DC        = PA8;
 const uint32_t TFT_CS        = PB12;
 const uint32_t I2S_WS        = PA3;
 const uint32_t I2S_BCK       = PA5;
 const uint32_t I2S_DATA      = PA7;
-const uint32_t capture_ratio = 3;
-const uint32_t ctl_ratio     = 10;
-const uint32_t text_ratio    = 10;
+const uint32_t capture_ratio = 4;
 
 HardwareTimer
-         timer(1);
+         timer_1(1),
+         timer_2(2);
 Adafruit_ILI9341_STM_SPI2
          tft = Adafruit_ILI9341_STM_SPI2(TFT_CS, TFT_DC);  
 uint16_t hData,
@@ -22,6 +22,7 @@ uint16_t hData,
          knob1;
 int16_t  sample;
 int32_t  avg_sample;
+size_t   sample_ix;
 double   pct;
 
 void setup() {
@@ -42,18 +43,8 @@ void setup() {
 
   pinMode(I2S_WS, OUTPUT);
   
-  if (true) {
-    lamb::MapleTimer::setup(timer, 22050, srate);
-  }
-  else {   
-    timer.pause();
-    timer.setPrescaleFactor(816);
-    timer.setOverflow(1);
-    timer.setCompare(TIMER_CH1, 0);
-    timer.attachCompare1Interrupt(srate);
-    timer.refresh();
-    timer.resume();
-  }
+  lamb::MapleTimer::setup(timer_1, SRATE, srate);
+  lamb::MapleTimer::setup(timer_2, KRATE, krate);
 }
 
 void graph() {
@@ -69,34 +60,41 @@ void graph() {
   int16_t tmp_sample = map(avg_sample, -32768, 32767, -120, 119);
   
   if (tmp_sample > 0)
-    tft.drawFastVLine(tmp_col, 120, tmp_sample, ILI9341_YELLOW);
+    tft.drawFastVLine(
+      tmp_col,
+      120,
+      tmp_sample,
+      ILI9341_YELLOW
+    );
   else 
   if (tmp_sample < 0) {
-    tft.drawFastVLine(tmp_col, 120 + tmp_sample, abs(tmp_sample), ILI9341_YELLOW);
+    tft.drawFastVLine(
+      tmp_col,
+      120 + tmp_sample,
+      abs(tmp_sample),
+      ILI9341_YELLOW);
   }
   
   col++;
   col %= col_max; 
 }
 
-size_t sample_ix = 0;
-
-void srate() {  
+void krate() {  
+  uint16_t tmp0 = knob0;
+  knob0 <<= 4;
+  knob0 -= tmp0;
+  knob0 += analogRead(PA0);
+  knob0 >>= 4;
+  pct = knob0 / 4092.0;
+}
+  
+void srate() {
   if ((sample_ix % (1 << capture_ratio)) == 0) {
     avg_sample >>= capture_ratio;
-    graph();
+    // graph();
     avg_sample = 0;
   }
-  
-  if ((sample_ix % (1 << (ctl_ratio))) == 0) {
-    uint16_t tmp0 = knob0;
-    knob0 <<= 4;
-    knob0 -= tmp0;
-    knob0 += analogRead(PA0);
-    knob0 >>= 4;
-    pct = knob0 / 4092.0;
-  }
-  
+
   sample = pct * data[sample_ix];      
   avg_sample += sample;
  
