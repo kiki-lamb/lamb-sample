@@ -12,8 +12,7 @@ const uint32_t I2S_DATA      = PA7;
 const uint32_t capture_ratio = 3;
 
 lamb::Device::PT8211 pt8211(I2S_WS);
-
-lamb::RingBuffer<int16_t, size_t, 256>
+lamb::RingBuffer<int16_t, 256>
          drawbuff;
 HardwareTimer
          timer_1(1),
