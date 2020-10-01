@@ -32,9 +32,9 @@ lamb::RingBuffer<int16_t, 256>
          drawbuff;
 
 lamb::oneshot<int16_t> bd(data+block_size*0, block_size);
-lamb::oneshot<int16_t> sd(data+block_size*1, block_size);
-lamb::oneshot<int16_t> xx(data+block_size*2, block_size);
-lamb::oneshot<int16_t> yy(data+block_size*3, block_size);
+lamb::oneshot<int16_t> lt(data+block_size*1, block_size);
+lamb::oneshot<int16_t> sd(data+block_size*2, block_size);
+lamb::oneshot<int16_t> sy(data+block_size*3, block_size);
 
 
 void setup() {
@@ -58,7 +58,7 @@ void setup() {
   lamb::MapleTimer::setup(timer_2, KRATE, krate);
 
   timer_3.pause();
-  timer_3.setPeriod(500000);
+  timer_3.setPeriod(125000);
   timer_3.setChannel1Mode(TIMER_OUTPUT_COMPARE);
   timer_3.setCompare(TIMER_CH1, 0);
   timer_3.attachCompare1Interrupt(lrate);
@@ -68,13 +68,43 @@ void setup() {
 
 uint32_t lrate_ix;
 
+lamb::oneshot<int16_t> * steps[] = {
+  &bd, NULL, NULL, NULL,
+  &bd, &lt,  NULL, &lt,
+  &bd, NULL, NULL, NULL,
+  &bd, NULL, NULL, NULL, 
+};
+
+lamb::oneshot<int16_t> * steps2[] = {
+  NULL, NULL, NULL, NULL, 
+  &sd,  NULL, NULL, NULL,
+  NULL, NULL, NULL, NULL,
+  &sd,  NULL, NULL, NULL, 
+};
+
+// lamb::oneshot<int16_t> * steps3[] = {
+//   &sy,  NULL, &sy,  &sy,
+//   NULL, &sy,  &sy,  NULL,
+//   &sy,  &sy,  NULL, &sy,
+//   &sy,  NULL, &sy,  NULL
+// };
+
+lamb::oneshot<int16_t> * steps3[] = {
+  NULL, NULL, &sy, NULL,
+  NULL, NULL, &sy, &sy,
+  NULL, NULL, &sy, NULL,
+  NULL, NULL, &sy, NULL
+};
+
 void lrate() {
-  if ((lrate_ix++ % 2) == 0) {
-    bd.trigger = true;
-  }
-  else {
-    xx.trigger = true;
-  }
+  if (steps[lrate_ix] != NULL)
+    steps[lrate_ix]->trigger = true;
+  
+  if (steps2[lrate_ix] != NULL)
+    steps2[lrate_ix]->trigger = true;
+  
+  if (steps3[lrate_ix] != NULL)
+    steps3[lrate_ix]->trigger = true;
   
   static uint32_t count = 0;
   
@@ -83,7 +113,10 @@ void lrate() {
   Serial.print(": ");
   Serial.println(total_samples);
 #endif
+
   total_samples = 0;
+  lrate_ix ++;
+  lrate_ix %= 16;
 }
 
 void graph() {
@@ -149,10 +182,10 @@ void srate() {
 
 //  sample = pct * data[sample_ix];
   sample = pct * (
-    (bd.play() >> 2) +
-    (sd.play() >> 2) +
-    (xx.play() >> 2) +
-    (yy.play() >> 2)
+    (bd.play() >> 1) +
+    (sd.play() >> 1) +
+    (lt.play() >> 1) +
+    (sy.play() >> 1)
   ); 
   avg_sample += sample;
 
