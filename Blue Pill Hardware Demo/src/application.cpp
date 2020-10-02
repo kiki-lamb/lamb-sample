@@ -60,7 +60,14 @@ namespace Application {
     knob0 -= tmp0;
     knob0 += analogRead(PA0);
     knob0 >>= 4;
+
     pct = knob0 / 4092.0;
+
+    uint16_t tmp1 = knob0;
+    knob0 <<= 2;
+    knob0 -= tmp1;
+    knob0 += analogRead(PA1);
+    knob0 >>= 2;
 
     static size_t buttons[] = { PB0, PB1, PB10, PB11 };
     
