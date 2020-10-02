@@ -4,14 +4,6 @@
 #include "samples.h"
 #include "application.h"
 
-
-uint16_t knob0;
-uint16_t knob1;
-int32_t  avg_sample;
-size_t   sample_ix;
-size_t   total_samples;
-double   pct;
-
 HardwareTimer timer_1(1);
 HardwareTimer timer_2(2);
 HardwareTimer timer_3(3);
@@ -88,7 +80,7 @@ void lrate() {
 #ifdef ENABLE_SERIAL
   Serial.print(++count);
   Serial.print(": ");
-  Serial.print(total_samples);
+  Serial.print(Application::total_samples);
   Serial.print(" SRATE: ");
   Serial.print(Application::SRATE);
   Serial.print(" KRATE: ");
@@ -96,7 +88,7 @@ void lrate() {
   Serial.println();
 #endif
 
-  total_samples = 0;
+  Application::total_samples = 0;
   lrate_ix ++;
 }
 
@@ -133,7 +125,7 @@ void graph() {
   uint16_t tmp_col = col+120;
   
   tft.drawFastVLine(tmp_col, 0, 240, ILI9341_BLACK);
-  uint16_t tmp_knob0 = 119 - map(knob0, 0, 4091, 0, 119);
+  uint16_t tmp_knob0 = 119 - map(Application::knob0, 0, 4091, 0, 119);
   tft.drawPixel(tmp_col, tmp_knob0, ILI9341_GREEN);
   tft.drawPixel(tmp_col, 239-tmp_knob0, ILI9341_GREEN);
 
@@ -161,23 +153,23 @@ void graph() {
 }
 
 void krate() {  
-  uint16_t tmp0 = knob0;
-  knob0 <<= 4;
-  knob0 -= tmp0;
-  knob0 += analogRead(PA0);
-  knob0 >>= 4;
-  pct = knob0 / 4092.0;
+  uint16_t tmp0 = Application::knob0;
+  Application::knob0 <<= 4;
+  Application::knob0 -= tmp0;
+  Application::knob0 += analogRead(PA0);
+  Application::knob0 >>= 4;
+  Application::pct = Application::knob0 / 4092.0;
 }
   
 void srate() {
-  if ((sample_ix % (1 << Application::CAPTURE_RATIO)) == 0) {
-    avg_sample >>= Application::CAPTURE_RATIO;
+  if ((Application::sample_ix % (1 << Application::CAPTURE_RATIO)) == 0) {
+    Application::avg_sample >>= Application::CAPTURE_RATIO;
 
     if (drawbuff.writable()) {
-      drawbuff.write(avg_sample);
+      drawbuff.write(Application::avg_sample);
     }
     
-    avg_sample = 0;
+   Application::avg_sample = 0;
   }
   
   int32_t sample = 0;
@@ -188,25 +180,25 @@ void srate() {
 
   sample >>= 1;
 
-  sample *= pct;
+  sample *= Application::pct;
   
-  avg_sample += sample;
+  Application::avg_sample += sample;
 
   pt8211.write_mono(sample);
   
-  total_samples ++;
-  sample_ix ++;
-  sample_ix %= Samples::NUM_ELEMENTS; 
+  Application::total_samples ++;
+  Application::sample_ix ++;
+  Application::sample_ix %= Samples::NUM_ELEMENTS; 
 }
 
 void draw_text() {
   tft.fillRect(10, 10, 80, 80, ILI9341_BLACK);
   tft.setCursor(10, 10);
-  tft.println(knob0);
+  tft.println(Application::knob0);
   tft.setCursor(10, 30);
-  tft.println(pct);
+  tft.println(Application::pct);
   tft.setCursor(10, 50);
-  tft.println(knob1);
+  tft.println(Application::knob1);
 }
 
 void loop(void) {

@@ -13,6 +13,13 @@ namespace Application {
   const uint32_t I2S_DATA      = PA7;
   const uint32_t CAPTURE_RATIO = 3;
   const size_t   BLOCK_SIZE    = (Samples::NUM_ELEMENTS >> 2);
+
+  uint16_t knob0;
+  uint16_t knob1;
+  int32_t  avg_sample;
+  size_t   sample_ix;
+  size_t   total_samples;
+  double   pct;
 }
 
 #endif
