@@ -4,13 +4,6 @@
 #include "samples.h"
 #include "application.h"
 
-const uint32_t TFT_DC        = PA8;
-const uint32_t TFT_CS        = PB12;
-const uint32_t I2S_WS        = PA3;
-const uint32_t I2S_BCK       = PA5;
-const uint32_t I2S_DATA      = PA7;
-const uint32_t capture_ratio = 3;
-const size_t   block_size    = (Samples::NUM_ELEMENTS >> 2);
 
 uint16_t knob0,
          knob1;
@@ -25,9 +18,12 @@ HardwareTimer
          timer_2(2),
          timer_3(3);
 Adafruit_ILI9341_STM_SPI2
-         tft = Adafruit_ILI9341_STM_SPI2(TFT_CS, TFT_DC);  
+         tft = Adafruit_ILI9341_STM_SPI2(
+           Application::TFT_CS,
+           Application::TFT_DC
+         );  
 
-lamb::Device::PT8211 pt8211(I2S_WS);
+lamb::Device::PT8211 pt8211(Application::I2S_WS);
 lamb::RingBuffer<int16_t, 256>
          drawbuff;
 
@@ -36,7 +32,7 @@ typedef lamb::oneshot_plus sample_t;
 sample_t * voices[4];
 void setup() {
   for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
-   voices[ix] = new sample_t(Samples::data+block_size*ix, block_size);
+   voices[ix] = new sample_t(Samples::data+Application::BLOCK_SIZE*ix, Application::BLOCK_SIZE);
   }
   
 #ifdef ENABLE_SERIAL
@@ -175,8 +171,8 @@ void krate() {
 }
   
 void srate() {
-  if ((sample_ix % (1 << capture_ratio)) == 0) {
-    avg_sample >>= capture_ratio;
+  if ((sample_ix % (1 << Application::CAPTURE_RATIO)) == 0) {
+    avg_sample >>= Application::CAPTURE_RATIO;
 
     if (drawbuff.writable()) {
       drawbuff.write(avg_sample);
