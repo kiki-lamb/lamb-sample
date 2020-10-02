@@ -5,18 +5,18 @@
 #include "application.h"
 
 
-uint16_t knob0,
-         knob1;
+uint16_t knob0;
+uint16_t knob1;
 int32_t  sample;
 int32_t  avg_sample;
-size_t   sample_ix,
-         total_samples;
+size_t   sample_ix;
+size_t   total_samples;
 double   pct;
 
-HardwareTimer
-         timer_1(1),
-         timer_2(2),
-         timer_3(3);
+HardwareTimer timer_1(1);
+HardwareTimer timer_2(2);
+HardwareTimer timer_3(3);
+
 Adafruit_ILI9341_STM_SPI2
          tft = Adafruit_ILI9341_STM_SPI2(
            Application::TFT_CS,
