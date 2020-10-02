@@ -1,3 +1,5 @@
+#ifndef BLUEPILL_DEMO_SAMPLES_H
+#define BLUEPILL_DEMO_SAMPLES_H
 
 namespace Samples {
   const size_t NUM_ELEMENTS = 28452;
@@ -3561,3 +3563,5 @@ namespace Samples {
  49, -14,   0,   0,   0, -13,  43, 206, // 28440-28447
  36,  97, 183,   2};// 28448-28451
 }
+
+#endif

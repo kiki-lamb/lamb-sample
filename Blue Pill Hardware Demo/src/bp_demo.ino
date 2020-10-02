@@ -1,5 +1,6 @@
 #include "SPI.h"
 #include "lamb.h"
+#include "tracks.h"
 #include "samples.h"
 
 const uint32_t KRATE         = 100;
@@ -11,7 +12,6 @@ const uint32_t I2S_BCK       = PA5;
 const uint32_t I2S_DATA      = PA7;
 const uint32_t capture_ratio = 3;
 const size_t   block_size    = (Samples::NUM_ELEMENTS >> 2);
-const size_t   VOICE_COUNT   = 4;
 
 uint16_t knob0,
          knob1;
@@ -36,7 +36,7 @@ typedef lamb::oneshot_plus sample_t;
 
 sample_t * voices[4];
 void setup() {
-  for (size_t ix = 0; ix < VOICE_COUNT; ix++) {
+  for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
    voices[ix] = new sample_t(Samples::data+block_size*ix, block_size);
   }
   
@@ -70,54 +70,20 @@ void setup() {
  
 uint32_t lrate_ix;
 
-const size_t TRACK_LENGTH = 32;
-
-uint8_t tracks[TRACK_LENGTH][VOICE_COUNT][2] = {
-  { { 0xCF, 0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
-  { { 0,    0 },   { 0, 1 },   { 0,    0 },  { 0,    0 } },
-  { { 0,    0 },   { 0, 1 },   { 0,    0 },  { 0xFF, 0 } },
-  { { 0,    0 },   { 0, 1 },   { 0,    0 },  { 0,    0 } },
-  { { 0xCF, 0 },   { 0, 0 },   { 0x7F, 0 },  { 0,    0 } },
-  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
-  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0xFF, 0 } },
-  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0xFF, 0 } },
-
-  { { 0xCF, 0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
-  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
-  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0xFF, 0 } },
-  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
-  { { 0xCF, 0 },   { 0, 0 },   { 0x7F, 0 },  { 0,    0 } },
-  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
-  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0xFF, 0 } },
-  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0xFF, 1 } },
-
-  { { 0xCF, 0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
-  { { 0,    0 },   { 0, 1 },   { 0,    0 },  { 0,    0 } },
-  { { 0,    0 },   { 0, 1 },   { 0,    0 },  { 0xFF, 1 } },
-  { { 0,    0 },   { 0, 1 },   { 0,    0 },  { 0,    0 } },
-  { { 0xCF, 0 },   { 0, 0 },   { 0x7F, 0 },  { 0xFF, 0 } },
-  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
-  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0xFF, 0 } },
-  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0xFF, 0 } },
-
-  { { 0xCF, 0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
-  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
-  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0xFF, 0 } },
-  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
-  { { 0xCF, 0 },   { 0, 0 },   { 0x7F, 0 },  { 0,    0 } },
-  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
-  { { 0xCF, 0 },   { 0, 0 },   { 0,    0 },  { 0xFF, 0 } },
-  { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0xFF, 1 } },
-};
-
 volatile bool draw_flag = false;
 
 void lrate() {
-  for (size_t ix = 0; ix < VOICE_COUNT; ix++) {
-    if (tracks[lrate_ix % TRACK_LENGTH][ix][0] > 0) {
+  for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
+    if (Tracks::data[lrate_ix % Tracks::NUM_ELEMENTS][ix][0] > 0) {
       voices[ix]->trigger = true;
-      voices[ix]->amplitude   = tracks[lrate_ix % TRACK_LENGTH][ix][0];
-      voices[ix]->phase_shift = tracks[lrate_ix % TRACK_LENGTH][ix][1];
+
+      voices[ix]->amplitude   = Tracks::data[
+        lrate_ix % Tracks::NUM_ELEMENTS
+      ][ix][0];
+      
+      voices[ix]->phase_shift = Tracks::data[
+        lrate_ix % Tracks::NUM_ELEMENTS
+      ][ix][1];
     }
 
     draw_flag = true;
@@ -139,7 +105,7 @@ const uint32_t v_spacing = 48;
 
 void graph() {
   if (draw_flag) {
-    for (size_t ix = 0; ix < VOICE_COUNT; ix++) {
+    for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
       if (voices[ix]->state) {
         tft.fillRect(
           36,
@@ -217,7 +183,7 @@ void srate() {
   
   sample = 0;
   
-  for (size_t ix = 0; ix < VOICE_COUNT; ix++) {
+  for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
     sample += voices[ix]->play();
   }
 
