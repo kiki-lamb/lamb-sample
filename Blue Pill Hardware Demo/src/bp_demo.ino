@@ -7,7 +7,6 @@
 
 uint16_t knob0;
 uint16_t knob1;
-int32_t  sample;
 int32_t  avg_sample;
 size_t   sample_ix;
 size_t   total_samples;
@@ -181,7 +180,7 @@ void srate() {
     avg_sample = 0;
   }
   
-  sample = 0;
+  int32_t sample = 0;
   
   for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
     sample += voices[ix]->play();
