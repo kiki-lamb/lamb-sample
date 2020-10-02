@@ -17,6 +17,10 @@ namespace Application {
   const size_t   BLOCK_SIZE    = (Samples::NUM_ELEMENTS >> 2);
   const uint32_t V_SPACING     = 48;
 
+  enum mode_t { MODE_AUTO, MODE_CLOCKED, MODE_TRIGGERED, MODE_PLAYALONG };
+  
+  const mode_t mode = MODE_PLAYALONG;
+  
   uint16_t knob0;
   uint16_t knob1;
   int32_t  avg_sample;
@@ -46,7 +50,9 @@ namespace Application {
 
   sample_t * voices[4];
 
-  //////////////////////////////////////////////////////////////////////////////
+  uint8_t last_button_values = 0;
+
+//////////////////////////////////////////////////////////////////////////////
 
   void krate() {  
     uint16_t tmp0 = knob0;
@@ -55,6 +61,59 @@ namespace Application {
     knob0 += analogRead(PA0);
     knob0 >>= 4;
     pct = knob0 / 4092.0;
+
+    static size_t buttons[] = { PB0, PB1, PB10, PB11 };
+    
+    uint8_t button_values = 0;
+    
+    for (size_t ix = 0; ix < 4; ix++) {
+      if (! digitalRead(buttons[ix])) {
+        button_values |= 1 << ix;
+      }
+    }
+    
+#ifdef LOG_RAW_BUTTONS
+    for(uint16_t mask = 0x80; mask; mask >>= 1) {
+      if(mask  & last_button_values)
+        Serial.print('1');
+      else
+        Serial.print('0');
+    }
+    
+    Serial.print(" => ");
+    
+    for(uint16_t mask = 0x80; mask; mask >>= 1) {
+      if(mask  & button_values)
+        Serial.print('1');
+      else
+        Serial.print('0');
+    }
+    Serial.println();
+#endif
+    
+    switch (mode) {
+    case MODE_CLOCKED:
+      if ( (! (last_button_values & 1)) &&
+           (button_values & 1)) {
+        Serial.println("Clock!");
+        lrate();
+      }
+      break;
+    case MODE_TRIGGERED:
+    case MODE_PLAYALONG:
+      for (size_t ix = 0; ix < 4; ix++) {
+        if ( (! (last_button_values & (1 << ix))) &&
+             (button_values & (1 << ix))) {
+          Serial.print("Trigger ");
+          Serial.println(ix);
+          
+          voices[ix]->trigger = true;
+        }
+      }
+      break;
+    }
+    
+    last_button_values = button_values;
   }
 
   void graph() {
@@ -218,13 +277,22 @@ namespace Application {
       krate
     );
 
-    timer_3.pause();
-    timer_3.setPeriod(125000);
-    timer_3.setChannel1Mode(TIMER_OUTPUT_COMPARE);
-    timer_3.setCompare(TIMER_CH1, 0);
-    timer_3.attachCompare1Interrupt(lrate);
-    timer_3.refresh();    
-    timer_3.resume();
+    if ((mode == MODE_AUTO) ||
+        (mode == MODE_PLAYALONG)) {
+      timer_3.pause();
+      timer_3.setPeriod(160000);
+      timer_3.setChannel1Mode(TIMER_OUTPUT_COMPARE);
+      timer_3.setCompare(TIMER_CH1, 0);
+      timer_3.attachCompare1Interrupt(lrate);
+      timer_3.refresh();    
+      timer_3.resume();
+    }
+
+    pinMode(PB0,  INPUT_PULLUP);
+    pinMode(PB1,  INPUT_PULLUP);
+    pinMode(PB10, INPUT_PULLUP);
+    pinMode(PB11, INPUT_PULLUP);
+    delay(500);
   }
  
   void loop(void) {
