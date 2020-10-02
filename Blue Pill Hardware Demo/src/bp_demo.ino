@@ -10,7 +10,7 @@ const uint32_t I2S_WS        = PA3;
 const uint32_t I2S_BCK       = PA5;
 const uint32_t I2S_DATA      = PA7;
 const uint32_t capture_ratio = 3;
-const size_t   block_size    = (NUM_ELEMENTS >> 2);
+const size_t   block_size    = (Samples::NUM_ELEMENTS >> 2);
 const size_t   VOICE_COUNT   = 4;
 
 uint16_t knob0,
@@ -37,7 +37,7 @@ typedef lamb::oneshot_plus sample_t;
 sample_t * voices[4];
 void setup() {
   for (size_t ix = 0; ix < VOICE_COUNT; ix++) {
-   voices[ix] = new sample_t(data+block_size*ix, block_size);
+   voices[ix] = new sample_t(Samples::data+block_size*ix, block_size);
   }
   
 #ifdef ENABLE_SERIAL
@@ -231,7 +231,7 @@ void srate() {
   
   total_samples ++;
   sample_ix ++;
-  sample_ix %= NUM_ELEMENTS; 
+  sample_ix %= Samples::NUM_ELEMENTS; 
 }
 
 void draw_text() {
