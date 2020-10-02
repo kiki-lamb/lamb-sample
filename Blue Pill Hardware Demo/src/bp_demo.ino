@@ -2,9 +2,8 @@
 #include "lamb.h"
 #include "tracks.h"
 #include "samples.h"
+#include "application.h"
 
-const uint32_t KRATE         = 100;
-const uint32_t SRATE         = 20000; // 22050;
 const uint32_t TFT_DC        = PA8;
 const uint32_t TFT_CS        = PB12;
 const uint32_t I2S_WS        = PA3;
@@ -56,8 +55,8 @@ void setup() {
 
   pt8211.begin(&SPI);
   
-  lamb::MapleTimer::setup(timer_1, SRATE, srate);
-  lamb::MapleTimer::setup(timer_2, KRATE, krate);
+  lamb::MapleTimer::setup(timer_1, Application::SRATE, srate);
+  lamb::MapleTimer::setup(timer_2, Application::KRATE, krate);
 
   timer_3.pause();
   timer_3.setPeriod(125000);
@@ -94,7 +93,12 @@ void lrate() {
 #ifdef ENABLE_SERIAL
   Serial.print(++count);
   Serial.print(": ");
-  Serial.println(total_samples);
+  Serial.print(total_samples);
+  Serial.print(" SRATE: ");
+  Serial.print(Application::SRATE);
+  Serial.print(" KRATE: ");
+  Serial.print(Application::KRATE);
+  Serial.println();
 #endif
 
   total_samples = 0;
