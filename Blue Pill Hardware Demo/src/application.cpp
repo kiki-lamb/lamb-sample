@@ -154,7 +154,7 @@ namespace Application {
           Serial.print("Trigger ");
           Serial.println(ix);
           
-          queued ||= 1 << (3-ix);
+          queued |= 1 << (3-ix);
         }
       }
       break;
@@ -262,8 +262,10 @@ namespace Application {
   }
 
   void lrate () {
-    if (!((mode == MODE_AUT) || (mode == MODE_PLAYALONG) || (mode == MODE_QUANTIZE)))
+    if (!((mode == MODE_AUTO) || (mode == MODE_PLAYALONG) || (mode == MODE_QUANTIZE))) {
+      lrate_ix = 0;
       return;
+    } 
     
     clock();
   }
