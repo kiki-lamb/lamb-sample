@@ -1,5 +1,4 @@
-#include "lamb.h"
-
+#include <Arduino.h>
 #include "application.h"
 
 void setup() {

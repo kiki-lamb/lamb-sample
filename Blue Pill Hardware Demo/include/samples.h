@@ -1,6 +1,9 @@
 #ifndef BLUEPILL_DEMO_SAMPLES_H
 #define BLUEPILL_DEMO_SAMPLES_H
 
+#include <inttypes.h>
+#include <Arduino.h>
+
 namespace Samples {
   const size_t NUM_ELEMENTS = 28452;
   
