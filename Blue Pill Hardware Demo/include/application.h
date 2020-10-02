@@ -1,6 +1,10 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
+#include <inttypes.h>
+#include "tracks.h"
+#include "samples.h"
+
 namespace Application {
   const uint32_t KRATE         = 100;
   const uint32_t SRATE         = 20000;
