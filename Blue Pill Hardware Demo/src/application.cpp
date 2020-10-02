@@ -79,8 +79,8 @@ namespace Application {
     
     if (tmp_knob1 != knob1) {
       knob1 = tmp_knob1;
-      Serial.print("knob1: ");
-      Serial.print(knob1);
+      //Serial.print("knob1: ");
+      //Serial.print(knob1);
     }
 
     if (knob1 < 1536) {
@@ -93,10 +93,10 @@ namespace Application {
       mode = MODE_PLAYALONG;
     }
 
-    Serial.print(" ");
-    Serial.print(mode);
+    //Serial.print(" ");
+    //Serial.print(mode);
 
-    Serial.println();
+    //Serial.println();
     
     static size_t buttons[] = { PB0, PB1, PB10, PB11 };
     
@@ -131,7 +131,7 @@ namespace Application {
     case MODE_CLOCKED:
       if ( (! (last_button_values & 1)) &&
            (button_values & 1)) {
-        Serial.println("Clock!");
+        //Serial.println("Clock!");
         clock();
       }
       break;
@@ -140,8 +140,8 @@ namespace Application {
       for (size_t ix = 0; ix < 4; ix++) {
         if ( (! (last_button_values & (1 << ix))) &&
              (button_values & (1 << ix))) {
-          Serial.print("Trigger ");
-          Serial.println(ix);
+          //Serial.print("Trigger ");
+          //Serial.println(ix);
           
           voices[3-ix]->trigger = true;
         }
@@ -151,8 +151,8 @@ namespace Application {
       for (size_t ix = 0; ix < 4; ix++) {
         if ( (! (last_button_values & (1 << ix))) &&
              (button_values & (1 << ix))) {
-          Serial.print("Trigger ");
-          Serial.println(ix);
+          //Serial.print("Trigger ");
+          //Serial.println(ix);
           
           queued |= 1 << (3-ix);
         }
@@ -269,41 +269,106 @@ namespace Application {
     
     clock();
   }
+
+  
+  uint8_t data[Tracks::NUM_ELEMENTS][Tracks::VOICE_COUNT][2] = {
+    { { 0xCF, 0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0xCF, 0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+
+    { { 0xCF, 0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0xCF, 0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+
+    { { 0xCF, 0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0xCF, 0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+
+    { { 0xCF, 0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0xCF, 0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    { { 0,    0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
+    };
+
+  void print_bits(uint8_t byte) {
+    for(uint16_t mask = 0x80; mask; mask >>= 1) {
+      if(mask  & byte)
+        Serial.print('1');
+      else
+        Serial.print('0');
+    }
+  }
   
   void clock() {
+      
     for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
+      Serial.print("Looking for ");
+      print_bits(1 << ix);
+      Serial.print(" in ");
+      print_bits(queued);
+      Serial.println();
+
       if (queued & (1 << ix)) {
-        voices[ix]->trigger = true;
+        data[
+          lrate_ix % Tracks::NUM_ELEMENTS
+        ][ix][0] = 0xff;
+
+        Serial.print("Record #");
+        Serial.print(ix);
+        Serial.print(" on step ");
+        Serial.print(lrate_ix % Tracks::NUM_ELEMENTS);
+        Serial.println();
+        
+//        voices[ix]->trigger = true;
       }
       
-      if (Tracks::data[lrate_ix % Tracks::NUM_ELEMENTS][ix][0] > 0) {
+      if (data[lrate_ix % Tracks::NUM_ELEMENTS][ix][0] > 0) {
         voices[ix]->trigger = true;
           
-        voices[ix]->amplitude   = Tracks::data[
+        voices[ix]->amplitude   = data[
           lrate_ix % Tracks::NUM_ELEMENTS
         ][ix][0];
         
-        voices[ix]->phase_shift = Tracks::data[
+        voices[ix]->phase_shift = data[
           lrate_ix % Tracks::NUM_ELEMENTS
         ][ix][1];
       }
-
-      queued = 0;
-      
-      draw_flag = true;
     }
+
+    queued = 0;
+    
+    draw_flag = true;
     
     static uint32_t count = 0;
     
 #ifdef ENABLE_SERIAL
-    Serial.print(++count);
-    Serial.print(": ");
-    Serial.print(total_samples);
-    Serial.print(" SRATE: ");
-    Serial.print(SRATE);
-    Serial.print(" KRATE: ");
-    Serial.print(KRATE);
-    Serial.println();
+//    Serial.print(++count);
+//    Serial.print(": ");
+//    Serial.print(total_samples);
+//    Serial.print(" SRATE: ");
+//    Serial.print(SRATE);
+//    Serial.print(" KRATE: ");
+//    Serial.print(KRATE);
+//    Serial.println();
 #endif
     
     total_samples = 0;
