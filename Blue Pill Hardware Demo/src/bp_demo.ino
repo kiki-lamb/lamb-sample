@@ -4,19 +4,6 @@
 #include "samples.h"
 #include "application.h"
 
-HardwareTimer timer_1(1);
-HardwareTimer timer_2(2);
-HardwareTimer timer_3(3);
-
-Adafruit_ILI9341_STM_SPI2
-         tft = Adafruit_ILI9341_STM_SPI2(
-           Application::TFT_CS,
-           Application::TFT_DC
-         );  
-
-lamb::Device::PT8211 pt8211(Application::I2S_WS);
-lamb::RingBuffer<int16_t, 256>
-         drawbuff;
 
 typedef lamb::oneshot_plus sample_t;
 
@@ -32,26 +19,26 @@ void setup() {
   
   pinMode(PA0, INPUT);
  
-  tft.begin();
-  tft.setRotation(3);
-  tft.setTextColor(ILI9341_WHITE);  
-  tft.setTextSize(2);
-  tft.fillScreen(ILI9341_BLACK);
+  Application::tft.begin();
+  Application::tft.setRotation(3);
+  Application::tft.setTextColor(ILI9341_WHITE);  
+  Application::tft.setTextSize(2);
+  Application::tft.fillScreen(ILI9341_BLACK);
         
   SPI.begin();
 
-  pt8211.begin(&SPI);
+  Application::pt8211.begin(&SPI);
   
-  lamb::MapleTimer::setup(timer_1, Application::SRATE, srate);
-  lamb::MapleTimer::setup(timer_2, Application::KRATE, krate);
+  lamb::MapleTimer::setup(Application::timer_1, Application::SRATE, srate);
+  lamb::MapleTimer::setup(Application::timer_2, Application::KRATE, krate);
 
-  timer_3.pause();
-  timer_3.setPeriod(125000);
-  timer_3.setChannel1Mode(TIMER_OUTPUT_COMPARE);
-  timer_3.setCompare(TIMER_CH1, 0);
-  timer_3.attachCompare1Interrupt(lrate);
-  timer_3.refresh();    
-  timer_3.resume();
+  Application::timer_3.pause();
+  Application::timer_3.setPeriod(125000);
+  Application::timer_3.setChannel1Mode(TIMER_OUTPUT_COMPARE);
+  Application::timer_3.setCompare(TIMER_CH1, 0);
+  Application::timer_3.attachCompare1Interrupt(lrate);
+  Application::timer_3.refresh();    
+  Application::timer_3.resume();
 }
  
 uint32_t lrate_ix;
@@ -98,7 +85,7 @@ void graph() {
   if (draw_flag) {
     for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
       if (voices[ix]->state) {
-        tft.fillRect(
+        Application::tft.fillRect(
           36,
           v_spacing*ix+(v_spacing >> 1),
           v_spacing-10,
@@ -107,7 +94,7 @@ void graph() {
         );
       }
       else {
-        tft.fillRect(
+        Application::tft.fillRect(
           36,
           v_spacing*ix+(v_spacing >> 1),
           v_spacing-10,
@@ -124,16 +111,16 @@ void graph() {
   static const uint16_t col_max = 200; // real max 320
   uint16_t tmp_col = col+120;
   
-  tft.drawFastVLine(tmp_col, 0, 240, ILI9341_BLACK);
+  Application::tft.drawFastVLine(tmp_col, 0, 240, ILI9341_BLACK);
   uint16_t tmp_knob0 = 119 - map(Application::knob0, 0, 4091, 0, 119);
-  tft.drawPixel(tmp_col, tmp_knob0, ILI9341_GREEN);
-  tft.drawPixel(tmp_col, 239-tmp_knob0, ILI9341_GREEN);
+  Application::tft.drawPixel(tmp_col, tmp_knob0, ILI9341_GREEN);
+  Application::tft.drawPixel(tmp_col, 239-tmp_knob0, ILI9341_GREEN);
 
-  int16_t tmp = drawbuff.read();
+  int16_t tmp = Application::drawbuff.read();
   int16_t tmp_sample = map(tmp, -32768, 32767, -120, 119);
   
   if (tmp_sample > 0)
-    tft.drawFastVLine(
+    Application::tft.drawFastVLine(
       tmp_col,
       120,
       tmp_sample,
@@ -141,7 +128,7 @@ void graph() {
     );
   else 
   if (tmp_sample < 0) {
-    tft.drawFastVLine(
+    Application::tft.drawFastVLine(
       tmp_col,
       120 + tmp_sample,
       abs(tmp_sample),
@@ -165,8 +152,8 @@ void srate() {
   if ((Application::sample_ix % (1 << Application::CAPTURE_RATIO)) == 0) {
     Application::avg_sample >>= Application::CAPTURE_RATIO;
 
-    if (drawbuff.writable()) {
-      drawbuff.write(Application::avg_sample);
+    if (Application::drawbuff.writable()) {
+      Application::drawbuff.write(Application::avg_sample);
     }
     
    Application::avg_sample = 0;
@@ -184,7 +171,7 @@ void srate() {
   
   Application::avg_sample += sample;
 
-  pt8211.write_mono(sample);
+  Application::pt8211.write_mono(sample);
   
   Application::total_samples ++;
   Application::sample_ix ++;
@@ -192,17 +179,17 @@ void srate() {
 }
 
 void draw_text() {
-  tft.fillRect(10, 10, 80, 80, ILI9341_BLACK);
-  tft.setCursor(10, 10);
-  tft.println(Application::knob0);
-  tft.setCursor(10, 30);
-  tft.println(Application::pct);
-  tft.setCursor(10, 50);
-  tft.println(Application::knob1);
+  Application::tft.fillRect(10, 10, 80, 80, ILI9341_BLACK);
+  Application::tft.setCursor(10, 10);
+  Application::tft.println(Application::knob0);
+  Application::tft.setCursor(10, 30);
+  Application::tft.println(Application::pct);
+  Application::tft.setCursor(10, 50);
+  Application::tft.println(Application::knob1);
 }
 
 void loop(void) {
-  if (drawbuff.readable()) {
+  if (Application::drawbuff.readable()) {
     graph();
   }
 }

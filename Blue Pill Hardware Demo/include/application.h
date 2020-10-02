@@ -20,6 +20,21 @@ namespace Application {
   size_t   sample_ix;
   size_t   total_samples;
   double   pct;
+
+  HardwareTimer timer_1(1);
+  HardwareTimer timer_2(2);
+  HardwareTimer timer_3(3);
+  
+  Adafruit_ILI9341_STM_SPI2 tft =
+    Adafruit_ILI9341_STM_SPI2(
+      Application::TFT_CS,
+      Application::TFT_DC
+    );  
+  
+  lamb::Device::PT8211 pt8211(Application::I2S_WS);
+  lamb::RingBuffer<int16_t, 256>
+  drawbuff;
+
 }
 
 #endif
