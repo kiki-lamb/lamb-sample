@@ -17,7 +17,13 @@ namespace Application {
   const size_t   BLOCK_SIZE    = (Samples::NUM_ELEMENTS >> 2);
   const uint32_t V_SPACING     = 48;
 
-  enum mode_t { MODE_AUTO = 1, MODE_CLOCKED = 2, MODE_TRIGGERED = 4, MODE_PLAYALONG = 8 };
+  enum mode_t {
+    MODE_AUTO = 1,
+    MODE_CLOCKED = 2,
+    MODE_TRIGGERED = 4,
+    MODE_PLAYALONG = 8 ,
+    MODE_QUANTIZE = 16
+  };
   
   mode_t mode = MODE_PLAYALONG;
   
@@ -51,7 +57,8 @@ namespace Application {
   sample_t * voices[4];
 
   uint8_t last_button_values = 0;
-
+  uint8_t queued = 0;
+  
 //////////////////////////////////////////////////////////////////////////////
 
   void krate() {  
@@ -76,8 +83,11 @@ namespace Application {
       Serial.print(knob1);
     }
 
-    if (knob1 < 2048) {
+    if (knob1 < 1536) {
       mode = MODE_TRIGGERED;
+    }
+    else if (knob1 > 3072) {
+      mode = MODE_QUANTIZE;
     }
     else {
       mode = MODE_PLAYALONG;
@@ -134,6 +144,17 @@ namespace Application {
           Serial.println(ix);
           
           voices[3-ix]->trigger = true;
+        }
+      }
+      break;
+    case MODE_QUANTIZE:
+      for (size_t ix = 0; ix < 4; ix++) {
+        if ( (! (last_button_values & (1 << ix))) &&
+             (button_values & (1 << ix))) {
+          Serial.print("Trigger ");
+          Serial.println(ix);
+          
+          queued ||= 1 << (3-ix);
         }
       }
       break;
@@ -241,17 +262,21 @@ namespace Application {
   }
 
   void lrate () {
-    if (!((mode == MODE_AUTO) || (mode == MODE_PLAYALONG)))
+    if (!((mode == MODE_AUT) || (mode == MODE_PLAYALONG) || (mode == MODE_QUANTIZE)))
       return;
     
     clock();
   }
   
-  void clock() {    
+  void clock() {
     for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
+      if (queued & (1 << ix)) {
+        voices[ix]->trigger = true;
+      }
+      
       if (Tracks::data[lrate_ix % Tracks::NUM_ELEMENTS][ix][0] > 0) {
         voices[ix]->trigger = true;
-        
+          
         voices[ix]->amplitude   = Tracks::data[
           lrate_ix % Tracks::NUM_ELEMENTS
         ][ix][0];
@@ -260,6 +285,8 @@ namespace Application {
           lrate_ix % Tracks::NUM_ELEMENTS
         ][ix][1];
       }
+
+      queued = 0;
       
       draw_flag = true;
     }
