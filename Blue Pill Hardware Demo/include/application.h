@@ -8,6 +8,7 @@
 
 namespace Application {
   void lrate();
+  void clock();
   void krate();
   void srate();
   void graph();  

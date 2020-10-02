@@ -17,9 +17,9 @@ namespace Application {
   const size_t   BLOCK_SIZE    = (Samples::NUM_ELEMENTS >> 2);
   const uint32_t V_SPACING     = 48;
 
-  enum mode_t { MODE_AUTO, MODE_CLOCKED, MODE_TRIGGERED, MODE_PLAYALONG };
+  enum mode_t { MODE_AUTO = 1, MODE_CLOCKED = 2, MODE_TRIGGERED = 4, MODE_PLAYALONG = 8 };
   
-  const mode_t mode = MODE_PLAYALONG;
+  mode_t mode = MODE_PLAYALONG;
   
   uint16_t knob0;
   uint16_t knob1;
@@ -63,12 +63,31 @@ namespace Application {
 
     pct = knob0 / 4092.0;
 
-    uint16_t tmp1 = knob0;
-    knob0 <<= 2;
-    knob0 -= tmp1;
-    knob0 += analogRead(PA1);
-    knob0 >>= 2;
+    uint16_t tmp_knob1 = knob1;
+    uint16_t tmp1 = tmp_knob1;
+    tmp_knob1 <<= 2;
+    tmp_knob1 -= tmp1;
+    tmp_knob1 += analogRead(PA1);
+    tmp_knob1 >>= 2;
+    
+    if (tmp_knob1 != knob1) {
+      knob1 = tmp_knob1;
+      Serial.print("knob1: ");
+      Serial.print(knob1);
+    }
 
+    if (knob1 < 2048) {
+      mode = MODE_TRIGGERED;
+    }
+    else {
+      mode = MODE_PLAYALONG;
+    }
+
+    Serial.print(" ");
+    Serial.print(mode);
+
+    Serial.println();
+    
     static size_t buttons[] = { PB0, PB1, PB10, PB11 };
     
     uint8_t button_values = 0;
@@ -103,7 +122,7 @@ namespace Application {
       if ( (! (last_button_values & 1)) &&
            (button_values & 1)) {
         Serial.println("Clock!");
-        lrate();
+        clock();
       }
       break;
     case MODE_TRIGGERED:
@@ -114,7 +133,7 @@ namespace Application {
           Serial.print("Trigger ");
           Serial.println(ix);
           
-          voices[ix]->trigger = true;
+          voices[3-ix]->trigger = true;
         }
       }
       break;
@@ -221,7 +240,14 @@ namespace Application {
     tft.println(knob1);
   }
 
-  void lrate() {
+  void lrate () {
+    if (!((mode == MODE_AUTO) || (mode == MODE_PLAYALONG)))
+      return;
+    
+    clock();
+  }
+  
+  void clock() {    
     for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
       if (Tracks::data[lrate_ix % Tracks::NUM_ELEMENTS][ix][0] > 0) {
         voices[ix]->trigger = true;
@@ -284,17 +310,14 @@ namespace Application {
       krate
     );
 
-    if ((mode == MODE_AUTO) ||
-        (mode == MODE_PLAYALONG)) {
-      timer_3.pause();
-      timer_3.setPeriod(160000);
-      timer_3.setChannel1Mode(TIMER_OUTPUT_COMPARE);
-      timer_3.setCompare(TIMER_CH1, 0);
-      timer_3.attachCompare1Interrupt(lrate);
-      timer_3.refresh();    
-      timer_3.resume();
-    }
-
+    timer_3.pause();
+    timer_3.setPeriod(140000);
+    timer_3.setChannel1Mode(TIMER_OUTPUT_COMPARE);
+    timer_3.setCompare(TIMER_CH1, 0);
+    timer_3.attachCompare1Interrupt(lrate);
+    timer_3.refresh();    
+    timer_3.resume();
+  
     pinMode(PB0,  INPUT_PULLUP);
     pinMode(PB1,  INPUT_PULLUP);
     pinMode(PB10, INPUT_PULLUP);
