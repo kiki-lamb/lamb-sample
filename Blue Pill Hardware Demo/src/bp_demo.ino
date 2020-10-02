@@ -4,13 +4,9 @@
 #include "samples.h"
 #include "application.h"
 
-
-typedef lamb::oneshot_plus sample_t;
-
-sample_t * voices[4];
 void setup() {
   for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
-   voices[ix] = new sample_t(Samples::data+Application::BLOCK_SIZE*ix, Application::BLOCK_SIZE);
+    Application::voices[ix] = new Application::sample_t(Samples::data+Application::BLOCK_SIZE*ix, Application::BLOCK_SIZE);
   }
   
 #ifdef ENABLE_SERIAL
@@ -41,25 +37,21 @@ void setup() {
   Application::timer_3.resume();
 }
  
-uint32_t lrate_ix;
-
-volatile bool draw_flag = false;
-
 void lrate() {
   for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
-    if (Tracks::data[lrate_ix % Tracks::NUM_ELEMENTS][ix][0] > 0) {
-      voices[ix]->trigger = true;
+    if (Tracks::data[Application::lrate_ix % Tracks::NUM_ELEMENTS][ix][0] > 0) {
+      Application::voices[ix]->trigger = true;
 
-      voices[ix]->amplitude   = Tracks::data[
-        lrate_ix % Tracks::NUM_ELEMENTS
+      Application::voices[ix]->amplitude   = Tracks::data[
+        Application::lrate_ix % Tracks::NUM_ELEMENTS
       ][ix][0];
       
-      voices[ix]->phase_shift = Tracks::data[
-        lrate_ix % Tracks::NUM_ELEMENTS
+      Application::voices[ix]->phase_shift = Tracks::data[
+        Application::lrate_ix % Tracks::NUM_ELEMENTS
       ][ix][1];
     }
 
-    draw_flag = true;
+    Application::draw_flag = true;
   }
   
   static uint32_t count = 0;
@@ -76,15 +68,15 @@ void lrate() {
 #endif
 
   Application::total_samples = 0;
-  lrate_ix ++;
+  Application::lrate_ix ++;
 }
 
 const uint32_t v_spacing = 48;
 
 void graph() {
-  if (draw_flag) {
+  if (Application::draw_flag) {
     for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
-      if (voices[ix]->state) {
+      if (Application::voices[ix]->state) {
         Application::tft.fillRect(
           36,
           v_spacing*ix+(v_spacing >> 1),
@@ -104,7 +96,7 @@ void graph() {
       }
     }
 
-    draw_flag = false;
+    Application::draw_flag = false;
   }            
   
   static uint16_t col = 0;
@@ -162,7 +154,7 @@ void srate() {
   int32_t sample = 0;
   
   for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
-    sample += voices[ix]->play();
+    sample += Application::voices[ix]->play();
   }
 
   sample >>= 1;

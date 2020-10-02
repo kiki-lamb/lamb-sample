@@ -35,6 +35,13 @@ namespace Application {
   lamb::RingBuffer<int16_t, 256>
   drawbuff;
 
+  uint32_t lrate_ix;
+
+  volatile bool draw_flag = false;
+
+  typedef lamb::oneshot_plus sample_t;
+
+  sample_t * voices[4];
 }
 
 #endif
