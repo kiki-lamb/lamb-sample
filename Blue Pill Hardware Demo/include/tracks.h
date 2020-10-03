@@ -4,7 +4,7 @@
 #include "samples.h"
 
 namespace Tracks {
-  const size_t NUM_ELEMENTS = 16;
+  const size_t NUM_ELEMENTS = 32;
   const size_t VOICE_COUNT  = 4;
 
 //  const uint8_t data[NUM_ELEMENTS][VOICE_COUNT][2] = {
