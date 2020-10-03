@@ -68,7 +68,7 @@ namespace Application {
     knob0 += analogRead(PA0);
     knob0 >>= 4;
 
-    pct = knob0 / (4092.0); // + 256.0);
+    pct = knob0 / (4092.0 - 512.0);
 
     uint16_t tmp_knob1 = knob1;
     uint16_t tmp1 = tmp_knob1;
