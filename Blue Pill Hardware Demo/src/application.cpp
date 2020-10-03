@@ -142,8 +142,9 @@ namespace Application {
              (button_values & (1 << ix))) {
           Serial.print("Trigger ");
           Serial.println(ix);
-          
-          voices[3-ix]->trigger = true;
+
+          voices[3-ix]->amplitude = 0xFF;
+          voices[3-ix]->trigger   = true;
         }
       }
       break;
