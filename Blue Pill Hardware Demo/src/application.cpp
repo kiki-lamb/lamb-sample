@@ -6,8 +6,8 @@
 #include <Arduino.h>
 
 namespace Application {
-  const uint32_t KRATE         = 100;
-  const uint32_t SRATE         = 20000;
+  const uint32_t K_RATE        = 100;
+  const uint32_t S_RATE        = 20000;
   const uint32_t TFT_DC        = PA8;
   const uint32_t TFT_CS        = PB12;
   const uint32_t I2S_WS        = PA3;
@@ -48,7 +48,7 @@ namespace Application {
   lamb::RingBuffer<int16_t, 256>
   drawbuff;
 
-  uint32_t lrate_ix;
+  uint32_t l_rate_ix;
 
   volatile bool draw_flag = false;
 
@@ -61,14 +61,14 @@ namespace Application {
   
 //////////////////////////////////////////////////////////////////////////////
 
-  void krate() {  
+  void k_rate() {  
     uint16_t tmp0 = knob0;
     knob0 <<= 4;
     knob0 -= tmp0;
     knob0 += analogRead(PA0);
     knob0 >>= 4;
 
-    pct = knob0 / (4092.0 + 256.0);
+    pct = knob0 / (4092.0); // + 256.0);
 
     uint16_t tmp_knob1 = knob1;
     uint16_t tmp1 = tmp_knob1;
@@ -221,7 +221,7 @@ namespace Application {
   col %= col_max; 
 }
   
-  void srate() {
+  void s_rate() {
     if ((sample_ix % (1 << CAPTURE_RATIO)) == 0) {
       avg_sample >>= CAPTURE_RATIO;
 
@@ -261,9 +261,9 @@ namespace Application {
     tft.println(knob1);
   }
 
-  void lrate () {
+  void l_rate () {
     if (!((mode == MODE_AUTO) || (mode == MODE_PLAYALONG) || (mode == MODE_QUANTIZE))) {
-      lrate_ix = 0;
+      l_rate_ix = 0;
       return;
     } 
     
@@ -271,39 +271,47 @@ namespace Application {
   }
 
   uint8_t data[Tracks::NUM_ELEMENTS][Tracks::VOICE_COUNT][2] = {
-    { { 0xCF, 0 }, { 0,    0 }, { 0,    0 }, { 0,    0 } },
-    { { 0,    0 }, { 0,    0 }, { 0,    0 }, { 0,    0 } },
-    { { 0xCF, 1 }, { 0,    0 }, { 0,    0 }, { 0xFF, 0 } },
-    { { 0xCF, 1 }, { 0,    0 }, { 0,    0 }, { 0,    0 } },
-    { { 0xCF, 0 }, { 0x80, 0 }, { 0x60, 0 }, { 0xFF, 1 } },
-    { { 0,    0 }, { 0,    0 }, { 0,    0 }, { 0xFF, 0 } },
-    { { 0,    0 }, { 0,    0 }, { 0,    0 }, { 0xBF, 1 } },
-    { { 0,    0 }, { 0,    0 }, { 0,    0 }, { 0xBF, 1 } },
-    { { 0xCF, 0 }, { 0,    0 }, { 0,    0 }, { 0,    0 } },
-    { { 0,    0 }, { 0,    0 }, { 0,    0 }, { 0,    0 } },
-    { { 0,    0 }, { 0,    0 }, { 0,    0 }, { 0xFF, 0 } },
-    { { 0,    0 }, { 0,    0 }, { 0,    0 }, { 0,    0 } },
-    { { 0xCF, 0 }, { 0x80, 0 }, { 0x60, 0 }, { 0xFF, 1 } },
-    { { 0,    0 }, { 0,    0 }, { 0,    0 }, { 0xFF, 0 } },
-    { { 0,    0 }, { 0,    0 }, { 0x80, 1 }, { 0xBF, 1 } },
-    { { 0,    0 }, { 0,    0 }, { 0,    0 }, { 0xBF, 1 } },
-    { { 0xCF, 0 }, { 0,    0 }, { 0,    0 }, { 0,    0 } },
-    { { 0,    0 }, { 0,    0 }, { 0,    0 }, { 0,    0 } },
-    { { 0,    0 }, { 0,    0 }, { 0,    0 }, { 0xFF, 0 } },
-    { { 0,    0 }, { 0,    0 }, { 0,    0 }, { 0,    0 } },
-    { { 0xCF, 0 }, { 0x80, 0 }, { 0x60, 0 }, { 0xFF, 1 } },
-    { { 0,    0 }, { 0,    0 }, { 0,    0 }, { 0xFF, 0 } },
-    { { 0,    0 }, { 0,    0 }, { 0,    0 }, { 0xBF, 1 } },
-    { { 0,    0 }, { 0,    0 }, { 0,    0 }, { 0xBF, 1 } },
-    { { 0xCF, 0 }, { 0,    0 }, { 0,    0 }, { 0,    0 } },
-    { { 0,    0 }, { 0,    0 }, { 0,    0 }, { 0,    0 } },
-    { { 0,    0 }, { 0,    0 }, { 0,    0 }, { 0xFF, 0 } },
-    { { 0,    0 }, { 0,    0 }, { 0,    0 }, { 0,    0 } },
-    { { 0xCF, 0 }, { 0x80, 0 }, { 0x60, 0 }, { 0xFF, 1 } },
-    { { 0,    0 }, { 0,    0 }, { 0,    0 }, { 0xFF, 0 } },
-    { { 0,    0 }, { 0,    0 }, { 0,    0 }, { 0xBF, 1 } },
-    { { 0,    0 }, { 0x80, 0 }, { 0,    0 }, { 0xBF, 1 } },
-    };
+    { { 0xAF, 0 }, { 0x20, 0 }, { 0,    1 }, { 0,    0 } },
+    { { 0,    0 }, { 0x30, 0 }, { 0,    1 }, { 0x40, 0 } },
+    { { 0xAF, 0 }, { 0x40, 0 }, { 0,    1 }, { 0xFF, 1 } },
+    { { 0xAF, 0 }, { 0x50, 0 }, { 0,    1 }, { 0xC0, 0 } },
+    //-----------------------------------------------------------
+    { { 0xAF, 0 }, { 0x60, 0 }, { 0x40, 1 }, { 0,    0 } },
+    { { 0,    0 }, { 0x70, 1 }, { 0,    1 }, { 0x40, 0 } },
+    { { 0,    0 }, { 0x80, 1 }, { 0,    1 }, { 0x80, 0 } },
+    { { 0,    0 }, { 0x90, 1 }, { 0x20, 0 }, { 0xC0, 0 } },
+    //-----------------------------------------------------------
+    { { 0xAF, 0 }, { 0,    1 }, { 0,    1 }, { 0,    0 } },
+    { { 0,    0 }, { 0,    1 }, { 0,    1 }, { 0x40, 0 } },
+    { { 0,    0 }, { 0,    1 }, { 0x10, 0 }, { 0x80, 0 } },
+    { { 0,    0 }, { 0,    1 }, { 0,    1 }, { 0xC0, 0 } },
+    //-----------------------------------------------------------
+    { { 0xAF, 0 }, { 0xE0, 1 }, { 0x30, 1 }, { 0,    0 } },
+    { { 0,    0 }, { 0,    1 }, { 0,    1 }, { 0x40, 0 } },
+    { { 0,    0 }, { 0x80, 0 }, { 0x80, 1 }, { 0x80, 0 } },
+    { { 0,    0 }, { 0,    1 }, { 0,    1 }, { 0xC0, 0 } },
+    //-----------------------------------------------------------
+    { { 0xAF, 0 }, { 0,    1 }, { 0,    1 }, { 0,    0 } },
+    { { 0,    0 }, { 0x40, 0 }, { 0x40, 1 }, { 0x40, 0 } },
+    { { 0,    0 }, { 0,    1 }, { 0,    1 }, { 0x80, 0 } },
+    { { 0,    0 }, { 0,    1 }, { 0,    1 }, { 0xC0, 1 } },
+    //-----------------------------------------------------------
+    { { 0xAF, 0 }, { 0x20, 0 }, { 0x20, 1 }, { 0,    0 } },
+    { { 0,    0 }, { 0,    1 }, { 0,    1 }, { 0x40, 1 } },
+    { { 0,    0 }, { 0,    1 }, { 0,    1 }, { 0x80, 1 } },
+    { { 0,    0 }, { 0x10, 0 }, { 0x10, 1 }, { 0xC0, 2 } },
+    //-----------------------------------------------------------
+    { { 0xAF, 0 }, { 0,    1 }, { 0,    1 }, { 0,    0 } },
+    { { 0,    0 }, { 0,    1 }, { 0,    1 }, { 0x40, 0 } },
+    { { 0,    0 }, { 0,    1 }, { 0x08, 1 }, { 0x80, 0 } },
+    { { 0,    0 }, { 0,    1 }, { 0,    1 }, { 0xC0, 0 } },
+    //-----------------------------------------------------------
+    { { 0xAF, 0 }, { 0x80, 1 }, { 0x60, 2 }, { 0,    0 } },
+    { { 0,    0 }, { 0,    1 }, { 0,    1 }, { 0x80, 0 } },
+    { { 0xAF, 0 }, { 0,    1 }, { 0,    1 }, { 0xC0, 1 } },
+    { { 0,    0 }, { 0x80, 1 }, { 0x30, 2 }, { 0xFF, 2 } },
+
+  };
 
   void print_bits(uint8_t byte) {
     for(uint16_t mask = 0x80; mask; mask >>= 1) {
@@ -325,27 +333,27 @@ namespace Application {
 
       if (queued & (1 << ix)) {
         data[
-          lrate_ix % Tracks::NUM_ELEMENTS
+          l_rate_ix % Tracks::NUM_ELEMENTS
         ][ix][0] = 0xff;
 
         Serial.print("Record #");
         Serial.print(ix);
         Serial.print(" on step ");
-        Serial.print(lrate_ix % Tracks::NUM_ELEMENTS);
+        Serial.print(l_rate_ix % Tracks::NUM_ELEMENTS);
         Serial.println();
         
 //        voices[ix]->trigger = true;
       }
       
-      if (data[lrate_ix % Tracks::NUM_ELEMENTS][ix][0] > 0) {
+      if (data[l_rate_ix % Tracks::NUM_ELEMENTS][ix][0] > 0) {
         voices[ix]->trigger = true;
           
         voices[ix]->amplitude   = data[
-          lrate_ix % Tracks::NUM_ELEMENTS
+          l_rate_ix % Tracks::NUM_ELEMENTS
         ][ix][0];
         
         voices[ix]->phase_shift = data[
-          lrate_ix % Tracks::NUM_ELEMENTS
+          l_rate_ix % Tracks::NUM_ELEMENTS
         ][ix][1];
       }
     }
@@ -360,15 +368,15 @@ namespace Application {
 //    Serial.print(++count);
 //    Serial.print(": ");
 //    Serial.print(total_samples);
-//    Serial.print(" SRATE: ");
-//    Serial.print(SRATE);
-//    Serial.print(" KRATE: ");
-//    Serial.print(KRATE);
+//    Serial.print(" S_RATE: ");
+//    Serial.print(S_RATE);
+//    Serial.print(" K_RATE: ");
+//    Serial.print(K_RATE);
 //    Serial.println();
 #endif
     
     total_samples = 0;
-    lrate_ix ++;
+    l_rate_ix ++;
   }
 
 
@@ -393,18 +401,18 @@ namespace Application {
 
     pt8211.begin(&SPI);
   
-    lamb::MapleTimer::setup(timer_1, SRATE, srate);
+    lamb::MapleTimer::setup(timer_1, S_RATE, s_rate);
     lamb::MapleTimer::setup(
       timer_2,
-      KRATE,
-      krate
+      K_RATE,
+      k_rate
     );
 
     timer_3.pause();
-    timer_3.setPeriod(120000);
+    timer_3.setPeriod(133000);
     timer_3.setChannel1Mode(TIMER_OUTPUT_COMPARE);
     timer_3.setCompare(TIMER_CH1, 0);
-    timer_3.attachCompare1Interrupt(lrate);
+    timer_3.attachCompare1Interrupt(l_rate);
     timer_3.refresh();    
     timer_3.resume();
   
