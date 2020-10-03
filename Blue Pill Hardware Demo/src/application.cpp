@@ -7,7 +7,7 @@
 
 namespace Application {
   const uint32_t K_RATE        = 100;
-  const uint32_t S_RATE        = 16000;
+  const uint32_t S_RATE        = 20000;
   const uint32_t TFT_DC        = PA8;
   const uint32_t TFT_CS        = PB12;
   const uint32_t I2S_WS        = PA3;
