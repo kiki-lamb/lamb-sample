@@ -98,17 +98,18 @@ namespace Application {
     //Serial.print(mode);
 
     //Serial.println();
-    
-    static size_t buttons[] = { PB0, PB1, PB10, PB11 };
+
+    static size_t buttons[] =      {  PB1  ,  PB10  ,  PB0 ,  PB11 ,  };
+    static char * button_names[] = { "PB1 ", "PB10 ", "PB0", "PB11",  };
     
     uint8_t button_values = 0;
-    
+
     for (size_t ix = 0; ix < 4; ix++) {
       if (! digitalRead(buttons[ix])) {
         button_values |= 1 << ix;
       }
     }
-    
+     
 #ifdef LOG_RAW_BUTTONS
     for(uint16_t mask = 0x80; mask; mask >>= 1) {
       if(mask  & last_button_values)
@@ -144,6 +145,8 @@ namespace Application {
         if ( (! (last_button_values & (1 << ix))) &&
              (button_values & (1 << ix))) {
           Serial.print("Trigger ");
+          Serial.print(button_names[ix]);
+          Serial.print(" / ");
           Serial.println(ix);
 
           voices[3-ix]->amplitude = 0xFF;
@@ -157,8 +160,10 @@ namespace Application {
         if ( (! (last_button_values & (1 << ix))) &&
              (button_values & (1 << ix))) {
           Serial.print("Catch ");
+          Serial.print(button_names[ix]);
+          Serial.print(" / ");
           Serial.println(ix);
-          
+
           queued |= 1 << (3-ix);
         }
       }
@@ -169,12 +174,12 @@ namespace Application {
   }
 
   void graph() {
-  if (draw_flag) {
-    for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
-      if (voices[ix]->state) {
-        tft.fillRect(
-          36,
-          V_SPACING*ix+(V_SPACING >> 1),
+    if (draw_flag) {
+      for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
+        if (voices[ix]->state) {
+          tft.fillRect(
+            36,
+            V_SPACING*ix+(V_SPACING >> 1),
           V_SPACING-10,
           V_SPACING-10,
           ILI9341_RED
@@ -319,7 +324,7 @@ namespace Application {
   };
 
   void print_bits(uint8_t byte) {
-    for(uint16_t mask = 0x80; mask; mask >>= 1) {
+    for(uint8_t mask = 0x80; mask; mask >>= 1) {
       if(mask  & byte)
         Serial.print('1');
       else
