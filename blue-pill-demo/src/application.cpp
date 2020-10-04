@@ -99,7 +99,7 @@ namespace Application {
 
     //Serial.println();
 
-    static size_t buttons[] =      {  PB11  ,  PB10 ,    PB1 ,   PB1   };
+    static size_t buttons[] =      {  PB11  ,  PB10 ,    PB1 ,   PB0   };
     static char * button_names[] = { "PB11 ", "PB10 ",  "PB1",  "PB1"  };
     
     uint8_t button_values = 0;
