@@ -18,14 +18,15 @@ namespace Application {
   const uint32_t V_SPACING     = 48;
 
   enum mode_t {
-    MODE_AUTO = 1,
-    MODE_CLOCKED = 2,
+    MODE_AUTOPLAY = 1,
+    MODE_EXTERNAL_CLOCK = 2,
     MODE_TRIGGERED = 4,
-    MODE_PLAYALONG = 8 ,
-    MODE_QUANTIZE = 16
+    MODE_AUTOPLAY_WITH_TRIGGERED = 8 ,
+    MODE_TRIGGERED_WITH_QUANTIZE = 16,
+    MODE_AUTOPLAY_AND_RECORD = 32,
   };
   
-  mode_t mode = MODE_PLAYALONG;
+  mode_t mode = MODE_TRIGGERED;
   
   uint16_t knob0;
   uint16_t knob1;
@@ -83,15 +84,15 @@ namespace Application {
       //Serial.print(knob1);
     }
 
-    if (knob1 < 1536) {
-      mode = MODE_TRIGGERED;
-    }
-    else if (knob1 > 3072) {
-      mode = MODE_QUANTIZE;
-    }
-    else {
-      mode = MODE_PLAYALONG;
-    }
+//    if (knob1 < 1024) {
+//      mode = MODE_TRIGGERED;
+//    }
+//    else if (knob1 > 2048) {
+//      mode = MODE_TRIGGERED_WITH_QUANTIZE;
+//    }
+//    else {
+//      mode = MODE_AUTOPLAY_WITH_TRIGGERED;
+//    }
 
     //Serial.print(" ");
     //Serial.print(mode);
@@ -128,15 +129,17 @@ namespace Application {
 #endif
     
     switch (mode) {
-    case MODE_CLOCKED:
+    case MODE_EXTERNAL_CLOCK:
       if ( (! (last_button_values & 1)) &&
            (button_values & 1)) {
-        //Serial.println("Clock!");
+        Serial.print("Clocking! ");
+        Serial.println(l_rate_ix);
+
         clock();
       }
       break;
     case MODE_TRIGGERED:
-    case MODE_PLAYALONG:
+    case MODE_AUTOPLAY_WITH_TRIGGERED:
       for (size_t ix = 0; ix < 4; ix++) {
         if ( (! (last_button_values & (1 << ix))) &&
              (button_values & (1 << ix))) {
@@ -148,7 +151,8 @@ namespace Application {
         }
       }
       break;
-    case MODE_QUANTIZE:
+    case MODE_TRIGGERED_WITH_QUANTIZE:
+    case MODE_AUTOPLAY_AND_RECORD:
       for (size_t ix = 0; ix < 4; ix++) {
         if ( (! (last_button_values & (1 << ix))) &&
              (button_values & (1 << ix))) {
@@ -262,12 +266,11 @@ namespace Application {
     tft.println(knob1);
   }
 
-  void l_rate () {
-    if (!((mode == MODE_AUTO) || (mode == MODE_PLAYALONG) || (mode == MODE_QUANTIZE))) {
-      l_rate_ix = 0;
+  void l_rate() {
+    if (mode == MODE_TRIGGERED || mode == MODE_EXTERNAL_CLOCK) {
       return;
-    } 
-    
+    }
+
     clock();
   }
 
@@ -325,60 +328,52 @@ namespace Application {
   }
   
   void clock() {
-      
+    Serial.println("Clocked! ");
+    
     for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
-      Serial.print("Looking for ");
-      print_bits(1 << ix);
-      Serial.print(" in ");
-      print_bits(queued);
-      Serial.println();
-
-      if (queued & (1 << ix)) {
-        data[
-          l_rate_ix % Tracks::NUM_ELEMENTS
-        ][ix][0] = 0xff;
-
-        Serial.print("Record #");
-        Serial.print(ix);
-        Serial.print(" on step ");
-        Serial.print(l_rate_ix % Tracks::NUM_ELEMENTS);
-        Serial.println();
-        
-//        voices[ix]->trigger = true;
-      }
-      
-      if (data[l_rate_ix % Tracks::NUM_ELEMENTS][ix][0] > 0) {
-        voices[ix]->trigger = true;
+      if ((mode == MODE_TRIGGERED_WITH_QUANTIZE) ||
+          (mode == MODE_AUTOPLAY_AND_RECORD)) {
+        if (queued & (1 << ix)) {
           
-        voices[ix]->amplitude   = data[
-          l_rate_ix % Tracks::NUM_ELEMENTS
-        ][ix][0];
-        
-        voices[ix]->phase_shift = data[
-          l_rate_ix % Tracks::NUM_ELEMENTS
-        ][ix][1];
+          if (mode == MODE_TRIGGERED_WITH_QUANTIZE) {
+            voices[ix]->trigger = true;
+          }
+          else if (mode == MODE_AUTOPLAY_AND_RECORD) {
+            data[
+              l_rate_ix % Tracks::NUM_ELEMENTS
+            ][ix][0] = 0xff;
+            
+            Serial.print("Record #");
+            Serial.print(ix);
+            Serial.print(" on step ");
+            Serial.print(l_rate_ix % Tracks::NUM_ELEMENTS);
+            Serial.println();          
+          }
+        }
+      }
+    
+      if ((mode == MODE_AUTOPLAY) ||
+          (mode == MODE_EXTERNAL_CLOCK) ||
+          (mode == MODE_AUTOPLAY_WITH_TRIGGERED) ||
+          (mode == MODE_AUTOPLAY_AND_RECORD) ) {
+        if (data[l_rate_ix % Tracks::NUM_ELEMENTS][ix][0] > 0) {
+          voices[ix]->trigger = true;
+          
+          voices[ix]->amplitude   = data[
+            l_rate_ix % Tracks::NUM_ELEMENTS
+          ][ix][0];
+          
+          voices[ix]->phase_shift = data[
+            l_rate_ix % Tracks::NUM_ELEMENTS
+          ][ix][1];
+        }
       }
     }
-
-    queued = 0;
     
-    draw_flag = true;
-    
-    static uint32_t count = 0;
-    
-#ifdef ENABLE_SERIAL
-//    Serial.print(++count);
-//    Serial.print(": ");
-//    Serial.print(total_samples);
-//    Serial.print(" S_RATE: ");
-//    Serial.print(S_RATE);
-//    Serial.print(" K_RATE: ");
-//    Serial.print(K_RATE);
-//    Serial.println();
-#endif
-    
+    queued        = 0;    
+    draw_flag     = true;    
     total_samples = 0;
-    l_rate_ix ++;
+    l_rate_ix     ++;
   }
 
 
@@ -386,45 +381,45 @@ namespace Application {
     for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
       voices[ix] = new sample_t(Samples::data+BLOCK_SIZE*ix, BLOCK_SIZE);
     }
-  
+    
 #ifdef ENABLE_SERIAL
     Serial.begin(115200);
 #endif
-  
+    
     pinMode(PA0, INPUT);
- 
+    
     tft.begin();
     tft.setRotation(3);
     tft.setTextColor(ILI9341_WHITE);  
     tft.setTextSize(2);
     tft.fillScreen(ILI9341_BLACK);
-        
+    
     SPI.begin();
-
+    
     pt8211.begin(&SPI);
-  
+    
     lamb::MapleTimer::setup(timer_1, S_RATE, s_rate);
     lamb::MapleTimer::setup(
       timer_2,
       K_RATE,
       k_rate
     );
-
+    
     timer_3.pause();
-    timer_3.setPeriod(133000);
+    timer_3.setPeriod(60000000L / (120*4));
     timer_3.setChannel1Mode(TIMER_OUTPUT_COMPARE);
     timer_3.setCompare(TIMER_CH1, 0);
     timer_3.attachCompare1Interrupt(l_rate);
     timer_3.refresh();    
     timer_3.resume();
-  
+    
     pinMode(PB0,  INPUT_PULLUP);
     pinMode(PB1,  INPUT_PULLUP);
     pinMode(PB10, INPUT_PULLUP);
     pinMode(PB11, INPUT_PULLUP);
     delay(500);
   }
- 
+  
   void loop(void) {
     if (drawbuff.readable()) {
       graph();
