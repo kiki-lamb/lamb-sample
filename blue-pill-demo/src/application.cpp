@@ -149,8 +149,8 @@ namespace Application {
           Serial.print(" / ");
           Serial.println(ix);
 
-          voices[3-ix]->amplitude = 0xFF;
-          voices[3-ix]->trigger   = true;
+          voices[ix]->amplitude = 0xFF;
+          voices[ix]->trigger   = true;
         }
       }
       break;
@@ -164,7 +164,7 @@ namespace Application {
           Serial.print(" / ");
           Serial.println(ix);
 
-          queued |= 1 << (3-ix);
+          queued |= 1 << (ix);
         }
       }
       break;
