@@ -56,6 +56,7 @@ namespace Application {
   typedef lamb::oneshot_plus sample_t;
 
   sample_t * voices[4];
+  const uint8_t voice_map[] = { 0, 2, 3, 1 };
 
   uint8_t last_button_values = 0;
   uint8_t queued = 0;
@@ -149,8 +150,8 @@ namespace Application {
           Serial.print(" / ");
           Serial.println(ix);
 
-          voices[ix]->amplitude = 0xFF;
-          voices[ix]->trigger   = true;
+          voices[voice_map[ix]]->amplitude = 0xFF;
+          voices[voice_map[ix]]->trigger   = true;
         }
       }
       break;
@@ -164,7 +165,7 @@ namespace Application {
           Serial.print(" / ");
           Serial.println(ix);
 
-          queued |= 1 << (ix);
+          queued |= 1 << (voice_map[ix]);
         }
       }
       break;
