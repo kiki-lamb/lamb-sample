@@ -46,7 +46,7 @@ namespace Application {
     );  
   
   lamb::Device::PT8211 pt8211(Application::I2S_WS);
-  lamb::RingBuffer<int16_t, 256>
+  lamb::ring_buffer<int16_t, 256>
   drawbuff;
 
   uint32_t l_rate_ix;
