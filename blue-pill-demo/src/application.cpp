@@ -39,13 +39,13 @@ namespace Application {
   HardwareTimer timer_2(2);
   HardwareTimer timer_3(3);
   
-  Adafruit_ILI9341_STM_SPI2 tft =
-    Adafruit_ILI9341_STM_SPI2(
+  lamb::device::Adafruit_ILI9341_STM_SPI2 tft =
+    lamb::device::Adafruit_ILI9341_STM_SPI2(
       Application::TFT_CS,
       Application::TFT_DC
     );  
   
-  lamb::Device::PT8211 pt8211(Application::I2S_WS);
+  lamb::device::pt8211 pt8211(Application::I2S_WS);
   lamb::ring_buffer<int16_t, 256>
   drawbuff;
 
@@ -209,7 +209,7 @@ namespace Application {
   tft.drawPixel(tmp_col, tmp_knob0, ILI9341_GREEN);
   tft.drawPixel(tmp_col, 239-tmp_knob0, ILI9341_GREEN);
 
-  int16_t tmp = drawbuff.read();
+  int16_t tmp = drawbuff.dequeue();
   int16_t tmp_sample = map(tmp, -32768, 32767, -120, 119);
   
   if (tmp_sample > 0)
@@ -237,7 +237,7 @@ namespace Application {
       avg_sample >>= CAPTURE_RATIO;
 
       if (drawbuff.writable()) {
-        drawbuff.write(avg_sample);
+        drawbuff.enqueue(avg_sample); // 
       }
     
       avg_sample = 0;
@@ -404,8 +404,8 @@ namespace Application {
     
     pt8211.begin(&SPI);
     
-    lamb::MapleTimer::setup(timer_1, S_RATE, s_rate);
-    lamb::MapleTimer::setup(
+    lamb::maple_timer::setup(timer_1, S_RATE, s_rate);
+    lamb::maple_timer::setup(
       timer_2,
       K_RATE,
       k_rate
