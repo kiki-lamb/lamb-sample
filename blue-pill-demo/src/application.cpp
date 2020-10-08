@@ -7,7 +7,7 @@
 
 namespace Application {
   const uint32_t K_RATE        = 100;
-  const uint32_t S_RATE        = 20000;
+  const uint32_t S_RATE        = 16500;
   const uint32_t TFT_DC        = PA8;
   const uint32_t TFT_CS        = PB12;
   const uint32_t I2S_WS        = PA3;
@@ -150,7 +150,11 @@ namespace Application {
           Serial.print(" / ");
           Serial.println(ix);
 
-          voices[voice_map[ix]]->amplitude = 0xFF;
+          voices[voice_map[0]]->amplitude = 0xd0;
+          voices[voice_map[1]]->amplitude = 0x68;
+          voices[voice_map[2]]->amplitude = 0xa0;    
+
+//          voices[voice_map[ix]]->amplitude = 0xFF;
           voices[voice_map[ix]]->trigger   = true;
         }
       }
@@ -401,6 +405,10 @@ namespace Application {
     tft.fillScreen(ILI9341_BLACK);
     
     SPI.begin();
+
+    voices[0]->amplitude = 0xbf;
+    voices[1]->amplitude = 0x00;
+    voices[2]->amplitude = 0xff;
     
     pt8211.begin(&SPI);
     
