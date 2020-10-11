@@ -7,7 +7,7 @@
 
 namespace Application {
   const uint32_t K_RATE        = 100;
-  const uint32_t S_RATE        = 16500;
+  const uint32_t S_RATE        = 18000;
   const uint32_t TFT_DC        = PA8;
   const uint32_t TFT_CS        = PB12;
   const uint32_t I2S_WS        = PA3;
@@ -160,6 +160,18 @@ namespace Application {
           Serial.println(ix);
 
           voices[voice_map[ix]]->trigger   = true;
+
+          if (ix == 5)
+            voices[voice_map[4]]->trigger   = false;
+          
+          if (ix == 4)
+            voices[voice_map[5]]->trigger   = false;
+
+          if (ix == 1)
+            voices[voice_map[2]]->trigger   = false;
+          
+          if (ix == 2)
+            voices[voice_map[1]]->trigger   = false;
         }
       }
       break;
@@ -373,7 +385,7 @@ namespace Application {
         if (data[l_rate_ix % Tracks::NUM_ELEMENTS][ix][0] > 0) {
           voices[ix]->trigger = true;
           
-          voices[ix]->amplitude   = data[
+           voices[ix]->amplitude   = data[
             l_rate_ix % Tracks::NUM_ELEMENTS
           ][ix][0];
           
@@ -414,7 +426,7 @@ namespace Application {
     voices[1]->amplitude = 0x80;
     voices[2]->amplitude = 0x80;
     voices[3]->amplitude = 0x20;
-    voices[4]->amplitude = 0xA0;
+    voices[4]->amplitude = 0xF0;
     voices[5]->amplitude = 0xA0;
     
     pt8211.begin(&SPI);
