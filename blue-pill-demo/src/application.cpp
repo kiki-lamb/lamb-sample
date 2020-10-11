@@ -150,9 +150,9 @@ namespace Application {
           Serial.print(" / ");
           Serial.println(ix);
 
-          voices[voice_map[0]]->amplitude = 0xd0;
-          voices[voice_map[1]]->amplitude = 0x48;
-          voices[voice_map[2]]->amplitude = 0xd0;    
+          voices[voice_map[0]]->amplitude = 0xc0;
+          voices[voice_map[1]]->amplitude = 0x60;
+          voices[voice_map[2]]->amplitude = 0xe0;    
 
 //          voices[voice_map[ix]]->amplitude = 0xFF;
           voices[voice_map[ix]]->trigger   = true;
