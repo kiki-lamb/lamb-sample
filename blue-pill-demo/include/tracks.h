@@ -5,7 +5,7 @@
 
 namespace Tracks {
   const size_t NUM_ELEMENTS = 32;
-  const size_t VOICE_COUNT  = 4;
+  const size_t VOICE_COUNT  = 6;
 
 //  const uint8_t data[NUM_ELEMENTS][VOICE_COUNT][2] = {
 //    { { 0xCF, 0 },   { 0, 0 },   { 0,    0 },  { 0,    0 } },
