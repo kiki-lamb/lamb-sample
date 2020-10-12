@@ -1,213 +1,114 @@
 #include "application.h"
-
-#include "tracks.h"
 #include "samples.h"
 #include <inttypes.h>
 #include <Arduino.h>
 
-namespace Application {
-  const uint32_t K_RATE        = 100;
-  const uint32_t S_RATE        = 17500;
-  const uint32_t TFT_DC        = PA8;
-  const uint32_t TFT_CS        = PB12;
-  const uint32_t I2S_WS        = PA3;
-  const uint32_t I2S_BCK       = PA5;
-  const uint32_t I2S_DATA      = PA7;
-  const uint32_t CAPTURE_RATIO = 3;
-  const size_t   BLOCK_SIZE    = Samples::NUM_ELEMENTS / 6;
-  const uint32_t V_SPACING     = 48;
+const uint32_t          application::K_RATE        = 100;
+const uint32_t          application::S_RATE        = 19000;
+uint16_t                application::knob0         = 4091;
+uint16_t                application::knob1         = 4091;
+uint16_t                application::knob2         = 4091;
+int32_t                 application::avg_sample    = 0;
+size_t                  application::sample_ix     = 0;
+size_t                  application::total_samples = 0;
+double                  application::pct           = 100.0;
+HardwareTimer           application::timer_1(1);
+HardwareTimer           application::timer_2(2);
+HardwareTimer           application::timer_3(3);
+application::sample_t * application::voices[6];
 
-  enum mode_t {
-    MODE_AUTOPLAY = 1,
-    MODE_EXTERNAL_CLOCK = 2,
-    MODE_TRIGGERED = 4,
-    MODE_AUTOPLAY_WITH_TRIGGERED = 8 ,
-    MODE_TRIGGERED_WITH_QUANTIZE = 16,
-    MODE_AUTOPLAY_AND_RECORD = 32,
-  };
+lamb::device::Adafruit_ILI9341_STM_SPI2 application::tft =
+  lamb::device::Adafruit_ILI9341_STM_SPI2(
+    application::TFT_CS,
+    application::TFT_DC
+  );  
   
-  mode_t mode = MODE_TRIGGERED;
-  
-  uint16_t knob0;
-  uint16_t knob1;
-  int32_t  avg_sample;
-  size_t   sample_ix;
-  size_t   total_samples;
-  double   pct;
+lamb::device::pt8211 application::pt8211(application::I2S_WS);
 
-  HardwareTimer timer_1(1);
-  HardwareTimer timer_2(2);
-  HardwareTimer timer_3(3);
-  
-  lamb::device::Adafruit_ILI9341_STM_SPI2 tft =
-    lamb::device::Adafruit_ILI9341_STM_SPI2(
-      Application::TFT_CS,
-      Application::TFT_DC
-    );  
-  
-  lamb::device::pt8211 pt8211(Application::I2S_WS);
-  lamb::ring_buffer<int16_t, 256>
-  drawbuff;
+lamb::ring_buffer<int16_t, 256> application::drawbuff;
 
-  uint32_t l_rate_ix;
+volatile bool application::draw_flag = false;
 
-  volatile bool draw_flag = false;
+uint8_t application::last_button_values = 0;
+uint8_t application::queued = 0;  
 
-  typedef lamb::oneshot_plus sample_t;
-
-  sample_t * voices[6];
-  const uint8_t voice_map[] = { 0, 1, 2, 3, 4, 5 };
-
-  uint8_t last_button_values = 0;
-  uint8_t queued = 0;
-  
 //////////////////////////////////////////////////////////////////////////////
 
-  void k_rate() {  
-    uint16_t tmp0 = knob0;
-    knob0 <<= 4;
-    knob0 -= tmp0;
-    knob0 += analogRead(PA0);
-    knob0 >>= 4;
+void application::k_rate() {  
+  uint16_t tmp0 = knob0;
+  knob0 <<= 4;
+  knob0 -= tmp0;
+  knob0 += analogRead(PA0);
+  knob0 >>= 4;
+    
+  pct = knob0 / 2048.0;
+    
+  static size_t buttons[] =      {  PB11  ,  PB10 ,    PB1 ,   PB0, PC14, PC15   };
+  static char * button_names[] = { "PB11", "PB10",  "PB1",  "PB0", "PC14", "PC15"  };
+    
+  uint8_t button_values = 0;
 
-//    pct = knob0 / 2048.0;
-    pct = 2208 / 2048.0;
-    
-    uint16_t tmp_knob1 = knob1;
-    uint16_t tmp1 = tmp_knob1;
-    tmp_knob1 <<= 2;
-    tmp_knob1 -= tmp1;
-    tmp_knob1 += analogRead(PA1);
-    tmp_knob1 >>= 2;
-    
-    if (tmp_knob1 != knob1) {
-      knob1 = tmp_knob1;
-      //Serial.print("knob1: ");
-      //Serial.print(knob1);
+  for (size_t ix = 0; ix < 6; ix++) {
+    if (! digitalRead(buttons[ix])) {
+      button_values |= 1 << ix;
     }
-
-//    if (knob1 < 1024) {
-//      mode = MODE_TRIGGERED;
-//    }
-//    else if (knob1 > 2048) {
-//      mode = MODE_TRIGGERED_WITH_QUANTIZE;
-//    }
-//    else {
-//      mode = MODE_AUTOPLAY_WITH_TRIGGERED;
-//    }
-
-    //Serial.print(" ");
-    //Serial.print(mode);
-
-    //Serial.println();
-
-    static size_t buttons[] =      {  PB11  ,  PB10 ,    PB1 ,   PB0, PC14, PC15   };
-    static char * button_names[] = { "PB11", "PB10",  "PB1",  "PB0", "PC14", "PC15"  };
-    
-    uint8_t button_values = 0;
-
-    for (size_t ix = 0; ix < 6; ix++) {
-      if (! digitalRead(buttons[ix])) {
-        button_values |= 1 << ix;
-      }
-    }
-
-#ifdef LOG_RAW_BUTTONS
-    for(uint16_t mask = 0x80; mask; mask >>= 1) {
-      if(mask  & last_button_values)
-        Serial.print('1');
-      else
-        Serial.print('0');
-    }
-    
-    Serial.print(" => ");
-    
-    for(uint16_t mask = 0x80; mask; mask >>= 1) {
-      if(mask  & button_values)
-        Serial.print('1');
-      else
-        Serial.print('0');
-    }
-    Serial.println();
-#endif
-    
-    switch (mode) {
-    case MODE_EXTERNAL_CLOCK:
-      if ( (! (last_button_values & 1)) &&
-           (button_values & 1)) {
-        Serial.print("Clocking! ");
-        Serial.println(l_rate_ix);
-
-        clock();
-      }
-      break;
-    case MODE_TRIGGERED:
-    case MODE_AUTOPLAY_WITH_TRIGGERED:
-//      voices[voice_map[0]]->amplitude = 0x80;
-//      voices[voice_map[1]]->amplitude = 0x80;
-//      voices[voice_map[2]]->amplitude = 0x80;
-//      voices[voice_map[3]]->amplitude = 0x40;
-//      voices[voice_map[4]]->amplitude = 0x80;
-//      voices[voice_map[5]]->amplitude = 0x80;    
-      
-      for (size_t ix = 0; ix < 6; ix++) {
-        if ( (! (last_button_values & (1 << ix))) &&
-             (button_values & (1 << ix))) {
-          Serial.print("Triggered ");
-          Serial.print(button_names[ix]);
-
-          Serial.print(" @ 0x");
-          Serial.print(voices[voice_map[ix]]->amplitude);
-
-          if (strlen(button_names[ix]) == 3) {
-            Serial.print(" ");
-          }
-
-          Serial.print(" / ");
-          Serial.println(ix);
-
-          voices[voice_map[ix]]->trigger   = true;
-
-          if (ix == 5)
-            voices[voice_map[4]]->trigger   = false;
-          
-          if (ix == 4)
-            voices[voice_map[5]]->trigger   = false;
-
-//          if (ix == 1)
-//            voices[voice_map[2]]->trigger   = false;
-          
-//          if (ix == 2)
-//          voices[voice_map[1]]->trigger   = false;
-        }
-      }
-      break;
-    case MODE_TRIGGERED_WITH_QUANTIZE:
-    case MODE_AUTOPLAY_AND_RECORD:
-      for (size_t ix = 0; ix < 6; ix++) {
-        if ( (! (last_button_values & (1 << ix))) &&
-             (button_values & (1 << ix))) {
-          Serial.print("Catch ");
-          Serial.print(button_names[ix]);
-          Serial.print(" / ");
-          Serial.println(ix);
-
-          queued |= 1 << (voice_map[ix]);
-        }
-      }
-      break;
-    }
-    
-    last_button_values = button_values;
   }
 
-  void graph() {
-    if (draw_flag) {
-      for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
-        if (voices[ix]->state) {
-          tft.fillRect(
-            36,
-            V_SPACING*ix+(V_SPACING >> 1),
+#ifdef LOG_RAW_BUTTONS
+  for(uint16_t mask = 0x80; mask; mask >>= 1) {
+    if(mask  & last_button_values)
+      Serial.print('1');
+    else
+      Serial.print('0');
+  }
+    
+  Serial.print(" => ");
+    
+  for(uint16_t mask = 0x80; mask; mask >>= 1) {
+    if(mask  & button_values)
+      Serial.print('1');
+    else
+      Serial.print('0');
+  }
+  Serial.println();
+#endif
+    
+  for (size_t ix = 0; ix < 6; ix++) {
+    if ( (! (last_button_values & (1 << ix))) &&
+         (button_values & (1 << ix))) {
+      Serial.print("Triggered ");
+      Serial.print(button_names[ix]);
+      
+      if ((ix == 2) || (ix == 3)) {
+        Serial.print(" ");
+      }
+      
+      Serial.print(" @ 0x");
+      Serial.print(voices[ix]->amplitude, HEX);
+      Serial.print(" / ");
+      Serial.println(ix);
+      
+      voices[ix]->trigger   = true;
+      
+      if (ix == 5)
+        voices[4]->trigger   = false;
+      
+      if (ix == 4)
+        voices[5]->trigger   = false;
+      
+    }
+  }
+    
+  last_button_values = button_values;
+}
+
+void application::graph() {
+  if (draw_flag) {
+    for (size_t ix = 0; ix < 6; ix++) {
+      if (voices[ix]->state) {
+        tft.fillRect(
+          36,
+          V_SPACING*ix+(V_SPACING >> 1),
           V_SPACING-10,
           V_SPACING-10,
           ILI9341_RED
@@ -247,227 +148,109 @@ namespace Application {
       ILI9341_YELLOW
     );
   else 
-  if (tmp_sample < 0) {
-    tft.drawFastVLine(
-      tmp_col,
-      120 + tmp_sample,
-      abs(tmp_sample),
-      ILI9341_YELLOW);
-  }
+    if (tmp_sample < 0) {
+      tft.drawFastVLine(
+        tmp_col,
+        120 + tmp_sample,
+        abs(tmp_sample),
+        ILI9341_YELLOW);
+    }
   
   col++;
   col %= col_max; 
 }
   
-  void s_rate() {
-    if ((sample_ix % (1 << CAPTURE_RATIO)) == 0) {
-      avg_sample >>= CAPTURE_RATIO;
+void application::s_rate() {
+  if ((sample_ix % (1 << CAPTURE_RATIO)) == 0) {
+    avg_sample >>= CAPTURE_RATIO;
 
-      if (drawbuff.writable()) {
-        drawbuff.enqueue(avg_sample); // 
-      }
-    
-      avg_sample = 0;
+    if (drawbuff.writable()) {
+      drawbuff.enqueue(avg_sample); // 
     }
+    
+    avg_sample = 0;
+  }
   
-    int32_t sample = 0;
+  int32_t sample = 0;
   
-    for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
-      int16_t tmp = voices[ix]->play();
+  for (size_t ix = 0; ix < 6; ix++) {
+    int16_t tmp = voices[ix]->play();
       
-      if ((ix == 5) && voices[ix]->trigger) {
-        Serial.println(tmp);
-      }
+    if ((ix == 5) && voices[ix]->trigger) {
+      Serial.println(tmp);
+    }
       
-      sample += tmp;
-    }
+    sample += tmp;
+  }
 
-    sample >>= 1;
+  sample >>= 1;
 
-    sample *= pct;
+  sample *= pct;
   
-    avg_sample += sample;
+  avg_sample += sample;
 
-    pt8211.write_mono(sample);
+  pt8211.write_mono(sample);
   
-    total_samples ++;
-    sample_ix ++;
-    sample_ix %= Samples::NUM_ELEMENTS; 
-  }
-
-  void draw_text() {
-    tft.fillRect(10, 10, 80, 80, ILI9341_BLACK);
-    tft.setCursor(10, 10);
-    tft.println(knob0);
-    tft.setCursor(10, 30);
-    tft.println(pct);
-    tft.setCursor(10, 50);
-    tft.println(knob1);
-  }
-
-  void l_rate() {
-    if (mode == MODE_TRIGGERED || mode == MODE_EXTERNAL_CLOCK) {
-      return;
-    }
-
-    clock();
-  }
-
-  uint8_t data[Tracks::NUM_ELEMENTS][Tracks::VOICE_COUNT][2] = {
-    { { 0xC0, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0xFF, 0 }, { 0x00, 0 }, { 0xFF, 0 } },
-    { { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 } },
-    { { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 } },
-    { { 0x60, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x80, 0 }, { 0x00, 0 }, { 0x80, 0 } },
-    //-------------------------------------------------------------------------------------
-    { { 0x00, 0 }, { 0x00, 0 }, { 0xA0, 0 }, { 0x00, 0 }, { 0xA0, 0 }, { 0x00, 0 } },
-    { { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x60, 0 }, { 0x00, 0 }, { 0x60, 0 } },
-    { { 0x30, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 } },
-    { { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 } },
-    //-------------------------------------------------------------------------------------
-    { { 0x18, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x40, 0 }, { 0x00, 0 }, { 0x40, 0 } },
-    { { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 } },
-    { { 0xC0, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 } },
-    { { 0x0E, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x20, 0 }, { 0x00, 0 }, { 0x20, 0 } },
-    //-------------------------------------------------------------------------------------
-    { { 0x60, 0 }, { 0x00, 0 }, { 0xA0, 0 }, { 0x00, 0 }, { 0xA0, 0 }, { 0x00, 0 } },
-    { { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 } },
-    { { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x10, 0 }, { 0x00, 0 }, { 0x10, 0 } },
-    { { 0x30, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 } },
-    //-------------------------------------------------------------------------------------
-    { { 0xC0, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0xFF, 1 }, { 0x00, 0 }, { 0xFF, 1 } },
-    { { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 1 }, { 0x00, 0 }, { 0x00, 1 } },
-    { { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 1 }, { 0x00, 0 }, { 0x00, 1 } },
-    { { 0x60, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x80, 1 }, { 0x00, 0 }, { 0x80, 1 } },
-    //-------------------------------------------------------------------------------------
-    { { 0x00, 0 }, { 0x00, 0 }, { 0xA0, 0 }, { 0x00, 1 }, { 0xA0, 0 }, { 0x00, 1 } },
-    { { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 1 }, { 0x00, 0 }, { 0x00, 1 } },
-    { { 0x30, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x40, 1 }, { 0x00, 0 }, { 0x40, 1 } },
-    { { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 1 }, { 0x00, 0 }, { 0x00, 1 } },
-    //-------------------------------------------------------------------------------------
-    { { 0x18, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x20, 1 }, { 0x00, 0 }, { 0x20, 1 } },
-    { { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 1 }, { 0x00, 0 }, { 0x00, 1 } },
-    { { 0xC0, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 1 }, { 0x00, 0 }, { 0x00, 1 } },
-    { { 0x0E, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x10, 1 }, { 0x00, 0 }, { 0x10, 1 } },
-    //-------------------------------------------------------------------------------------
-    { { 0x60, 0 }, { 0x00, 0 }, { 0xA0, 0 }, { 0x00, 1 }, { 0xA0, 0 }, { 0x00, 1 } },
-    { { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 1 }, { 0x00, 0 }, { 0x00, 1 } },
-    { { 0x00, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x08, 1 }, { 0x00, 0 }, { 0x08, 1 } },
-    { { 0x30, 0 }, { 0x00, 0 }, { 0x00, 0 }, { 0x00, 1 }, { 0x00, 0 }, { 0x00, 1 } },
-    //-------------------------------------------------------------------------------------
-
-  };
-
-  void print_bits(uint8_t byte) {
-    for(uint8_t mask = 0x80; mask; mask >>= 1) {
-      if(mask  & byte)
-        Serial.print('1');
-      else
-        Serial.print('0');
-    }
-  }
-  
-  void clock() {
-    Serial.println("Clocked! ");
-    
-    for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
-      if ((mode == MODE_TRIGGERED_WITH_QUANTIZE) ||
-          (mode == MODE_AUTOPLAY_AND_RECORD)) {
-        if (queued & (1 << ix)) {
-          
-          if (mode == MODE_TRIGGERED_WITH_QUANTIZE) {
-            voices[ix]->trigger = true;
-          }
-          else if (mode == MODE_AUTOPLAY_AND_RECORD) {
-            data[
-              l_rate_ix % Tracks::NUM_ELEMENTS
-            ][ix][0] = 0xff;
-            
-            Serial.print("Record #");
-            Serial.print(ix);
-            Serial.print(" on step ");
-            Serial.print(l_rate_ix % Tracks::NUM_ELEMENTS);
-            Serial.println();          
-          }
-        }
-      }
-    
-      if ((mode == MODE_AUTOPLAY) ||
-          (mode == MODE_EXTERNAL_CLOCK) ||
-          (mode == MODE_AUTOPLAY_WITH_TRIGGERED) ||
-          (mode == MODE_AUTOPLAY_AND_RECORD) ) {
-        if (data[l_rate_ix % Tracks::NUM_ELEMENTS][ix][0] > 0) {
-          voices[ix]->trigger = true;
-          
-           voices[ix]->amplitude   = data[
-            l_rate_ix % Tracks::NUM_ELEMENTS
-          ][ix][0];
-          
-          voices[ix]->phase_shift = data[
-            l_rate_ix % Tracks::NUM_ELEMENTS
-          ][ix][1];
-        }
-      }
-    }
-    
-    queued        = 0;    
-    draw_flag     = true;    
-    total_samples = 0;
-    l_rate_ix     ++;
-  }
-
-  void setup() {
-    for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
-      voices[ix] = new sample_t(Samples::data+BLOCK_SIZE*ix, BLOCK_SIZE);
-    }
-    
-#ifdef ENABLE_SERIAL
-    Serial.begin(115200);
-#endif
-    
-    pinMode(PA0, INPUT);
-    
-    tft.begin();
-    tft.setRotation(3);
-    tft.setTextColor(ILI9341_WHITE);  
-    tft.setTextSize(2);
-    tft.fillScreen(ILI9341_BLACK);
-    
-    SPI.begin();
-
-    voices[0]->amplitude = 0xbf; // kick
-    voices[1]->amplitude = 0xdf; // lo bass
-    voices[2]->amplitude = 0xdf; // hi bass
-    voices[3]->amplitude = 0x7f; // snare 
-    voices[4]->amplitude = 0xff; // closed hat
-    voices[5]->amplitude = 0xbf; // open hat
-    
-    pt8211.begin(&SPI);
-    
-    lamb::maple_timer::setup(timer_1, S_RATE, s_rate);
-    lamb::maple_timer::setup(timer_2, K_RATE, k_rate);
-    
-    timer_3.pause();
-    timer_3.setPeriod(60000000L / (120*4));
-    timer_3.setChannel1Mode(TIMER_OUTPUT_COMPARE);
-    timer_3.setCompare(TIMER_CH1, 0);
-    timer_3.attachCompare1Interrupt(l_rate);
-    timer_3.refresh();    
-    timer_3.resume();
-    
-    pinMode(PB0,  INPUT_PULLUP);
-    pinMode(PB1,  INPUT_PULLUP);
-    pinMode(PB10, INPUT_PULLUP);
-    pinMode(PB11, INPUT_PULLUP);
-    pinMode(PC14, INPUT_PULLUP);
-    pinMode(PC15, INPUT_PULLUP);
-    
-    delay(500);
-  }
-  
-  void loop(void) {
-    if (drawbuff.readable()) {
-      graph();
-    }
-  }
+  total_samples ++;
+  sample_ix ++;
+  sample_ix %= Samples::NUM_ELEMENTS; 
 }
 
+void application::draw_text() {
+  tft.fillRect(10, 10, 80, 80, ILI9341_BLACK);
+  tft.setCursor(10, 10);
+  tft.println(knob0);
+  tft.setCursor(10, 30);
+  tft.println(pct);
+  tft.setCursor(10, 50);
+  tft.println(knob1);
+}
+  
+void application::setup() {
+  for (size_t ix = 0; ix < 6; ix++) {
+    voices[ix] = new sample_t(Samples::data+BLOCK_SIZE*ix, BLOCK_SIZE);
+  }
+    
+#ifdef ENABLE_SERIAL
+  Serial.begin(115200);
+#endif
+    
+  pinMode(PA0, INPUT);
+  pinMode(PA1, INPUT);
+  pinMode(PA2, INPUT);
+    
+  tft.begin();
+  tft.setRotation(3);
+  tft.setTextColor(ILI9341_WHITE);  
+  tft.setTextSize(2);
+  tft.fillScreen(ILI9341_BLACK);
+    
+  SPI.begin();
+
+  voices[0]->amplitude = 0xbf; // kick
+  voices[1]->amplitude = 0xdf; // lo bass
+  voices[2]->amplitude = 0xdf; // hi bass
+  voices[3]->amplitude = 0x7f; // snare 
+  voices[4]->amplitude = 0xff; // closed hat
+  voices[5]->amplitude = 0x9f; // open hat
+    
+  pt8211.begin(&SPI);
+    
+  lamb::maple_timer::setup(timer_1, S_RATE, s_rate);
+  lamb::maple_timer::setup(timer_2, K_RATE, k_rate);
+    
+  pinMode(PB0,  INPUT_PULLUP);
+  pinMode(PB1,  INPUT_PULLUP);
+  pinMode(PB10, INPUT_PULLUP);
+  pinMode(PB11, INPUT_PULLUP);
+  pinMode(PC14, INPUT_PULLUP);
+  pinMode(PC15, INPUT_PULLUP);
+    
+  delay(500);
+}
+  
+void application::loop(void) {
+  if (drawbuff.readable()) {
+    graph();
+  }
+}

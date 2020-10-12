@@ -2,9 +2,9 @@
 #include "application.h"
 
 void setup() {
-  Application::setup();
+  application::setup();
 }
 
 void loop() {
-  Application::loop();
+  application::loop();
 }
