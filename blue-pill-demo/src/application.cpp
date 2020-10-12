@@ -101,7 +101,7 @@ namespace Application {
     //Serial.println();
 
     static size_t buttons[] =      {  PB11  ,  PB10 ,    PB1 ,   PB0, PC14, PC15   };
-    static char * button_names[] = { "PB11 ", "PB10 ",  "PB1",  "PB0", "PC14", "PC15"  };
+    static char * button_names[] = { "PB11", "PB10",  "PB1",  "PB0", "PC14", "PC15"  };
     
     uint8_t button_values = 0;
 
@@ -152,14 +152,19 @@ namespace Application {
       for (size_t ix = 0; ix < 6; ix++) {
         if ( (! (last_button_values & (1 << ix))) &&
              (button_values & (1 << ix))) {
-          Serial.print("Trigger ");
+          Serial.print("Triggered ");
           Serial.print(button_names[ix]);
+
+          if (strlen(button_names[ix]) == 3) {
+            Serial.print(" ");
+          }
+
           Serial.print(" / ");
           Serial.println(ix);
 
           voices[voice_map[ix]]->trigger   = true;
 
-          if (ix == 5)
+          // if (ix == 5)
             voices[voice_map[4]]->trigger   = false;
           
           if (ix == 4)
@@ -420,21 +425,17 @@ namespace Application {
     
     SPI.begin();
 
-    voices[0]->amplitude = 0x90; // kick
-    voices[1]->amplitude = 0xC0; // lo bass
-    voices[2]->amplitude = 0xC0; // hi bass
-    voices[3]->amplitude = 0x50; // snare 
-    voices[4]->amplitude = 0xB0; // closed hat
-    voices[5]->amplitude = 0x80; // open hat
+    voices[0]->amplitude = 0x58; // kick
+    voices[1]->amplitude = 0xA8; // lo bass
+    voices[2]->amplitude = 0xA8; // hi bass
+    voices[3]->amplitude = 0x30; // snare 
+    voices[4]->amplitude = 0xFF; // closed hat
+    voices[5]->amplitude = 0x60; // open hat
     
     pt8211.begin(&SPI);
     
     lamb::maple_timer::setup(timer_1, S_RATE, s_rate);
-    lamb::maple_timer::setup(
-      timer_2,
-      K_RATE,
-      k_rate
-    );
+    lamb::maple_timer::setup(timer_2, K_RATE, k_rate);
     
     timer_3.pause();
     timer_3.setPeriod(60000000L / (120*4));
