@@ -7,7 +7,7 @@
 
 namespace Application {
   const uint32_t K_RATE        = 100;
-  const uint32_t S_RATE        = 18000;
+  const uint32_t S_RATE        = 22050;
   const uint32_t TFT_DC        = PA8;
   const uint32_t TFT_CS        = PB12;
   const uint32_t I2S_WS        = PA3;
@@ -111,8 +111,6 @@ namespace Application {
       }
     }
 
-#define LOG_RAW_BUTTONS
-    
 #ifdef LOG_RAW_BUTTONS
     for(uint16_t mask = 0x80; mask; mask >>= 1) {
       if(mask  & last_button_values)
@@ -422,12 +420,12 @@ namespace Application {
     
     SPI.begin();
 
-    voices[0]->amplitude = 0x80;
-    voices[1]->amplitude = 0x80;
-    voices[2]->amplitude = 0x80;
-    voices[3]->amplitude = 0x20;
-    voices[4]->amplitude = 0xF0;
-    voices[5]->amplitude = 0xA0;
+    voices[0]->amplitude = 0x90; // kick
+    voices[1]->amplitude = 0xC0; // lo bass
+    voices[2]->amplitude = 0xC0; // hi bass
+    voices[3]->amplitude = 0x50; // snare 
+    voices[4]->amplitude = 0xB0; // closed hat
+    voices[5]->amplitude = 0x80; // open hat
     
     pt8211.begin(&SPI);
     
