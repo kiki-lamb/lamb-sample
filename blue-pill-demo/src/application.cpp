@@ -3,45 +3,42 @@
 #include <inttypes.h>
 #include <Arduino.h>
 
-const uint32_t          application::K_RATE        = 100;
-const uint32_t          application::S_RATE        = 19000;
-uint16_t                application::knob0         = 4091;
-uint16_t                application::knob1         = 4091;
-uint16_t                application::knob2         = 4091;
-int32_t                 application::avg_sample    = 0;
-size_t                  application::sample_ix     = 0;
-size_t                  application::total_samples = 0;
-double                  application::pct           = 100.0;
-HardwareTimer           application::timer_1(1);
-HardwareTimer           application::timer_2(2);
-HardwareTimer           application::timer_3(3);
-application::sample_t * application::voices[6];
+using namespace lamb;
 
-lamb::device::Adafruit_ILI9341_STM_SPI2 application::tft =
-  lamb::device::Adafruit_ILI9341_STM_SPI2(
+const uint32_t          application::K_RATE         = 100;
+const uint32_t          application::S_RATE         = 19000;
+uint16_t                application::_knob0         = 4091;
+uint16_t                application::_knob1         = 4091;
+uint16_t                application::_knob2         = 4091;
+int32_t                 application::_avg_sample    = 0;
+size_t                  application::_sample_ix     = 0;
+size_t                  application::_total_samples = 0;
+double                  application::_pct           = 100.0;
+HardwareTimer           application::_timer_1(1);
+HardwareTimer           application::_timer_2(2);
+application::voice *    application::_voices[6];
+application::dac        application::_dac(application::I2S_WS);
+application::draw_buff  application::_draw_buff;
+flag                    application::_draw_flag(true);
+uint8_t                 application::_last_button_values = 0;
+
+application::tft application::_tft =
+  application::tft(
     application::TFT_CS,
     application::TFT_DC
   );  
   
-lamb::device::pt8211 application::pt8211(application::I2S_WS);
-
-lamb::ring_buffer<int16_t, 256> application::drawbuff;
-
-volatile bool application::draw_flag = false;
-
-uint8_t application::last_button_values = 0;
-uint8_t application::queued = 0;  
 
 //////////////////////////////////////////////////////////////////////////////
 
 void application::k_rate() {  
-  uint16_t tmp0 = knob0;
-  knob0 <<= 4;
-  knob0 -= tmp0;
-  knob0 += analogRead(PA0);
-  knob0 >>= 4;
+  uint16_t tmp0 = _knob0;
+  _knob0 <<= 4;
+  _knob0 -= tmp0;
+  _knob0 += analogRead(PA0);
+  _knob0 >>= 4;
     
-  pct = knob0 / 2048.0;
+  _pct = _knob0 / 2048.0;
     
   static size_t buttons[] =      {  PB11  ,  PB10 ,    PB1 ,   PB0, PC14, PC15   };
   static char * button_names[] = { "PB11", "PB10",  "PB1",  "PB0", "PC14", "PC15"  };
@@ -56,7 +53,7 @@ void application::k_rate() {
 
 #ifdef LOG_RAW_BUTTONS
   for(uint16_t mask = 0x80; mask; mask >>= 1) {
-    if(mask  & last_button_values)
+    if(mask  & _last_button_values)
       Serial.print('1');
     else
       Serial.print('0');
@@ -74,7 +71,7 @@ void application::k_rate() {
 #endif
     
   for (size_t ix = 0; ix < 6; ix++) {
-    if ( (! (last_button_values & (1 << ix))) &&
+    if ( (! (_last_button_values & (1 << ix))) &&
          (button_values & (1 << ix))) {
       Serial.print("Triggered ");
       Serial.print(button_names[ix]);
@@ -84,64 +81,62 @@ void application::k_rate() {
       }
       
       Serial.print(" @ 0x");
-      Serial.print(voices[ix]->amplitude, HEX);
+      Serial.print(_voices[ix]->amplitude, HEX);
       Serial.print(" / ");
       Serial.println(ix);
       
-      voices[ix]->trigger   = true;
+      _voices[ix]->trigger   = true;
       
       if (ix == 5)
-        voices[4]->trigger   = false;
+        _voices[4]->trigger   = false;
       
       if (ix == 4)
-        voices[5]->trigger   = false;
+        _voices[5]->trigger   = false;
       
     }
   }
     
-  last_button_values = button_values;
+  _last_button_values = button_values;
 }
 
 void application::graph() {
-  if (draw_flag) {
-    for (size_t ix = 0; ix < 6; ix++) {
-      if (voices[ix]->state) {
-        tft.fillRect(
-          36,
-          V_SPACING*ix+(V_SPACING >> 1),
-          V_SPACING-10,
-          V_SPACING-10,
-          ILI9341_RED
-        );
-      }
-      else {
-        tft.fillRect(
-          36,
-          V_SPACING*ix+(V_SPACING >> 1),
-          V_SPACING-10,
-          V_SPACING-10,
-          ILI9341_BLACK
-        );
-      }
+  if (! _draw_flag.consume()) return;
+  
+  for (size_t ix = 0; ix < 6; ix++) {
+    if (_voices[ix]->state) {
+      _tft.fillRect(
+        36,
+        V_SPACING*ix+(V_SPACING >> 1),
+        V_SPACING-10,
+        V_SPACING-10,
+        ILI9341_RED
+      );
     }
-
-    draw_flag = false;
-  }            
+    else {
+      _tft.fillRect(
+        36,
+        V_SPACING*ix+(V_SPACING >> 1),
+        V_SPACING-10,
+        V_SPACING-10,
+        ILI9341_BLACK
+      );
+    }
+  }
   
   static uint16_t col = 0;
   static const uint16_t col_max = 200; // real max 320
   uint16_t tmp_col = col+120;
   
-  tft.drawFastVLine(tmp_col, 0, 240, ILI9341_BLACK);
-  uint16_t tmp_knob0 = 119 - map(knob0, 0, 4091, 0, 119);
-  tft.drawPixel(tmp_col, tmp_knob0, ILI9341_GREEN);
-  tft.drawPixel(tmp_col, 239-tmp_knob0, ILI9341_GREEN);
+  _tft.drawFastVLine(tmp_col, 0, 240, ILI9341_BLACK);
+  uint16_t tmp__knob0 = 119 - map(_knob0, 0, 4091, 0, 119);
+  _tft.drawPixel(tmp_col, tmp__knob0, ILI9341_GREEN);
+  _tft.drawPixel(tmp_col, 239-tmp__knob0, ILI9341_GREEN);
 
-  int16_t tmp = drawbuff.dequeue();
+  int16_t tmp = _draw_buff.dequeue();
   int16_t tmp_sample = map(tmp, -32768, 32767, -120, 119);
   
   if (tmp_sample > 0)
-    tft.drawFastVLine(
+    _tft.drawFastVLine(
       tmp_col,
       120,
       tmp_sample,
@@ -149,7 +144,7 @@ void application::graph() {
     );
   else 
     if (tmp_sample < 0) {
-      tft.drawFastVLine(
+      _tft.drawFastVLine(
         tmp_col,
         120 + tmp_sample,
         abs(tmp_sample),
@@ -161,22 +156,22 @@ void application::graph() {
 }
   
 void application::s_rate() {
-  if ((sample_ix % (1 << CAPTURE_RATIO)) == 0) {
-    avg_sample >>= CAPTURE_RATIO;
+  if ((_sample_ix % (1 << CAPTURE_RATIO)) == 0) {
+    _avg_sample >>= CAPTURE_RATIO;
 
-    if (drawbuff.writable()) {
-      drawbuff.enqueue(avg_sample); // 
+    if (_draw_buff.writable()) {
+      _draw_buff.enqueue(_avg_sample); // 
     }
     
-    avg_sample = 0;
+    _avg_sample = 0;
   }
   
   int32_t sample = 0;
   
   for (size_t ix = 0; ix < 6; ix++) {
-    int16_t tmp = voices[ix]->play();
+    int16_t tmp = _voices[ix]->play();
       
-    if ((ix == 5) && voices[ix]->trigger) {
+    if ((ix == 5) && _voices[ix]->trigger) {
       Serial.println(tmp);
     }
       
@@ -185,30 +180,30 @@ void application::s_rate() {
 
   sample >>= 1;
 
-  sample *= pct;
+  sample *= _pct;
   
-  avg_sample += sample;
+  _avg_sample += sample;
 
-  pt8211.write_mono(sample);
+  _dac.write_mono(sample);
   
-  total_samples ++;
-  sample_ix ++;
-  sample_ix %= Samples::NUM_ELEMENTS; 
+  _total_samples ++;
+  _sample_ix ++;
+  _sample_ix %= Samples::NUM_ELEMENTS; 
 }
 
 void application::draw_text() {
-  tft.fillRect(10, 10, 80, 80, ILI9341_BLACK);
-  tft.setCursor(10, 10);
-  tft.println(knob0);
-  tft.setCursor(10, 30);
-  tft.println(pct);
-  tft.setCursor(10, 50);
-  tft.println(knob1);
+  _tft.fillRect(10, 10, 80, 80, ILI9341_BLACK);
+  _tft.setCursor(10, 10);
+  _tft.println(_knob0);
+  _tft.setCursor(10, 30);
+  _tft.println(_pct);
+  _tft.setCursor(10, 50);
+  _tft.println(_knob1);
 }
   
 void application::setup() {
   for (size_t ix = 0; ix < 6; ix++) {
-    voices[ix] = new sample_t(Samples::data+BLOCK_SIZE*ix, BLOCK_SIZE);
+    _voices[ix] = new voice(Samples::data+BLOCK_SIZE*ix, BLOCK_SIZE);
   }
     
 #ifdef ENABLE_SERIAL
@@ -219,25 +214,25 @@ void application::setup() {
   pinMode(PA1, INPUT);
   pinMode(PA2, INPUT);
     
-  tft.begin();
-  tft.setRotation(3);
-  tft.setTextColor(ILI9341_WHITE);  
-  tft.setTextSize(2);
-  tft.fillScreen(ILI9341_BLACK);
+  _tft.begin();
+  _tft.setRotation(3);
+  _tft.setTextColor(ILI9341_WHITE);  
+  _tft.setTextSize(2);
+  _tft.fillScreen(ILI9341_BLACK);
     
   SPI.begin();
 
-  voices[0]->amplitude = 0xbf; // kick
-  voices[1]->amplitude = 0xdf; // lo bass
-  voices[2]->amplitude = 0xdf; // hi bass
-  voices[3]->amplitude = 0x7f; // snare 
-  voices[4]->amplitude = 0xff; // closed hat
-  voices[5]->amplitude = 0x9f; // open hat
+  _voices[0]->amplitude = 0xbf; // kick
+  _voices[1]->amplitude = 0xdf; // lo bass
+  _voices[2]->amplitude = 0xdf; // hi bass
+  _voices[3]->amplitude = 0x7f; // snare 
+  _voices[4]->amplitude = 0xff; // closed hat
+  _voices[5]->amplitude = 0x9f; // open hat
     
-  pt8211.begin(&SPI);
+  _dac.begin(&SPI);
     
-  lamb::maple_timer::setup(timer_1, S_RATE, s_rate);
-  lamb::maple_timer::setup(timer_2, K_RATE, k_rate);
+  maple_timer::setup(_timer_1, S_RATE, s_rate);
+  maple_timer::setup(_timer_2, K_RATE, k_rate);
     
   pinMode(PB0,  INPUT_PULLUP);
   pinMode(PB1,  INPUT_PULLUP);
@@ -250,7 +245,7 @@ void application::setup() {
 }
   
 void application::loop(void) {
-  if (drawbuff.readable()) {
+  if (_draw_buff.readable()) {
     graph();
   }
 }
