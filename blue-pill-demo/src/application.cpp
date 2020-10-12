@@ -7,7 +7,7 @@
 
 namespace Application {
   const uint32_t K_RATE        = 100;
-  const uint32_t S_RATE        = 22050;
+  const uint32_t S_RATE        = 17500;
   const uint32_t TFT_DC        = PA8;
   const uint32_t TFT_CS        = PB12;
   const uint32_t I2S_WS        = PA3;
@@ -70,8 +70,12 @@ namespace Application {
     knob0 += analogRead(PA0);
     knob0 >>= 4;
 
-    pct = knob0 / 2048.0;
+//    pct = knob0 / 2048.0;
+    pct = 2208 / 2048.0;
 
+    Serial.print("knob0: ");
+    Serial.println(knob0);
+    
     uint16_t tmp_knob1 = knob1;
     uint16_t tmp1 = tmp_knob1;
     tmp_knob1 <<= 2;
@@ -155,6 +159,9 @@ namespace Application {
           Serial.print("Triggered ");
           Serial.print(button_names[ix]);
 
+          Serial.print(" @ 0x");
+          Serial.print(voices[voice_map[ix]]->amplitude);
+
           if (strlen(button_names[ix]) == 3) {
             Serial.print(" ");
           }
@@ -164,17 +171,17 @@ namespace Application {
 
           voices[voice_map[ix]]->trigger   = true;
 
-          // if (ix == 5)
+          if (ix == 5)
             voices[voice_map[4]]->trigger   = false;
           
           if (ix == 4)
             voices[voice_map[5]]->trigger   = false;
 
-          if (ix == 1)
-            voices[voice_map[2]]->trigger   = false;
+//          if (ix == 1)
+//            voices[voice_map[2]]->trigger   = false;
           
-          if (ix == 2)
-            voices[voice_map[1]]->trigger   = false;
+//          if (ix == 2)
+//          voices[voice_map[1]]->trigger   = false;
         }
       }
       break;
@@ -269,7 +276,13 @@ namespace Application {
     int32_t sample = 0;
   
     for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
-      sample += voices[ix]->play();
+      int16_t tmp = voices[ix]->play();
+      
+      if ((ix == 5) && voices[ix]->trigger) {
+        Serial.println(tmp);
+      }
+      
+      sample += tmp;
     }
 
     sample >>= 1;
@@ -405,7 +418,6 @@ namespace Application {
     l_rate_ix     ++;
   }
 
-
   void setup() {
     for (size_t ix = 0; ix < Tracks::VOICE_COUNT; ix++) {
       voices[ix] = new sample_t(Samples::data+BLOCK_SIZE*ix, BLOCK_SIZE);
@@ -425,12 +437,12 @@ namespace Application {
     
     SPI.begin();
 
-    voices[0]->amplitude = 0x58; // kick
-    voices[1]->amplitude = 0xA8; // lo bass
-    voices[2]->amplitude = 0xA8; // hi bass
-    voices[3]->amplitude = 0x30; // snare 
-    voices[4]->amplitude = 0xFF; // closed hat
-    voices[5]->amplitude = 0x60; // open hat
+    voices[0]->amplitude = 0xbf; // kick
+    voices[1]->amplitude = 0xdf; // lo bass
+    voices[2]->amplitude = 0xdf; // hi bass
+    voices[3]->amplitude = 0x7f; // snare 
+    voices[4]->amplitude = 0xff; // closed hat
+    voices[5]->amplitude = 0xbf; // open hat
     
     pt8211.begin(&SPI);
     
