@@ -72,9 +72,6 @@ namespace Application {
 
 //    pct = knob0 / 2048.0;
     pct = 2208 / 2048.0;
-
-    Serial.print("knob0: ");
-    Serial.println(knob0);
     
     uint16_t tmp_knob1 = knob1;
     uint16_t tmp1 = tmp_knob1;
