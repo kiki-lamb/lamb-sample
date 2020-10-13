@@ -1,32 +1,30 @@
 #include "application.h"
-#include "samples.h"
 #include <inttypes.h>
 #include <Arduino.h>
 
 using namespace lamb;
 
-const uint32_t               application::K_RATE         = 100;
-const uint32_t               application::S_RATE         = 19000;
-uint16_t                     application::_knob0         = 4091;
-uint16_t                     application::_knob1         = 4091;
-uint16_t                     application::_knob2         = 4091;
-int32_t                      application::_avg_sample    = 0;
-size_t                       application::_sample_ix     = 0;
-size_t                       application::_total_samples = 0;
-double                       application::_pct           = 100.0;
+const uint32_t               application::K_RATE              = 100;
+const uint32_t               application::S_RATE              = 19000;
+double                       application::_pct                = 100.0;
+int32_t                      application::_avg_sample         = 0;
+size_t                       application::_sample_ix          = 0;
+size_t                       application::_total_samples      = 0;
+uint16_t                     application::_knob0              = 4091;
+uint16_t                     application::_knob1              = 4091;
+uint16_t                     application::_knob2              = 4091;
+uint8_t                      application::_last_button_values = 0;
+uint8_t                      application::_queued             = 0;
+application::voice *         application::_voices[6];
+application::draw_buffer     application::_draw_buffer;
 HardwareTimer                application::_timer_1(1);
 HardwareTimer                application::_timer_2(2);
 HardwareTimer                application::_timer_3(3);
-application::sample_t *      application::_voices[6];
 application::dac             application::_dac(application::I2S_WS);
-application::draw_buffer     application::_draw_buffer;
-uint8_t                      application::_last_button_values = 0;
-uint8_t                      application::_queued             = 0;  
-
-application::tft application::_tft(
+application::tft             application::_tft(
   application::TFT_CS,
   application::TFT_DC
-);  
+); 
   
 //////////////////////////////////////////////////////////////////////////////
 
@@ -170,7 +168,7 @@ void application::s_rate() {
 
 void application::setup() {
   for (size_t ix = 0; ix < 6; ix++) {
-    _voices[ix] = new sample_t(Samples::data+BLOCK_SIZE*ix, BLOCK_SIZE);
+    _voices[ix] = new voice(Samples::data+BLOCK_SIZE*ix, BLOCK_SIZE);
   }
     
 #ifdef ENABLE_SERIAL

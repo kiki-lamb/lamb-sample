@@ -1,13 +1,12 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-#include <inttypes.h>
-#include "samples.h"
 #include "lamb.h"
+#include "samples.h"
 
 class application {
 public:
-  typedef lamb::oneshot_plus                        sample_t;
+  typedef lamb::oneshot_plus                        voice;
   typedef lamb::device::Adafruit_ILI9341_STM_SPI2   tft;
   typedef lamb::ring_buffer<int16_t, 256>           draw_buffer;
   typedef lamb::device::pt8211                      dac;
@@ -36,7 +35,7 @@ private:
   static          HardwareTimer        _timer_2;
   static          HardwareTimer        _timer_3;
   static          dac                  _dac;
-  static          sample_t *           _voices[6];
+  static          voice *              _voices[6];
   static          uint8_t              _last_button_values;
   static          uint8_t              _queued; 
   static          tft                  _tft;
