@@ -5,30 +5,30 @@
 
 using namespace lamb;
 
-const uint32_t          application::K_RATE         = 100;
-const uint32_t          application::S_RATE         = 19000;
-uint16_t                application::_knob0         = 4091;
-uint16_t                application::_knob1         = 4091;
-uint16_t                application::_knob2         = 4091;
-int32_t                 application::_avg_sample    = 0;
-size_t                  application::_sample_ix     = 0;
-size_t                  application::_total_samples = 0;
-double                  application::_pct           = 100.0;
-HardwareTimer           application::_timer_1(1);
-HardwareTimer           application::_timer_2(2);
-application::voice *    application::_voices[6];
-application::dac        application::_dac(application::I2S_WS);
-application::draw_buff  application::_draw_buff;
-flag                    application::_draw_flag(true);
-uint8_t                 application::_last_button_values = 0;
+const uint32_t               application::K_RATE         = 100;
+const uint32_t               application::S_RATE         = 19000;
+uint16_t                     application::_knob0         = 4091;
+uint16_t                     application::_knob1         = 4091;
+uint16_t                     application::_knob2         = 4091;
+int32_t                      application::_avg_sample    = 0;
+size_t                       application::_sample_ix     = 0;
+size_t                       application::_total_samples = 0;
+double                       application::_pct           = 100.0;
+HardwareTimer                application::_timer_1(1);
+HardwareTimer                application::_timer_2(2);
+HardwareTimer                application::_timer_3(3);
+application::sample_t *      application::_voices[6];
+application::dac             application::_dac(application::I2S_WS);
+application::draw_buffer     application::_draw_buffer;
+volatile bool                application::_draw_flag          = false;
+uint8_t                      application::_last_button_values = 0;
+uint8_t                      application::_queued             = 0;  
 
-application::tft application::_tft =
-  application::tft(
-    application::TFT_CS,
-    application::TFT_DC
-  );  
+application::tft application::_tft(
+  application::TFT_CS,
+  application::TFT_DC
+);  
   
-
 //////////////////////////////////////////////////////////////////////////////
 
 void application::k_rate() {  
@@ -100,39 +100,43 @@ void application::k_rate() {
 }
 
 void application::graph() {
-  if (! _draw_flag.consume()) return;
-  
-  for (size_t ix = 0; ix < 6; ix++) {
-    if (_voices[ix]->state) {
-      _tft.fillRect(
-        36,
-        V_SPACING*ix+(V_SPACING >> 1),
-        V_SPACING-10,
-        V_SPACING-10,
-        ILI9341_RED
-      );
+  if (_draw_flag) {
+    for (size_t ix = 0; ix < 6; ix++) {
+      if (_voices[ix]->state) {
+        _tft.fillRect(
+          36,
+          V_SPACING*ix+(V_SPACING >> 1),
+          V_SPACING-10,
+          V_SPACING-10,
+          ILI9341_RED
+        );
+      }
+      else {
+        _tft.fillRect(
+          36,
+          V_SPACING*ix+(V_SPACING >> 1),
+          V_SPACING-10,
+          V_SPACING-10,
+          ILI9341_BLACK
+        );
+      }
     }
-    else {
-      _tft.fillRect(
-        36,
-        V_SPACING*ix+(V_SPACING >> 1),
-        V_SPACING-10,
-        V_SPACING-10,
-        ILI9341_BLACK
-      );
-    }
-  }
+
+    _draw_flag = false;
+  }            
+
   
   static uint16_t col = 0;
   static const uint16_t col_max = 200; // real max 320
   uint16_t tmp_col = col+120;
   
   _tft.drawFastVLine(tmp_col, 0, 240, ILI9341_BLACK);
-  uint16_t tmp__knob0 = 119 - map(_knob0, 0, 4091, 0, 119);
-  _tft.drawPixel(tmp_col, tmp__knob0, ILI9341_GREEN);
-  _tft.drawPixel(tmp_col, 239-tmp__knob0, ILI9341_GREEN);
+  uint16_t tmp_knob0 = 119 - map(_knob0, 0, 4091, 0, 119);
+  _tft.drawPixel(tmp_col, tmp_knob0, ILI9341_GREEN);
+  _tft.drawPixel(tmp_col, 239-tmp_knob0, ILI9341_GREEN);
 
-  int16_t tmp = _draw_buff.dequeue();
+  int16_t tmp = _draw_buffer.dequeue();
+
   int16_t tmp_sample = map(tmp, -32768, 32767, -120, 119);
   
   if (tmp_sample > 0)
@@ -159,8 +163,8 @@ void application::s_rate() {
   if ((_sample_ix % (1 << CAPTURE_RATIO)) == 0) {
     _avg_sample >>= CAPTURE_RATIO;
 
-    if (_draw_buff.writable()) {
-      _draw_buff.enqueue(_avg_sample); // 
+    if (_draw_buffer.writable()) {
+      _draw_buffer.enqueue(_avg_sample); // 
     }
     
     _avg_sample = 0;
@@ -191,19 +195,9 @@ void application::s_rate() {
   _sample_ix %= Samples::NUM_ELEMENTS; 
 }
 
-void application::draw_text() {
-  _tft.fillRect(10, 10, 80, 80, ILI9341_BLACK);
-  _tft.setCursor(10, 10);
-  _tft.println(_knob0);
-  _tft.setCursor(10, 30);
-  _tft.println(_pct);
-  _tft.setCursor(10, 50);
-  _tft.println(_knob1);
-}
-  
 void application::setup() {
   for (size_t ix = 0; ix < 6; ix++) {
-    _voices[ix] = new voice(Samples::data+BLOCK_SIZE*ix, BLOCK_SIZE);
+    _voices[ix] = new sample_t(Samples::data+BLOCK_SIZE*ix, BLOCK_SIZE);
   }
     
 #ifdef ENABLE_SERIAL
@@ -245,7 +239,7 @@ void application::setup() {
 }
   
 void application::loop(void) {
-  if (_draw_buff.readable()) {
+  if (_draw_buffer.readable()) {
     graph();
   }
 }
