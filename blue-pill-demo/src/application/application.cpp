@@ -69,12 +69,12 @@ void application::setup_voices() {
     _voices[_voices_map[ix]] = new voice(Samples::data+BLOCK_SIZE*ix, BLOCK_SIZE);
   }
 
-  _voices[_voices_map[0]]->amplitude = 0xc0; // 0xb8; // kick
+  _voices[_voices_map[0]]->amplitude = 0xd0; // 0xb8; // kick
   _voices[_voices_map[1]]->amplitude = 0xd0; // 0xd8; // lo bass
   _voices[_voices_map[2]]->amplitude = 0xd0; // 0xd8; // hi bass
   _voices[_voices_map[3]]->amplitude = 0x80; // 0x78; // snare 
-  _voices[_voices_map[4]]->amplitude = 0xf0; // closed hat
-  _voices[_voices_map[5]]->amplitude = 0xf0; // open hat
+  _voices[_voices_map[4]]->amplitude = 0xd0; // closed hat
+  _voices[_voices_map[5]]->amplitude = 0xe0; // open hat
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -128,7 +128,7 @@ application::application_event application::process_control_event(
 
 ////////////////////////////////////////////////////////////////////////////////
 
-application::application_event application::process_button_event(
+application::application_event application::process_encoder_event(
   application::control_event const & control_event
 ) {
   application_event application_event;
@@ -136,7 +136,7 @@ application::application_event application::process_button_event(
 
   Serial.println("Don't know how to process encoders yet!");
 
-  return appliction_event;
+  return application_event;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -238,7 +238,6 @@ void application::k_rate() {
       Serial.println(ix);
       
       _voices[_voices_map[ix]]->trigger  = true;
-      _voices[_voices_map[4]]->trigger  &= ! _voices[_voices_map[5]]->trigger;
       _voices[_voices_map[5]]->trigger  &= ! _voices[_voices_map[4]]->trigger;
     }
   }
