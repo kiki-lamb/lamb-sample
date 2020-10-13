@@ -51,7 +51,59 @@ application::tft             application::_tft(
   
 //////////////////////////////////////////////////////////////////////////////
 
-void application::k_rate() {  
+application::application_event application::process_control_event(
+  application::control_event const & control_event
+) {
+  application_event application_event;
+  application_event.type = application_event_type::EVT_UNKNOWN;
+ 
+  if (control_event.type == control_event_type::CTL_EVT_NOT_AVAILABLE) {
+    application_event.type = application_event_type::APP_EVT_NOT_AVAILABLE;
+
+    return application_event;
+  }
+  else if (control_event.type == control_event_type::EVT_BUTTON) {
+    return process_button_event(control_event);
+  }
+//  else if (control_event.type == control_event_type::EVT_ENCODER) {
+//    return process_encoder_event(control_event);
+//  }
+
+  return application_event;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+application::application_event application::process_button_event(
+  application::control_event const & control_event
+) {
+  application_event application_event;
+  application_event.type           = application_event_type::EVT_UNKNOWN;
+  uint8_t           button_number  = control_event.parameter_hi();
+  int8_t            button_state   = (int8_t)control_event.parameter_lo(); 
+  
+  Serial.print(F("Button event, number: "));
+  Serial.print(button_number);
+  Serial.print(F(", state: "));
+  Serial.print(button_state);
+  Serial.println();
+
+  return application_event;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void application::k_rate() {
+  _control_event_source.poll();
+
+  while(
+    process_control_event(
+      _control_event_source.dequeue_event()
+    )
+  );
+
+  
   uint16_t tmp0 = _knob0;
   _knob0 <<= 4;
   _knob0 -= tmp0;

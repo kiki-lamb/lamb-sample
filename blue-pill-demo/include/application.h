@@ -4,6 +4,7 @@
 #include "lamb.h"
 #include "samples.h"
 #include "events/control.h"
+#include "events/application.h"
 
 class application {
 public:
@@ -15,6 +16,8 @@ public:
   typedef lamb::controls::button                          button;
   typedef events::control                                 control_event;
   typedef events::control_event_type                      control_event_type;
+  typedef events::application                             application_event;
+  typedef events::application_event_type                  application_event_type;
   typedef lamb::events::sources::buffer<control_event, 8> control_source;
   
   typedef lamb::events::sources::button_pad<
@@ -75,7 +78,7 @@ private:
   static          uint8_t              _queued; 
   static          tft                  _tft;
   static          draw_buffer          _draw_buffer;
- 
+  
   static          void                 k_rate();
   static          void                 s_rate();
   static          void                 graph();  
@@ -84,7 +87,15 @@ private:
   static          void                 setup_tft();
   static          void                 setup_dac();
   static          void                 setup_timers();
-  
+
+  static          application_event    process_control_event(
+    control_event const & control_event
+  );
+
+  static          application_event    process_button_event(
+    control_event const & control_event
+  );
+
 public:
   static          void                 setup();
   static          void                 loop();
