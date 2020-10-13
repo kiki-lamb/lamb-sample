@@ -4,21 +4,24 @@
 
 using namespace lamb;
 
-const uint32_t               application::K_RATE              { 100   };
-const uint32_t               application::S_RATE              { 19000 };
-double                       application::_pct                { 100.0 };
-int32_t                      application::_avg_sample         { 0     };
-size_t                       application::_sample_ix          { 0     };
-size_t                       application::_total_samples      { 0     };
-uint16_t                     application::_knob0              { 4091  };
-uint16_t                     application::_knob1              { 4091  };
-uint16_t                     application::_knob2              { 4091  };
-uint8_t                      application::_last_button_values { 0     };
-uint8_t                      application::_queued             { 0     };
-HardwareTimer                application::_timer_1            ( 1     );
-HardwareTimer                application::_timer_2            ( 2     );
-HardwareTimer                application::_timer_3            ( 3     );
-application::voice *         application::_voices             [ 6     ];
+const uint32_t               application::K_RATE               { 100   };
+const uint32_t               application::S_RATE               { 19000 };
+
+double                       application::_master_vol          { 100.0 };
+int32_t                      application::_avg_sample          { 0     };
+size_t                       application::_sample_ix           { 0     };
+
+uint16_t                     application::_knob0               { 4091  };
+uint16_t                     application::_knob1               { 4091  };
+uint16_t                     application::_knob2               { 4091  };
+
+uint8_t                      application::_last_trigger_states { 0     };
+
+HardwareTimer                application::_timer_1             ( 1     );
+HardwareTimer                application::_timer_2             ( 2     );
+HardwareTimer                application::_timer_3             ( 3     );
+
+application::voice *         application::_voices              [ 6     ];
 application::draw_buffer     application::_draw_buffer;
 
 application::button          application::_button_device0;
@@ -104,12 +107,12 @@ void application::k_rate() {
   _knob0 += analogRead(PA0);
   _knob0 >>= 4;
     
-  _pct = _knob0 / 2048.0;
+  _master_vol = _knob0 / 2048.0;
     
   static size_t buttons[] =      {  PB11  ,  PB10 ,    PB1 ,   PB0, PC14, PC15   };
   static char * button_names[] = { "PB11", "PB10",  "PB1",  "PB0", "PC14", "PC15"  };
     
-  uint8_t button_values = 0;
+  uint8_t trigger_states = 0;
 
   _control_event_source.poll();
 
@@ -118,18 +121,14 @@ void application::k_rate() {
       _control_event_source.dequeue_event()
     )
   ) {
-    button_values |= 1 << ae.parameter;
+    trigger_states |= 1 << ae.parameter;
   }
   
-//  for (size_t ix = 0; ix < 6; ix++) {
-//    if (! digitalRead(buttons[ix])) {
-//      button_values |= 1 << ix;
-//    }
 //  }
 
 #ifdef LOG_RAW_BUTTONS
   for(uint16_t mask = 0x80; mask; mask >>= 1) {
-    if(mask  & _last_button_values)
+    if(mask  & _last_trigger_states)
       Serial.print('1');
     else
       Serial.print('0');
@@ -138,7 +137,7 @@ void application::k_rate() {
   Serial.print(" => ");
     
   for(uint16_t mask = 0x80; mask; mask >>= 1) {
-    if(mask  & button_values)
+    if(mask  & trigger_states)
       Serial.print('1');
     else
       Serial.print('0');
@@ -147,8 +146,8 @@ void application::k_rate() {
 #endif
     
   for (size_t ix = 0; ix < 6; ix++) {
-    if ( (! (_last_button_values & (1 << ix))) &&
-         (button_values & (1 << ix))) {
+    if ( (! (_last_trigger_states & (1 << ix))) &&
+         (trigger_states & (1 << ix))) {
       Serial.print("Triggered ");
       Serial.print(button_names[ix]);
       
@@ -168,11 +167,10 @@ void application::k_rate() {
       
       if (ix == 4)
         _voices[5]->trigger   = false;
-      
     }
   }
     
-  _last_button_values = button_values;
+  _last_trigger_states = trigger_states;
 }
 
 void application::graph() {
@@ -234,13 +232,12 @@ void application::s_rate() {
 
   sample_ >>= 1;
 
-  sample_ *= _pct;
+  sample_ *= _master_vol;
   
   _avg_sample += sample_;
 
   _dac.write_mono(sample_);
   
-  _total_samples ++;
   _sample_ix ++;
   _sample_ix %= Samples::NUM_ELEMENTS; 
 }
