@@ -89,21 +89,15 @@ application::application_event application::process_button_event(
   Serial.print(button_state);
   Serial.println();
 
+  application_event.type      = application_event_type::EVT_TRIGGER;
+  application_event.parameter = button_number;
+  
   return application_event;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 void application::k_rate() {
-  _control_event_source.poll();
-
-  while(
-    process_control_event(
-      _control_event_source.dequeue_event()
-    )
-  );
-
-  
   uint16_t tmp0 = _knob0;
   _knob0 <<= 4;
   _knob0 -= tmp0;
@@ -117,11 +111,21 @@ void application::k_rate() {
     
   uint8_t button_values = 0;
 
-  for (size_t ix = 0; ix < 6; ix++) {
-    if (! digitalRead(buttons[ix])) {
-      button_values |= 1 << ix;
-    }
+  _control_event_source.poll();
+
+  while(
+    application_event ae = process_control_event(
+      _control_event_source.dequeue_event()
+    )
+  ) {
+    button_values |= 1 << ae.parameter;
   }
+  
+//  for (size_t ix = 0; ix < 6; ix++) {
+//    if (! digitalRead(buttons[ix])) {
+//      button_values |= 1 << ix;
+//    }
+//  }
 
 #ifdef LOG_RAW_BUTTONS
   for(uint16_t mask = 0x80; mask; mask >>= 1) {
