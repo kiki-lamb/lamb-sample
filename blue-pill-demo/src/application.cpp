@@ -106,9 +106,9 @@ void application::graph() {
   _tft.drawPixel(tmp_col, tmp_knob0, ILI9341_GREEN);
   _tft.drawPixel(tmp_col, 239-tmp_knob0, ILI9341_GREEN);
 
-  int16_t tmp = _draw_buffer.dequeue();
+  sample tmp = _draw_buffer.dequeue();
 
-  int16_t tmp_sample = map(tmp, -32768, 32767, -120, 119);
+  sample tmp_sample = map(tmp, -32768, 32767, -120, 119);
   
   if (tmp_sample > 0)
     _tft.drawFastVLine(
@@ -141,25 +141,25 @@ void application::s_rate() {
     _avg_sample = 0;
   }
   
-  int32_t sample = 0;
+  int32_t sample_ = 0;
   
   for (size_t ix = 0; ix < 6; ix++) {
-    int16_t tmp = _voices[ix]->play();
+    sample tmp = _voices[ix]->play();
       
     if ((ix == 5) && _voices[ix]->trigger) {
       Serial.println(tmp);
     }
       
-    sample += tmp;
+    sample_ += tmp;
   }
 
-  sample >>= 1;
+  sample_ >>= 1;
 
-  sample *= _pct;
+  sample_ *= _pct;
   
-  _avg_sample += sample;
+  _avg_sample += sample_;
 
-  _dac.write_mono(sample);
+  _dac.write_mono(sample_);
   
   _total_samples ++;
   _sample_ix ++;

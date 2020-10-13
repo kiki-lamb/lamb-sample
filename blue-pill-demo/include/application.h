@@ -6,10 +6,11 @@
 
 class application {
 public:
+  typedef int16_t                                   sample;
   typedef lamb::oneshot_plus                        voice;
   typedef lamb::device::Adafruit_ILI9341_STM_SPI2   tft;
-  typedef lamb::ring_buffer<int16_t, 256>           draw_buffer;
   typedef lamb::device::pt8211                      dac;
+  typedef lamb::ring_buffer<int16_t, 256>           draw_buffer;
   
   static const    uint32_t             K_RATE;
   static const    uint32_t             S_RATE;
