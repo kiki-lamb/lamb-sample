@@ -80,6 +80,11 @@ private:
   static          void                 s_rate();
   static          void                 graph();  
   static          void                 setup_controls();
+  static          void                 setup_voices();
+  static          void                 setup_tft();
+  static          void                 setup_dac();
+  static          void                 setup_timers();
+  
 public:
   static          void                 setup();
   static          void                 loop();

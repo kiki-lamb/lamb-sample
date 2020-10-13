@@ -203,30 +203,16 @@ void application::setup_controls() {
   _combined_source     .sources[4] = &_button_source4;
   _combined_source     .sources[5] = &_button_source5;
   _control_event_source.source = &_combined_source;
+
+  pinMode(PA0, INPUT);
+  pinMode(PA1, INPUT);
+  pinMode(PA2, INPUT);  
 }
 
-void application::setup() {
-  setup_controls();
-  
+void application::setup_voices() {
   for (size_t ix = 0; ix < 6; ix++) {
     _voices[ix] = new voice(Samples::data+BLOCK_SIZE*ix, BLOCK_SIZE);
   }
-    
-#ifdef ENABLE_SERIAL
-  Serial.begin(115200);
-#endif
-    
-  pinMode(PA0, INPUT);
-  pinMode(PA1, INPUT);
-  pinMode(PA2, INPUT);
-    
-  _tft.begin();
-  _tft.setRotation(3);
-  _tft.setTextColor(ILI9341_WHITE);  
-  _tft.setTextSize(2);
-  _tft.fillScreen(ILI9341_BLACK);
-    
-  SPI.begin();
 
   _voices[0]->amplitude = 0xbf; // kick
   _voices[1]->amplitude = 0xdf; // lo bass
@@ -234,19 +220,38 @@ void application::setup() {
   _voices[3]->amplitude = 0x7f; // snare 
   _voices[4]->amplitude = 0xff; // closed hat
   _voices[5]->amplitude = 0x9f; // open hat
+}
+      
+void application::setup_tft() {
+  _tft.begin();
+  _tft.setRotation(3);
+  _tft.setTextColor(ILI9341_WHITE);  
+  _tft.setTextSize(2);
+  _tft.fillScreen(ILI9341_BLACK);
+}
+
+void application::setup_dac() {
+  SPI.begin();
     
   _dac.begin(&SPI);
-    
+}
+
+void application::setup_timers() {
   maple_timer::setup(_timer_1, S_RATE, s_rate);
   maple_timer::setup(_timer_2, K_RATE, k_rate);
-    
-  pinMode(PB0,  INPUT_PULLUP);
-  pinMode(PB1,  INPUT_PULLUP);
-  pinMode(PB10, INPUT_PULLUP);
-  pinMode(PB11, INPUT_PULLUP);
-  pinMode(PC14, INPUT_PULLUP);
-  pinMode(PC15, INPUT_PULLUP);
-    
+}
+
+void application::setup() {
+#ifdef ENABLE_SERIAL
+  Serial.begin(115200);
+#endif
+  
+  setup_voices();
+  setup_controls();
+  setup_tft();
+  setup_dac();
+  setup_timers();
+        
   delay(500);
 }
   
