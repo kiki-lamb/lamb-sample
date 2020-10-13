@@ -20,7 +20,7 @@ public:
   typedef events::application_event_type                   application_event_type;
   typedef lamb::events::sources::buffer<control_event, 16> control_source;
   
-  typedef lamb::events::sources::button_pad<
+  typedef lamb::events::sources::buttons<
     button,
     control_event,
     control_event_type::EVT_BUTTON
