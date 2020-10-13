@@ -4,23 +4,46 @@
 
 using namespace lamb;
 
-const uint32_t               application::K_RATE              = 100;
-const uint32_t               application::S_RATE              = 19000;
-double                       application::_pct                = 100.0;
-int32_t                      application::_avg_sample         = 0;
-size_t                       application::_sample_ix          = 0;
-size_t                       application::_total_samples      = 0;
-uint16_t                     application::_knob0              = 4091;
-uint16_t                     application::_knob1              = 4091;
-uint16_t                     application::_knob2              = 4091;
-uint8_t                      application::_last_button_values = 0;
-uint8_t                      application::_queued             = 0;
-application::voice *         application::_voices[6];
+const uint32_t               application::K_RATE              { 100   };
+const uint32_t               application::S_RATE              { 19000 };
+double                       application::_pct                { 100.0 };
+int32_t                      application::_avg_sample         { 0     };
+size_t                       application::_sample_ix          { 0     };
+size_t                       application::_total_samples      { 0     };
+uint16_t                     application::_knob0              { 4091  };
+uint16_t                     application::_knob1              { 4091  };
+uint16_t                     application::_knob2              { 4091  };
+uint8_t                      application::_last_button_values { 0     };
+uint8_t                      application::_queued             { 0     };
+HardwareTimer                application::_timer_1            ( 1     );
+HardwareTimer                application::_timer_2            ( 2     );
+HardwareTimer                application::_timer_3            ( 3     );
+application::voice *         application::_voices             [ 6     ];
 application::draw_buffer     application::_draw_buffer;
-HardwareTimer                application::_timer_1(1);
-HardwareTimer                application::_timer_2(2);
-HardwareTimer                application::_timer_3(3);
-application::dac             application::_dac(application::I2S_WS);
+
+application::button          application::_button_device0;
+application::button          application::_button_device1;
+application::button          application::_button_device2;
+application::button          application::_button_device3;
+application::button          application::_button_device4;
+application::button          application::_button_device5;
+
+application::button_source   application::_button_source0(&_button_device0, 0);
+application::button_source   application::_button_source1(&_button_device1, 1);
+application::button_source   application::_button_source2(&_button_device2, 2);
+application::button_source   application::_button_source3(&_button_device3, 3);
+application::button_source   application::_button_source4(&_button_device4, 4);
+application::button_source   application::_button_source5(&_button_device5, 5);
+
+application::combined_source application::_combined_source;
+
+application::control_source
+application::_control_event_source;
+
+application::dac             application::_dac(
+  application::I2S_WS
+);
+
 application::tft             application::_tft(
   application::TFT_CS,
   application::TFT_DC
@@ -166,7 +189,25 @@ void application::s_rate() {
   _sample_ix %= Samples::NUM_ELEMENTS; 
 }
 
+void application::setup_controls() {
+  _button_device0      .setup(PB0);
+  _button_device1      .setup(PB1);
+  _button_device2      .setup(PB10);
+  _button_device3      .setup(PB11);
+  _button_device4      .setup(PC14);
+  _button_device5      .setup(PC15);
+  _combined_source     .sources[0] = &_button_source0;
+  _combined_source     .sources[1] = &_button_source1;
+  _combined_source     .sources[2] = &_button_source2;
+  _combined_source     .sources[3] = &_button_source3;
+  _combined_source     .sources[4] = &_button_source4;
+  _combined_source     .sources[5] = &_button_source5;
+  _control_event_source.source = &_combined_source;
+}
+
 void application::setup() {
+  setup_controls();
+  
   for (size_t ix = 0; ix < 6; ix++) {
     _voices[ix] = new voice(Samples::data+BLOCK_SIZE*ix, BLOCK_SIZE);
   }
