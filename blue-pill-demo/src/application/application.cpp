@@ -4,6 +4,8 @@
 
 using namespace lamb;
 
+// const size_t                 application::_voices_map 
+  
 const uint32_t               application::K_RATE               { 100   };
 const uint32_t               application::S_RATE               { 19000 };
 
@@ -38,16 +40,15 @@ application::control_source  application::_control_event_source;
 application::dac             application::_dac(application::I2S_WS);
 application::tft             application::_tft(application::TFT_CS, application::TFT_DC);
 
-  
 //////////////////////////////////////////////////////////////////////////////
 
 void application::setup_controls() {
-  _button_device0      .setup(PB0);
-  _button_device1      .setup(PB1);
-  _button_device2      .setup(PB10);
-  _button_device3      .setup(PB11);
-  _button_device4      .setup(PC14);
-  _button_device5      .setup(PC15);
+  _button_device0      .setup(PB11);
+  _button_device1      .setup(PB10);
+  _button_device2      .setup(PB1);
+  _button_device3      .setup(PB0);
+  _button_device4      .setup(PC15);
+  _button_device5      .setup(PC14);
   _combined_source     .sources[0] = &_button_source0;
   _combined_source     .sources[1] = &_button_source1;
   _combined_source     .sources[2] = &_button_source2;
@@ -65,15 +66,15 @@ void application::setup_controls() {
 
 void application::setup_voices() {
   for (size_t ix = 0; ix < 6; ix++) {
-    _voices[ix] = new voice(Samples::data+BLOCK_SIZE*ix, BLOCK_SIZE);
+    _voices[_voices_map[ix]] = new voice(Samples::data+BLOCK_SIZE*ix, BLOCK_SIZE);
   }
 
-  _voices[0]->amplitude = 0xe0; // 0xb8; // kick
-  _voices[1]->amplitude = 0xe0; // 0xd8; // lo bass
-  _voices[2]->amplitude = 0xe0; // 0xd8; // hi bass
-  _voices[3]->amplitude = 0x60; // 0x78; // snare 
-  _voices[4]->amplitude = 0xef; // closed hat
-  _voices[5]->amplitude = 0xef; // open hat
+  _voices[_voices_map[0]]->amplitude = 0xc0; // 0xb8; // kick
+  _voices[_voices_map[1]]->amplitude = 0xd0; // 0xd8; // lo bass
+  _voices[_voices_map[2]]->amplitude = 0xd0; // 0xd8; // hi bass
+  _voices[_voices_map[3]]->amplitude = 0x80; // 0x78; // snare 
+  _voices[_voices_map[4]]->amplitude = 0xf0; // closed hat
+  _voices[_voices_map[5]]->amplitude = 0xf0; // open hat
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -118,11 +119,24 @@ application::application_event application::process_control_event(
   else if (control_event.type == control_event_type::EVT_BUTTON) {
     return process_button_event(control_event);
   }
-//  else if (control_event.type == control_event_type::EVT_ENCODER) {
-//    return process_encoder_event(control_event);
-//  }
+  else if (control_event.type == control_event_type::EVT_ENCODER) {
+    return process_encoder_event(control_event);
+  }
 
   return application_event;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+application::application_event application::process_button_event(
+  application::control_event const & control_event
+) {
+  application_event application_event;
+  application_event.type           = application_event_type::EVT_UNKNOWN;
+
+  Serial.println("Don't know how to process encoders yet!");
+
+  return appliction_event;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -219,13 +233,13 @@ void application::k_rate() {
       }
       
       Serial.print(" @ 0x");
-      Serial.print(_voices[ix]->amplitude, HEX);
+      Serial.print(_voices[_voices_map[ix]]->amplitude, HEX);
       Serial.print(" / ");
       Serial.println(ix);
       
-      _voices[ix]->trigger  = true;
-      _voices[4]->trigger  &= ! _voices[5]->trigger;
-      _voices[5]->trigger  &= ! _voices[4]->trigger;
+      _voices[_voices_map[ix]]->trigger  = true;
+      _voices[_voices_map[4]]->trigger  &= ! _voices[_voices_map[5]]->trigger;
+      _voices[_voices_map[5]]->trigger  &= ! _voices[_voices_map[4]]->trigger;
     }
   }
 }
@@ -247,9 +261,9 @@ void application::s_rate() {
   int32_t sample_ = 0;
   
   for (size_t ix = 0; ix < 6; ix++) {
-    sample tmp = _voices[ix]->play();
+    sample tmp = _voices[_voices_map[ix]]->play();
       
-    if ((ix == 5) && _voices[ix]->trigger) {
+    if ((ix == 5) && _voices[_voices_map[ix]]->trigger) {
       Serial.println(tmp);
     }
       
