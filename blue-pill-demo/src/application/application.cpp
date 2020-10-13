@@ -70,11 +70,11 @@ void application::setup_voices() {
   }
 
   _voices[_voices_map[0]]->amplitude = 0xd0; // 0xb8; // kick
-  _voices[_voices_map[1]]->amplitude = 0xd0; // 0xd8; // lo bass
-  _voices[_voices_map[2]]->amplitude = 0xd0; // 0xd8; // hi bass
-  _voices[_voices_map[3]]->amplitude = 0x80; // 0x78; // snare 
-  _voices[_voices_map[4]]->amplitude = 0xd0; // closed hat
-  _voices[_voices_map[5]]->amplitude = 0xe0; // open hat
+  _voices[_voices_map[1]]->amplitude = 0xe0; // 0xd8; // lo bass
+  _voices[_voices_map[2]]->amplitude = 0xe0; // 0xd8; // hi bass
+  _voices[_voices_map[3]]->amplitude = 0x60; // 0x78; // snare 
+  _voices[_voices_map[4]]->amplitude = 0xa0; // closed hat
+  _voices[_voices_map[5]]->amplitude = 0x80; // open hat
 }
 
 ////////////////////////////////////////////////////////////////////////////////
