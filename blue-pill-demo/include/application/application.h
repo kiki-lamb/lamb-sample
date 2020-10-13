@@ -8,23 +8,23 @@
 
 class application {
 public:
-  typedef int16_t                                          sample;
-  typedef lamb::oneshot_plus                               voice;
-  typedef lamb::device::Adafruit_ILI9341_STM_SPI2          tft;
-  typedef lamb::device::pt8211                             dac;
-  typedef lamb::ring_buffer<int16_t, 256>                  draw_buffer;
-  typedef lamb::controls::button                           button;
-  typedef events::control                                  control_event;
-  typedef events::control_event_type                       control_event_type;
-  typedef events::application                              application_event;
-  typedef events::application_event_type                   application_event_type;
-  typedef lamb::events::sources::buffer<control_event, 16> control_source;
+  typedef int16_t                                            sample;
+  typedef lamb::oneshot_plus                                 voice;
+  typedef lamb::device::Adafruit_ILI9341_STM_SPI2            tft;
+  typedef lamb::device::pt8211                               dac;
+  typedef lamb::ring_buffer<int16_t, 256>                    draw_buffer;
+  typedef lamb::controls::button                             button;
+  typedef events::control                                    control_event;
+  typedef events::control_event_type                         control_event_type;
+  typedef events::application                                application_event;
+  typedef events::application_event_type                     application_event_type;
+  typedef lamb::events::sources::buffer<control_event, 16>   control_source;
   
   typedef lamb::events::sources::buttons<
     button,
     control_event,
     control_event_type::EVT_BUTTON
-    >                                                      button_source;
+    >                                                        button_source;
   
   static const    uint8_t              event_sources_count = 6;
   static const    uint32_t             TFT_DC              = PA8;
@@ -37,12 +37,12 @@ public:
   
   typedef lamb::events::sources::combine<
     control_event,
-    event_sources_count>                                   combined_source;
+    event_sources_count>                                     combined_source;
 
 private:
-  static const    uint32_t             CAPTURE_RATIO = 3;
-  static const    size_t               BLOCK_SIZE    = Samples::NUM_ELEMENTS / 6;
-  static const    uint32_t             V_SPACING     = 48;  
+  static const    uint32_t             CAPTURE_RATIO       = 3;
+  static const    size_t               BLOCK_SIZE          = Samples::NUM_ELEMENTS / 6;
+  static const    uint32_t             V_SPACING           = 48;  
 
   static          button               _button_device0;
   static          button               _button_device1;
@@ -73,7 +73,6 @@ private:
   static          HardwareTimer        _timer_3;
   static          dac                  _dac;
   static          voice *              _voices[6];
-  static          uint8_t              _last_trigger_states;
   static          tft                  _tft;
   static          draw_buffer          _draw_buffer;
   

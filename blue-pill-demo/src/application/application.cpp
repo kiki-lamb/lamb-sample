@@ -15,8 +15,6 @@ uint16_t                     application::_knob0               { 4091  };
 uint16_t                     application::_knob1               { 4091  };
 uint16_t                     application::_knob2               { 4091  };
 
-uint8_t                      application::_last_trigger_states { 0     };
-
 HardwareTimer                application::_timer_1             ( 1     );
 HardwareTimer                application::_timer_2             ( 2     );
 HardwareTimer                application::_timer_3             ( 3     );
@@ -234,8 +232,6 @@ void application::k_rate() {
         _voices[5]->trigger   = false;
     }
   }
-    
-  _last_trigger_states = trigger_states;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
