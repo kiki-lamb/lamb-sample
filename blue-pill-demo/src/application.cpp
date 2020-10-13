@@ -20,7 +20,6 @@ HardwareTimer                application::_timer_3(3);
 application::sample_t *      application::_voices[6];
 application::dac             application::_dac(application::I2S_WS);
 application::draw_buffer     application::_draw_buffer;
-volatile bool                application::_draw_flag          = false;
 uint8_t                      application::_last_button_values = 0;
 uint8_t                      application::_queued             = 0;  
 
@@ -100,32 +99,6 @@ void application::k_rate() {
 }
 
 void application::graph() {
-  if (_draw_flag) {
-    for (size_t ix = 0; ix < 6; ix++) {
-      if (_voices[ix]->state) {
-        _tft.fillRect(
-          36,
-          V_SPACING*ix+(V_SPACING >> 1),
-          V_SPACING-10,
-          V_SPACING-10,
-          ILI9341_RED
-        );
-      }
-      else {
-        _tft.fillRect(
-          36,
-          V_SPACING*ix+(V_SPACING >> 1),
-          V_SPACING-10,
-          V_SPACING-10,
-          ILI9341_BLACK
-        );
-      }
-    }
-
-    _draw_flag = false;
-  }            
-
-  
   static uint16_t col = 0;
   static const uint16_t col_max = 200; // real max 320
   uint16_t tmp_col = col+120;

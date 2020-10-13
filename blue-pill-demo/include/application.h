@@ -36,7 +36,6 @@ private:
   static          HardwareTimer        _timer_2;
   static          HardwareTimer        _timer_3;
   static          dac                  _dac;
-  static volatile bool                 _draw_flag;
   static          sample_t *           _voices[6];
   static          uint8_t              _last_button_values;
   static          uint8_t              _queued; 
