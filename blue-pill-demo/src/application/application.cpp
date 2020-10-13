@@ -36,7 +36,7 @@ application::button_source   application::_button_source4(&_button_device4, 4);
 application::button_source   application::_button_source5(&_button_device5, 5);
 application::control_source  application::_control_event_source;
 application::dac             application::_dac(application::I2S_WS);
-application::tft            application::_tft(application::TFT_CS, application::TFT_DC);
+application::tft             application::_tft(application::TFT_CS, application::TFT_DC);
 
   
 //////////////////////////////////////////////////////////////////////////////
@@ -54,7 +54,7 @@ void application::setup_controls() {
   _combined_source     .sources[3] = &_button_source3;
   _combined_source     .sources[4] = &_button_source4;
   _combined_source     .sources[5] = &_button_source5;
-  _control_event_source.source = &_combined_source;
+  _control_event_source.source     = &_combined_source;
 
   pinMode(PA0, INPUT);
   pinMode(PA1, INPUT);
@@ -68,12 +68,12 @@ void application::setup_voices() {
     _voices[ix] = new voice(Samples::data+BLOCK_SIZE*ix, BLOCK_SIZE);
   }
 
-  _voices[0]->amplitude = 0xbf; // kick
-  _voices[1]->amplitude = 0xdf; // lo bass
-  _voices[2]->amplitude = 0xdf; // hi bass
-  _voices[3]->amplitude = 0x7f; // snare 
-  _voices[4]->amplitude = 0xff; // closed hat
-  _voices[5]->amplitude = 0x9f; // open hat
+  _voices[0]->amplitude = 0xe0; // 0xb8; // kick
+  _voices[1]->amplitude = 0xe0; // 0xd8; // lo bass
+  _voices[2]->amplitude = 0xe0; // 0xd8; // hi bass
+  _voices[3]->amplitude = 0x60; // 0x78; // snare 
+  _voices[4]->amplitude = 0xef; // closed hat
+  _voices[5]->amplitude = 0xef; // open hat
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -223,16 +223,13 @@ void application::k_rate() {
       Serial.print(" / ");
       Serial.println(ix);
       
-      _voices[ix]->trigger    = true;
-      
-      if (ix == 5)
-        _voices[4]->trigger   = false;
-      
-      if (ix == 4)
-        _voices[5]->trigger   = false;
+      _voices[ix]->trigger  = true;
+      _voices[4]->trigger  &= ! _voices[5]->trigger;
+      _voices[5]->trigger  &= ! _voices[4]->trigger;
     }
   }
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
   
