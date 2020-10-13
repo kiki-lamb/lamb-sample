@@ -124,30 +124,8 @@ void application::k_rate() {
     trigger_states |= 1 << ae.parameter;
   }
   
-//  }
-
-#ifdef LOG_RAW_BUTTONS
-  for(uint16_t mask = 0x80; mask; mask >>= 1) {
-    if(mask  & _last_trigger_states)
-      Serial.print('1');
-    else
-      Serial.print('0');
-  }
-    
-  Serial.print(" => ");
-    
-  for(uint16_t mask = 0x80; mask; mask >>= 1) {
-    if(mask  & trigger_states)
-      Serial.print('1');
-    else
-      Serial.print('0');
-  }
-  Serial.println();
-#endif
-    
   for (size_t ix = 0; ix < 6; ix++) {
-    if ( (! (_last_trigger_states & (1 << ix))) &&
-         (trigger_states & (1 << ix))) {
+    if (trigger_states & (1 << ix)) {
       Serial.print("Triggered ");
       Serial.print(button_names[ix]);
       
@@ -160,7 +138,7 @@ void application::k_rate() {
       Serial.print(" / ");
       Serial.println(ix);
       
-      _voices[ix]->trigger   = true;
+      _voices[ix]->trigger    = true;
       
       if (ix == 5)
         _voices[4]->trigger   = false;
