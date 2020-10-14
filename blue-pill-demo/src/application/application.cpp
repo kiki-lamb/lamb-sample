@@ -147,9 +147,10 @@ application::application_event application::process_control_event(
     Serial.println();
     application_event.type = application_event_type::APP_EVT_NOT_AVAILABLE;
 
-    Serial.println(control_event.parameter &0xfff);
-    _master_vol = (control_event.parameter &0xfff) / 2048.0; // 0.75; // _knob0 / 2048.0;
-  
+    _knob0 = control_event.parameter &0xfff;
+    Serial.println(_knob0);
+    _master_vol = _knob0 / 2048.0; // 0.75; // _knob0 / 2048.0;
+    
   
     return application_event;
   }
