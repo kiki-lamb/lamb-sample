@@ -10,6 +10,7 @@ namespace events {
 
     EVT_TRIGGER = 1,
     EVT_MASTER_VOLUME = 2,
+    EVT_PITCH = 3,
     EVT_UNKNOWN = 64
   };  
 

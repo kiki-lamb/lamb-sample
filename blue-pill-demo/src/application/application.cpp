@@ -7,7 +7,7 @@ using namespace lamb;
 //////////////////////////////////////////////////////////////////////////////
 
 const uint32_t               application::K_RATE            { 100                       };
-const uint32_t               application::S_RATE            { 19000                     };
+const uint32_t               application::S_RATE            { 22050                     };
 uint32_t                     application::_phincrs[128]   = { 0                         };
 int32_t                      application::_avg_sample       { 0                         };
 uint16_t                     application::_master_vol       { 2048                      };
@@ -75,8 +75,8 @@ void application::setup_controls() {
 
 void application::setup_voices() {
   for (size_t ix = 0; ix < 6; ix++) {
-    _voices[_voices_map[ix]] = new voice(Samples::data+BLOCK_SIZE*ix, BLOCK_SIZE);
-    _voices[_voices_map[ix]]->phincr = lamb::Tables::generate_phase_increment(S_RATE, 1);
+    _voices[_voices_map[ix]]         = new voice(Samples::data+BLOCK_SIZE*ix, BLOCK_SIZE);
+    _voices[_voices_map[ix]]->phincr = lamb::Tables::generate_phase_increment(S_RATE, 1) >> 1;
   }
 
   _voices[_voices_map[0]]->amplitude = 0xd0; // 0xb8; // kick
@@ -146,14 +146,17 @@ application::application_event application::process_signal_event(
 
   application_event application_event;
 
-  if (sig_num != 2) {
-    application_event.type         = application_event_type::APP_EVT_NOT_AVAILABLE;
-
-    return application_event;
+  if (sig_num == 2) {
+    application_event.type           = application_event_type::EVT_MASTER_VOLUME;
+    application_event.parameter      = sig_val;
   }
-  
-  application_event.type           = application_event_type::EVT_MASTER_VOLUME;
-  application_event.parameter      = sig_val;
+  else if (sig_num == 0) {
+    application_event.type           = application_event_type::EVT_PITCH;
+    application_event.parameter      = sig_val;
+  }
+  else {
+    application_event.type           = application_event_type::APP_EVT_NOT_AVAILABLE;
+  }
 
   // Serial.print("Signal ");
   // Serial.print(sig_num);
@@ -187,11 +190,11 @@ application::application_event application::process_button_event(
   uint8_t           button_number  = control_event.parameter_hi();
   int8_t            button_state   = (int8_t)control_event.parameter_lo(); 
   
-  Serial.print(F("Button event, number: "));
-  Serial.print(button_number);
-  Serial.print(F(", state: "));
-  Serial.print(button_state);
-  Serial.println();
+  // Serial.print(F("Button event, number: "));
+  // Serial.print(button_number);
+  // Serial.print(F(", state: "));
+  // Serial.print(button_state);
+  // Serial.println();
 
   application_event.type      = application_event_type::EVT_TRIGGER;
   application_event.parameter = button_number;
@@ -271,6 +274,21 @@ void application::k_rate() {
       
       break;
     }
+    case application_event_type::EVT_PITCH:
+    {
+      const uint8_t shift = 8;
+      uint16_t tmp = ae.parameter;
+      tmp <<= shift;
+
+      Serial.print("phincr = ");
+      Serial.print(tmp);
+      Serial.println();
+      
+      _voices[_voices_map[1]]->phincr = ae.parameter << shift;
+      _voices[_voices_map[2]]->phincr = ae.parameter << shift;
+      
+      break;     
+    }
     default:
     {
       Serial.print("Unrecognized event: ");
@@ -282,17 +300,17 @@ void application::k_rate() {
   
   for (size_t ix = 0; ix < 6; ix++) {
     if (trigger_states & (1 << ix)) {
-      Serial.print("Triggered ");
-      Serial.print(button_names[ix]);
+      // Serial.print("Triggered ");
+      // Serial.print(button_names[ix]);
       
       if ((ix == 2) || (ix == 3)) {
-        Serial.print(" ");
+        //Serial.print(" ");
       }
       
-      Serial.print(" @ 0x");
-      Serial.print(_voices[_voices_map[ix]]->amplitude, HEX);
-      Serial.print(" / ");
-      Serial.println(ix);
+      // Serial.print(" @ 0x");
+      // Serial.print(_voices[_voices_map[ix]]->amplitude, HEX);
+      // Serial.print(" / ");
+      // Serial.println(ix);
       
       _voices[_voices_map[ix]]->trigger  = true;
       _voices[_voices_map[5]]->trigger  &= ! _voices[_voices_map[4]]->trigger;
