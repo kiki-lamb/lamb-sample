@@ -139,9 +139,25 @@ application::application_event application::process_control_event(
 application::application_event application::process_signal_event(
   application::control_event const & control_event
 ) {
+  uint16_t sig_val = control_event.parameter & 0x0fff;
+  uint8_t  sig_num = (control_event.parameter& 0xf000) >> 12;
+
   application_event application_event;
+
+  if (sig_num != 2) {
+    application_event.type         = application_event_type::APP_EVT_NOT_AVAILABLE;
+
+    return application_event;
+  }
+  
   application_event.type           = application_event_type::EVT_MASTER_VOLUME;
-  application_event.parameter      = control_event.parameter & 0xfff;
+  application_event.parameter      = sig_val;
+
+  // Serial.print("Signal ");
+  // Serial.print(sig_num);
+  // Serial.print(" = ");
+  // Serial.print (sig_val);
+  // Serial.println();
 
   return application_event;
 }
