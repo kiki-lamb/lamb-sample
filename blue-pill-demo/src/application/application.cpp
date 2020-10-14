@@ -231,8 +231,7 @@ void application::k_rate() {
       if (tmp != _knob0) {        
         _knob0 = tmp;
         
-        _master_vol = ((_knob0 << 2) - _knob0) >> 1;
-
+        _master_vol = ((_knob0 << 2) - _knob0) >> 2;
       }
 
       break;
@@ -298,7 +297,6 @@ void application::s_rate() {
     sample_ += tmp;
   }
 
-  sample_    >>= 1;
   sample_     *= _master_vol;
   sample_    >>= 12;
   
@@ -331,7 +329,6 @@ void application::loop(void) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
 
 /* Local Variables:  */
 /* fill-column: 100  */
