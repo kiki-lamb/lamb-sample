@@ -276,16 +276,22 @@ void application::k_rate() {
     }
     case application_event_type::EVT_PITCH:
     {
-      const uint8_t shift = 8;
+      const uint8_t shift = 7;
       uint16_t tmp = ae.parameter;
-      tmp <<= shift;
+      tmp >>= shift;
+      tmp *= 3;
+
+      if (tmp > 6)
+        tmp -= 6;
 
       Serial.print("phincr = ");
       Serial.print(tmp);
+      Serial.print(" ");
+      Serial.print(_phincrs[tmp] >> 8);
       Serial.println();
       
-      _voices[_voices_map[1]]->phincr = ae.parameter << shift;
-      _voices[_voices_map[2]]->phincr = ae.parameter << shift;
+      _voices[_voices_map[1]]->phincr = _phincrs[tmp] >> 6;
+      _voices[_voices_map[2]]->phincr = _phincrs[tmp] >> 6;
       
       break;     
     }
@@ -358,7 +364,7 @@ void application::generate_phincrs() {
   
   for (uint8_t ix = 0; ix < 128; ix++) {
     uint32_t phincr = lamb::Tables::generate_phase_increment(
-      S_RATE,
+      S_RATE << 1,
       lamb::midi_notes::floats_data[ix]
       );
     
