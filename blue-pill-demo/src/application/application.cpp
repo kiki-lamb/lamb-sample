@@ -53,8 +53,8 @@ void application::setup_controls() {
   _button_device4      .setup(PC15);
   _button_device5      .setup(PC14);
 
-  _combined_source     .sources[0]  = &_signal_source0;
-//  _combined_source     .sources[0]  = &_button_source0;
+//  _combined_source     .sources[0]  = &_signal_source0;
+  _combined_source     .sources[0]  = &_button_source0;
   
   _combined_source     .sources[1]  = &_button_source0;
   _combined_source     .sources[2]  = &_button_source1;
@@ -231,13 +231,19 @@ void application::graph() {
 //////////////////////////////////////////////////////////////////////////////
 
 void application::k_rate() {
-//  uint16_t tmp0 = _knob0;
-//  _knob0 <<= 4;
-//  _knob0 -= tmp0;
-//  _knob0 += analogRead(PA0);
-//  _knob0 >>= 4;
+  uint16_t tmp0 = _knob0;
+  _knob0 <<= 4;
+  _knob0 -= tmp0;
+
+  if (_signal_device0.read()) {
+    auto sig_ev = light_buffer_read(_signal_device0.analog_events);
+
+    _knob0 += sig_ev.adc_value;
+  }
+  
+  _knob0 >>= 4;
     
-//  _master_vol = 0.75; // _knob0 / 2048.0;
+  _master_vol = _knob0 / 2048.0;
     
   static size_t buttons[] =      {  PB11  ,  PB10 ,    PB1 ,   PB0, PC14, PC15   };
   static char * button_names[] = { "PB11", "PB10",  "PB1",  "PB0", "PC14", "PC15"  };
