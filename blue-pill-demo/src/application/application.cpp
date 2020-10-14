@@ -25,12 +25,12 @@ application::voice *         application::_voices              [ 6      ];
 application::draw_buffer     application::_draw_buffer;
 application::combined_source application::_combined_source;
 application::signal          application::_signal_device0      ( PA0, 8 );
-application::button          application::_button_device0;
-application::button          application::_button_device1;
-application::button          application::_button_device2;
-application::button          application::_button_device3;
-application::button          application::_button_device4;
-application::button          application::_button_device5;
+application::button          application::_button_device0      ( PB11   );
+application::button          application::_button_device1      ( PB10   );
+application::button          application::_button_device2      ( PB1    );
+application::button          application::_button_device3      ( PB0    );
+application::button          application::_button_device4      ( PC15   );
+application::button          application::_button_device5      ( PC14   );
 application::signal_source   application::_signal_source0(&_signal_device0);
 application::button_source   application::_button_source0(&_button_device0, 0);
 application::button_source   application::_button_source1(&_button_device1, 1);
@@ -46,15 +46,15 @@ application::tft             application::_tft(application::TFT_CS, application:
 
 void application::setup_controls() {
   _signal_device0      .setup();  
-  _button_device0      .setup(PB11);
-  _button_device1      .setup(PB10);
-  _button_device2      .setup(PB1);
-  _button_device3      .setup(PB0);
-  _button_device4      .setup(PC15);
-  _button_device5      .setup(PC14);
+  _button_device0      .setup();
+  _button_device1      .setup();
+  _button_device2      .setup();
+  _button_device3      .setup();
+  _button_device4      .setup();
+  _button_device5      .setup();
 
-//  _combined_source     .sources[0]  = &_signal_source0;
-  _combined_source     .sources[0]  = &_button_source0;
+  _combined_source     .sources[0]  = &_signal_source0;
+  //_combined_source     .sources[0]  = &_button_source0;
   
   _combined_source     .sources[1]  = &_button_source0;
   _combined_source     .sources[2]  = &_button_source1;
@@ -143,13 +143,10 @@ application::application_event application::process_control_event(
     return process_button_event(control_event);
   }
   else if (control_event.type == control_event_type::EVT_SIGNAL) {
-//    Serial.println();
     application_event.type = application_event_type::APP_EVT_NOT_AVAILABLE;
 
     _knob0 = control_event.parameter &0xfff;
-//    Serial.println(_knob0);
-    _master_vol = _knob0 / 2048.0;
-    
+    _master_vol = _knob0 / 2048.0;    
   
     return application_event;
   }
@@ -233,15 +230,13 @@ void application::graph() {
 //////////////////////////////////////////////////////////////////////////////
 
 void application::k_rate() {
-  _signal_source0.poll();
+  // _signal_source0.poll();
   
-  if (_signal_source0.ready()) {
-    _knob0 = _signal_source0.dequeue_event().parameter & 0xfff;
+  // if (_signal_source0.ready()) {
+  //   _knob0 = _signal_source0.dequeue_event().parameter & 0xfff;
 
-    _master_vol = _knob0 / 2048.0;
-  }
-  
-
+  //   _master_vol = _knob0 / 2048.0;
+  // 
     
   static size_t buttons[] =      {  PB11 ,   PB10 ,    PB1 ,   PB0,   PC14 ,  PC15   };
   static char * button_names[] = { "PB11",  "PB10",   "PB1",  "PB0", "PC14", "PC15"  };
