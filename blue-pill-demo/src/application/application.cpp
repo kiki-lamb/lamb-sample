@@ -7,7 +7,7 @@ using namespace lamb;
 //////////////////////////////////////////////////////////////////////////////
 
 const uint32_t               application::K_RATE            { 100                       };
-const uint32_t               application::S_RATE            { 22050                     };
+const uint32_t               application::S_RATE            { 18000                     };
 uint32_t                     application::_phincrs[128]   = { 0                         };
 int32_t                      application::_avg_sample       { 0                         };
 uint16_t                     application::_master_vol       { 2048                      };
@@ -276,13 +276,19 @@ void application::k_rate() {
     }
     case application_event_type::EVT_PITCH:
     {
-      const uint8_t shift = 7;
+      static uint8_t notes[16] = {
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
+
+//        24, 26, 27, 29, 31, 32, 35,
+//        36, 38, 39, 41, 53, 44, 47,
+//        48, 50
+//      };
+      };
+      
+
+      const uint8_t shift = 8;
       uint16_t tmp = ae.parameter;
       tmp >>= shift;
-      tmp *= 3;
-
-      if (tmp > 6)
-        tmp -= 6;
 
       Serial.print("phincr = ");
       Serial.print(tmp);
@@ -290,8 +296,8 @@ void application::k_rate() {
       Serial.print(_phincrs[tmp] >> 8);
       Serial.println();
       
-      _voices[_voices_map[1]]->phincr = _phincrs[tmp] >> 6;
-      _voices[_voices_map[2]]->phincr = _phincrs[tmp] >> 6;
+      _voices[_voices_map[1]]->phincr = _phincrs[notes[tmp]+22] >> 6;
+      _voices[_voices_map[2]]->phincr = _phincrs[notes[tmp]+22] >> 6;
       
       break;     
     }
