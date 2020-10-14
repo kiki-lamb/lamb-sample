@@ -8,6 +8,7 @@ using namespace lamb;
 
 const uint32_t               application::K_RATE            { 100                       };
 const uint32_t               application::S_RATE            { 19000                     };
+uint32_t                     application::_phincrs[128]   = { 0                         };
 int32_t                      application::_avg_sample       { 0                         };
 uint16_t                     application::_master_vol       { 2048                      };
 uint16_t                     application::_knob0            { 4091                      };
@@ -329,10 +330,34 @@ void application::s_rate() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+void application::generate_phincrs() {
+  Serial.print("\n\nGenerating...");
+  Serial.println();
+  
+  auto start = millis();
+  
+  for (uint8_t ix = 0; ix < 128; ix++) {
+    uint32_t phincr = lamb::Tables::generate_phase_increment(
+      S_RATE,
+      lamb::midi_notes::floats_data[ix]
+      );
+    
+    _phincrs[ix] = phincr;
+    
+  }
+  
+  Serial.print("Done after ");
+  Serial.print(millis() - start);
+  Serial.print(" ms.");
+  Serial.println();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void application::setup() {
-#ifdef ENABLE_SERIAL
   Serial.begin(115200);
-#endif
+
+  generate_phincrs();
   
   setup_voices();
   setup_controls();

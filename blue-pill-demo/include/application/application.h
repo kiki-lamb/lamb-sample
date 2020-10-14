@@ -87,6 +87,7 @@ private:
   static            HardwareTimer        _timer_2;
   static            HardwareTimer        _timer_3;
   static            dac                  _dac;
+  static            uint32_t             _phincrs[128];
   static            voice *              _voices[6];
   static constexpr  size_t               _voices_map[6] = { 0, 1, 2, 3, 4, 5 };
   static            tft                  _tft;
@@ -95,6 +96,7 @@ private:
   static            void                 k_rate();
   static            void                 s_rate();
   static            void                 graph();  
+  static            void                 generate_phincrs();
   static            void                 setup_controls();
   static            void                 setup_voices();
   static            void                 setup_tft();
