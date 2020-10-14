@@ -64,7 +64,7 @@ void application::setup_controls() {
   _combined_source     .sources[6]  = &_button_source5;
   _control_event_source.source      = &_combined_source;
 
-    while (true) {
+  while (false) { // true) {
     _control_event_source.poll();
 
     auto e = _control_event_source.dequeue_event();
@@ -143,10 +143,14 @@ application::application_event application::process_control_event(
     return process_button_event(control_event);
   }
   else if (control_event.type == control_event_type::EVT_SIGNAL) {
-    Serial.print("SIGNAL!");
+//    Serial.print("SIGNAL!");
     Serial.println();
     application_event.type = application_event_type::APP_EVT_NOT_AVAILABLE;
-    
+
+    Serial.println(control_event.parameter &0xfff);
+    _master_vol = (control_event.parameter &0xfff) / 2048.0; // 0.75; // _knob0 / 2048.0;
+  
+  
     return application_event;
   }
 
@@ -233,7 +237,7 @@ void application::k_rate() {
 //  _knob0 += analogRead(PA0);
 //  _knob0 >>= 4;
     
-  _master_vol = 0.75; // _knob0 / 2048.0;
+//  _master_vol = 0.75; // _knob0 / 2048.0;
     
   static size_t buttons[] =      {  PB11  ,  PB10 ,    PB1 ,   PB0, PC14, PC15   };
   static char * button_names[] = { "PB11", "PB10",  "PB1",  "PB0", "PC14", "PC15"  };
