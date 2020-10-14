@@ -19,13 +19,17 @@ HardwareTimer                application::_timer_2          ( 2                 
 HardwareTimer                application::_timer_3          ( 3                         );
 application::voice *         application::_voices           [ 6                         ];
 application::signal          application::_signal_device0   ( PA0,  8, 4                );
+application::signal          application::_signal_device1   ( PA1,  8, 4                );
+application::signal          application::_signal_device2   ( PA2,  8, 4                );
+application::signal_source   application::_signal_source0   ( &_signal_device0          );
+application::signal_source   application::_signal_source1   ( &_signal_device1          );
+application::signal_source   application::_signal_source2   ( &_signal_device2          );
 application::button          application::_button_device0   ( PB11, 0                   );
 application::button          application::_button_device1   ( PB10, 1                   );
 application::button          application::_button_device2   ( PB1,  2                   );
 application::button          application::_button_device3   ( PB0,  3                   );
 application::button          application::_button_device4   ( PC15, 4                   );
 application::button          application::_button_device5   ( PC14, 5                   );
-application::signal_source   application::_signal_source0   ( &_signal_device0          );
 application::button_source   application::_button_source0   ( &_button_device0          );
 application::button_source   application::_button_source1   ( &_button_device1          );
 application::button_source   application::_button_source2   ( &_button_device2          );
@@ -41,7 +45,10 @@ application::control_source  application::_control_event_source;
 //////////////////////////////////////////////////////////////////////////////
 
 void application::setup_controls() {
-  _signal_device0      .setup();  
+  _signal_device0      .setup();
+  _signal_device1      .setup();
+  _signal_device2      .setup();
+      
   _button_device0      .setup();
   _button_device1      .setup();
   _button_device2      .setup();
@@ -50,12 +57,16 @@ void application::setup_controls() {
   _button_device5      .setup();
 
   _combined_source     .sources[0]  = &_signal_source0;
-  _combined_source     .sources[1]  = &_button_source0;
-  _combined_source     .sources[2]  = &_button_source1;
-  _combined_source     .sources[3]  = &_button_source2;
-  _combined_source     .sources[4]  = &_button_source3;
-  _combined_source     .sources[5]  = &_button_source4;
-  _combined_source     .sources[6]  = &_button_source5;
+  _combined_source     .sources[1]  = &_signal_source1;
+  _combined_source     .sources[2]  = &_signal_source2;
+
+  _combined_source     .sources[3]  = &_button_source0;
+  _combined_source     .sources[4]  = &_button_source1;
+  _combined_source     .sources[5]  = &_button_source2;
+  _combined_source     .sources[6]  = &_button_source3;
+  _combined_source     .sources[7]  = &_button_source4;
+  _combined_source     .sources[8]  = &_button_source5;
+
   _control_event_source.source      = &_combined_source;
 }
 

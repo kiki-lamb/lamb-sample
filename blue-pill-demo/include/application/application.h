@@ -33,7 +33,7 @@ public:
     control_event_type::EVT_BUTTON
     >                                                        button_source;
   
-  static const      uint8_t              event_sources_count = 7;
+  static const      uint8_t              event_sources_count = 9;
   static const      uint32_t             TFT_DC              = PA8;
   static const      uint32_t             TFT_CS              = PB12;
   static const      uint32_t             I2S_WS              = PA3;
@@ -51,7 +51,14 @@ private:
   static const      size_t               BLOCK_SIZE          = Samples::NUM_ELEMENTS / 6;
   static const      uint32_t             V_SPACING           = 48;  
 
-  static            signal               _signal_device0;  
+  static            signal               _signal_device0;
+  static            signal               _signal_device1;
+  static            signal               _signal_device2;
+  
+  static            signal_source        _signal_source0;
+  static            signal_source        _signal_source1;
+  static            signal_source        _signal_source2;
+  
   static            button               _button_device0;
   static            button               _button_device1;
   static            button               _button_device2;
@@ -59,7 +66,6 @@ private:
   static            button               _button_device4;
   static            button               _button_device5;
 
-  static            signal_source        _signal_source0;
   static            button_source        _button_source0;
   static            button_source        _button_source1;
   static            button_source        _button_source2;
