@@ -24,14 +24,14 @@ HardwareTimer                application::_timer_3             ( 3      );
 application::voice *         application::_voices              [ 6      ];
 application::draw_buffer     application::_draw_buffer;
 application::combined_source application::_combined_source;
-application::signal          application::_signal_device0      (2, 64 );
+application::signal          application::_signal_device0;
 application::button          application::_button_device0;
 application::button          application::_button_device1;
 application::button          application::_button_device2;
 application::button          application::_button_device3;
 application::button          application::_button_device4;
 application::button          application::_button_device5;
-application::signal_source   application::_signal_source0(&_signal_device0, 2);
+application::signal_source   application::_signal_source0(&_signal_device0);
 application::button_source   application::_button_source0(&_button_device0, 0);
 application::button_source   application::_button_source1(&_button_device1, 1);
 application::button_source   application::_button_source2(&_button_device2, 2);
@@ -235,10 +235,12 @@ void application::k_rate() {
   _knob0 <<= 4;
   _knob0 -= tmp0;
 
-  if (_signal_device0.read()) {
-    auto sig_ev = light_buffer_read(_signal_device0.analog_events);
+  _signal_source0.poll();
+  
+  if (_signal_source0.ready()) {
+    auto sig_ev = _signal_source0.dequeue_event();
 
-    _knob0 += sig_ev.adc_value;
+    _knob0 += sig_ev.parameter & 0xfff;
   }
   
   _knob0 >>= 4;
