@@ -4,6 +4,8 @@
 
 using namespace lamb;
 
+//////////////////////////////////////////////////////////////////////////////
+
 const uint32_t               application::K_RATE                  { 100                 };
 const uint32_t               application::S_RATE                  { 19000               };
 double                       application::_master_vol             { 100.0               };
@@ -34,7 +36,6 @@ application::tft             application::_tft(application::TFT_CS, application:
 application::draw_buffer     application::_draw_buffer;         
 application::combined_source application::_combined_source;
 application::control_source  application::_control_event_source;
-
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -108,19 +109,17 @@ application::application_event application::process_control_event(
 
   switch (control_event.type) {
   case control_event_type::CTL_EVT_NOT_AVAILABLE:
-    application_event.type = application_event_type::APP_EVT_NOT_AVAILABLE;
-    
+    application_event.type = application_event_type::APP_EVT_NOT_AVAILABLE;    
     return application_event;
-    
-  case control_event_type::EVT_BUTTON:
-    return process_button_event(control_event);
     
   case control_event_type::EVT_SIGNAL:
     return process_signal_event(control_event);
+
+  case control_event_type::EVT_BUTTON:
+    return process_button_event(control_event);  
   }
   
   return application_event;
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -226,7 +225,7 @@ void application::k_rate() {
     switch (ae.type) {
     case application_event_type::EVT_MASTER_VOLUME:
     {
-      uint16_t tmp = ae.parameter & 0xfff;
+      uint16_t tmp = ae.parameter;
 
       if (tmp != _knob0) {
         _knob0 = tmp;
