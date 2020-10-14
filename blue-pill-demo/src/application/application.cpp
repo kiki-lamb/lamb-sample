@@ -359,6 +359,8 @@ void application::setup() {
 
   generate_phincrs();
   
+  // samples are 6013 long.
+  
   setup_voices();
   setup_controls();
   setup_tft();
