@@ -24,7 +24,7 @@ HardwareTimer                application::_timer_3             ( 3      );
 application::voice *         application::_voices              [ 6      ];
 application::draw_buffer     application::_draw_buffer;
 application::combined_source application::_combined_source;
-application::signal          application::_signal_device0      (24, 32 );
+application::signal          application::_signal_device0      (2, 64 );
 application::button          application::_button_device0;
 application::button          application::_button_device1;
 application::button          application::_button_device2;
@@ -143,13 +143,12 @@ application::application_event application::process_control_event(
     return process_button_event(control_event);
   }
   else if (control_event.type == control_event_type::EVT_SIGNAL) {
-//    Serial.print("SIGNAL!");
-    Serial.println();
+//    Serial.println();
     application_event.type = application_event_type::APP_EVT_NOT_AVAILABLE;
 
     _knob0 = control_event.parameter &0xfff;
-    Serial.println(_knob0);
-    _master_vol = _knob0 / 2048.0; // 0.75; // _knob0 / 2048.0;
+//    Serial.println(_knob0);
+    _master_vol = _knob0 / 2048.0;
     
   
     return application_event;
