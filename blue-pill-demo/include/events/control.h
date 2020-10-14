@@ -9,6 +9,7 @@ namespace events {
     CTL_EVT_NOT_AVAILABLE = 0,       
     EVT_ENCODER       = 1,
     EVT_BUTTON        = 2,
+    EVT_SIGNAL        = 4
   };
 
   class control :

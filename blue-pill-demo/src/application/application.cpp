@@ -6,30 +6,32 @@ using namespace lamb;
 
 // const size_t                 application::_voices_map 
   
-const uint32_t               application::K_RATE               { 100   };
-const uint32_t               application::S_RATE               { 19000 };
+const uint32_t               application::K_RATE               { 100    };
+const uint32_t               application::S_RATE               { 19000  };
 
-double                       application::_master_vol          { 100.0 };
-int32_t                      application::_avg_sample          { 0     };
-size_t                       application::_sample_ix           { 0     };
+double                       application::_master_vol          { 100.0  };
+int32_t                      application::_avg_sample          { 0      };
+size_t                       application::_sample_ix           { 0      };
 
-uint16_t                     application::_knob0               { 4091  };
-uint16_t                     application::_knob1               { 4091  };
-uint16_t                     application::_knob2               { 4091  };
+uint16_t                     application::_knob0               { 4091   };
+uint16_t                     application::_knob1               { 4091   };
+uint16_t                     application::_knob2               { 4091   };
 
-HardwareTimer                application::_timer_1             ( 1     );
-HardwareTimer                application::_timer_2             ( 2     );
-HardwareTimer                application::_timer_3             ( 3     );
+HardwareTimer                application::_timer_1             ( 1      );
+HardwareTimer                application::_timer_2             ( 2      );
+HardwareTimer                application::_timer_3             ( 3      );
 
-application::voice *         application::_voices              [ 6     ];
+application::voice *         application::_voices              [ 6      ];
 application::draw_buffer     application::_draw_buffer;
 application::combined_source application::_combined_source;
+application::signal          application::_signal_device0      ( 20, 64 );
 application::button          application::_button_device0;
 application::button          application::_button_device1;
 application::button          application::_button_device2;
 application::button          application::_button_device3;
 application::button          application::_button_device4;
 application::button          application::_button_device5;
+application::signal_source   application::_signal_source0(&_signal_device0, 16);
 application::button_source   application::_button_source0(&_button_device0, 0);
 application::button_source   application::_button_source1(&_button_device1, 1);
 application::button_source   application::_button_source2(&_button_device2, 2);
@@ -43,23 +45,44 @@ application::tft             application::_tft(application::TFT_CS, application:
 //////////////////////////////////////////////////////////////////////////////
 
 void application::setup_controls() {
+  _signal_device0      .setup(PA0);  
   _button_device0      .setup(PB11);
   _button_device1      .setup(PB10);
   _button_device2      .setup(PB1);
   _button_device3      .setup(PB0);
   _button_device4      .setup(PC15);
   _button_device5      .setup(PC14);
-  _combined_source     .sources[0] = &_button_source0;
-  _combined_source     .sources[1] = &_button_source1;
-  _combined_source     .sources[2] = &_button_source2;
-  _combined_source     .sources[3] = &_button_source3;
-  _combined_source     .sources[4] = &_button_source4;
-  _combined_source     .sources[5] = &_button_source5;
-  _control_event_source.source     = &_combined_source;
 
-  pinMode(PA0, INPUT);
-  pinMode(PA1, INPUT);
-  pinMode(PA2, INPUT);  
+  // _combined_source     .sources[0]  = &_signal_source0;
+  _combined_source     .sources[0]  = &_button_source0;
+  
+  _combined_source     .sources[1]  = &_button_source0;
+  _combined_source     .sources[2]  = &_button_source1;
+  _combined_source     .sources[3]  = &_button_source2;
+  _combined_source     .sources[4]  = &_button_source3;
+  _combined_source     .sources[5]  = &_button_source4;
+  _combined_source     .sources[6]  = &_button_source5;
+  _control_event_source.source      = &_combined_source;
+
+    while (true) {
+    _control_event_source.poll();
+
+    auto e = _control_event_source.dequeue_event();
+
+    if (0 != e.type) {
+      Serial.print("Got ");
+      Serial.print(e.type, HEX);
+      Serial.print(" ");
+      Serial.print(e.parameter);
+      Serial.println();
+    }
+    
+    delay(2);
+  }
+
+//  pinMode(PA0, INPUT);
+//  pinMode(PA1, INPUT);
+//  pinMode(PA2, INPUT);  
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -119,8 +142,12 @@ application::application_event application::process_control_event(
   else if (control_event.type == control_event_type::EVT_BUTTON) {
     return process_button_event(control_event);
   }
-  else if (control_event.type == control_event_type::EVT_ENCODER) {
-    return process_encoder_event(control_event);
+  else if (control_event.type == control_event_type::EVT_SIGNAL) {
+    Serial.print("SIGNAL!");
+    Serial.println();
+    application_event.type = application_event_type::APP_EVT_NOT_AVAILABLE;
+    
+    return application_event;
   }
 
   return application_event;
@@ -200,13 +227,13 @@ void application::graph() {
 //////////////////////////////////////////////////////////////////////////////
 
 void application::k_rate() {
-  uint16_t tmp0 = _knob0;
-  _knob0 <<= 4;
-  _knob0 -= tmp0;
-  _knob0 += analogRead(PA0);
-  _knob0 >>= 4;
+//  uint16_t tmp0 = _knob0;
+//  _knob0 <<= 4;
+//  _knob0 -= tmp0;
+//  _knob0 += analogRead(PA0);
+//  _knob0 >>= 4;
     
-  _master_vol = _knob0 / 2048.0;
+  _master_vol = 0.75; // _knob0 / 2048.0;
     
   static size_t buttons[] =      {  PB11  ,  PB10 ,    PB1 ,   PB0, PC14, PC15   };
   static char * button_names[] = { "PB11", "PB10",  "PB1",  "PB0", "PC14", "PC15"  };
@@ -220,7 +247,9 @@ void application::k_rate() {
       _control_event_source.dequeue_event()
     )
   ) {
-    trigger_states |= 1 << ae.parameter;
+    if (ae.type == application_event_type::EVT_TRIGGER) {
+      trigger_states |= 1 << ae.parameter;
+    }
   }
   
   for (size_t ix = 0; ix < 6; ix++) {
