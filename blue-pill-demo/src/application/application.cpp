@@ -24,14 +24,14 @@ HardwareTimer                application::_timer_3             ( 3      );
 application::voice *         application::_voices              [ 6      ];
 application::draw_buffer     application::_draw_buffer;
 application::combined_source application::_combined_source;
-application::signal          application::_signal_device0      ( 20, 64 );
+application::signal          application::_signal_device0      ( 24, 64 );
 application::button          application::_button_device0;
 application::button          application::_button_device1;
 application::button          application::_button_device2;
 application::button          application::_button_device3;
 application::button          application::_button_device4;
 application::button          application::_button_device5;
-application::signal_source   application::_signal_source0(&_signal_device0, 16);
+application::signal_source   application::_signal_source0(&_signal_device0, 1);
 application::button_source   application::_button_source0(&_button_device0, 0);
 application::button_source   application::_button_source1(&_button_device1, 1);
 application::button_source   application::_button_source2(&_button_device2, 2);
@@ -53,8 +53,8 @@ void application::setup_controls() {
   _button_device4      .setup(PC15);
   _button_device5      .setup(PC14);
 
-  // _combined_source     .sources[0]  = &_signal_source0;
-  _combined_source     .sources[0]  = &_button_source0;
+  _combined_source     .sources[0]  = &_signal_source0;
+//  _combined_source     .sources[0]  = &_button_source0;
   
   _combined_source     .sources[1]  = &_button_source0;
   _combined_source     .sources[2]  = &_button_source1;
