@@ -288,13 +288,7 @@ void application::s_rate() {
   int32_t sample_ = 0;
   
   for (size_t ix = 0; ix < 6; ix++) {
-    sample tmp = _voices[_voices_map[ix]]->play();
-      
-    if ((ix == 5) && _voices[_voices_map[ix]]->trigger) {
-      Serial.println(tmp);
-    }
-      
-    sample_ += tmp;
+    sample_ += _voices[_voices_map[ix]]->play();
   }
 
   sample_     *= _master_vol;
