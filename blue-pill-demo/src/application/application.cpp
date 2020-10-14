@@ -24,7 +24,7 @@ HardwareTimer                application::_timer_3             ( 3      );
 application::voice *         application::_voices              [ 6      ];
 application::draw_buffer     application::_draw_buffer;
 application::combined_source application::_combined_source;
-application::signal          application::_signal_device0;
+application::signal          application::_signal_device0      ( PA0, 8 );
 application::button          application::_button_device0;
 application::button          application::_button_device1;
 application::button          application::_button_device2;
@@ -45,7 +45,7 @@ application::tft             application::_tft(application::TFT_CS, application:
 //////////////////////////////////////////////////////////////////////////////
 
 void application::setup_controls() {
-  _signal_device0      .setup(PA0);  
+  _signal_device0      .setup();  
   _button_device0      .setup(PB11);
   _button_device1      .setup(PB10);
   _button_device2      .setup(PB1);
@@ -200,7 +200,9 @@ void application::graph() {
   uint16_t tmp_col = col+120;
   
   _tft.drawFastVLine(tmp_col, 0, 240, ILI9341_BLACK);
+
   uint16_t tmp_knob0 = 119 - map(_knob0, 0, 4091, 0, 119);
+
   _tft.drawPixel(tmp_col, tmp_knob0, ILI9341_GREEN);
   _tft.drawPixel(tmp_col, 239-tmp_knob0, ILI9341_GREEN);
 
@@ -231,24 +233,18 @@ void application::graph() {
 //////////////////////////////////////////////////////////////////////////////
 
 void application::k_rate() {
-  uint16_t tmp0 = _knob0;
-  _knob0 <<= 4;
-  _knob0 -= tmp0;
-
   _signal_source0.poll();
   
   if (_signal_source0.ready()) {
-    auto sig_ev = _signal_source0.dequeue_event();
+    _knob0 = _signal_source0.dequeue_event().parameter & 0xfff;
 
-    _knob0 += sig_ev.parameter & 0xfff;
+    _master_vol = _knob0 / 2048.0;
   }
   
-  _knob0 >>= 4;
+
     
-  _master_vol = _knob0 / 2048.0;
-    
-  static size_t buttons[] =      {  PB11  ,  PB10 ,    PB1 ,   PB0, PC14, PC15   };
-  static char * button_names[] = { "PB11", "PB10",  "PB1",  "PB0", "PC14", "PC15"  };
+  static size_t buttons[] =      {  PB11 ,   PB10 ,    PB1 ,   PB0,   PC14 ,  PC15   };
+  static char * button_names[] = { "PB11",  "PB10",   "PB1",  "PB0", "PC14", "PC15"  };
     
   uint8_t trigger_states = 0;
 
