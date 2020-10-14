@@ -13,6 +13,7 @@ int32_t                      application::_avg_sample             { 0           
 uint16_t                     application::_knob0                  { 4091                };
 uint16_t                     application::_knob1                  { 4091                };
 uint16_t                     application::_knob2                  { 4091                };
+size_t                       application::_sample_ix              { 0                   };
 HardwareTimer                application::_timer_1                ( 1                   );
 HardwareTimer                application::_timer_2                ( 2                   );
 HardwareTimer                application::_timer_3                ( 3                   );
