@@ -6,34 +6,34 @@ using namespace lamb;
 
 //////////////////////////////////////////////////////////////////////////////
 
-const uint32_t               application::K_RATE                  { 100                       };
-const uint32_t               application::S_RATE                  { 19000                     };
-double                       application::_master_vol             { 100.0                     };
-int32_t                      application::_avg_sample             { 0                         };
-uint16_t                     application::_knob0                  { 4091                      };
-uint16_t                     application::_knob1                  { 4091                      };
-uint16_t                     application::_knob2                  { 4091                      };
-size_t                       application::_sample_ix              { 0                         };
-HardwareTimer                application::_timer_1                ( 1                         );
-HardwareTimer                application::_timer_2                ( 2                         );
-HardwareTimer                application::_timer_3                ( 3                         );
-application::voice *         application::_voices                 [ 6                         ];
-application::signal          application::_signal_device0         ( PA0,  8, 4                );
-application::button          application::_button_device0         ( PB11, 0                   );
-application::button          application::_button_device1         ( PB10, 1                   );
-application::button          application::_button_device2         ( PB1,  2                   );
-application::button          application::_button_device3         ( PB0,  3                   );
-application::button          application::_button_device4         ( PC15, 4                   );
-application::button          application::_button_device5         ( PC14, 5                   );
-application::signal_source   application::_signal_source0         ( &_signal_device0          );
-application::button_source   application::_button_source0         ( &_button_device0          );
-application::button_source   application::_button_source1         ( &_button_device1          );
-application::button_source   application::_button_source2         ( &_button_device2          );
-application::button_source   application::_button_source3         ( &_button_device3          );
-application::button_source   application::_button_source4         ( &_button_device4          );
-application::button_source   application::_button_source5         ( &_button_device5          );
-application::dac             application::_dac                    ( application::I2S_WS, &SPI );
-application::tft             application::_tft(application::TFT_CS, application::TFT_DC       );
+const uint32_t               application::K_RATE            { 100                       };
+const uint32_t               application::S_RATE            { 19000                     };
+int32_t                      application::_avg_sample       { 0                         };
+uint16_t                     application::_master_vol       { 2048                      };
+uint16_t                     application::_knob0            { 4091                      };
+uint16_t                     application::_knob1            { 4091                      };
+uint16_t                     application::_knob2            { 4091                      };
+size_t                       application::_sample_ix        { 0                         };
+HardwareTimer                application::_timer_1          ( 1                         );
+HardwareTimer                application::_timer_2          ( 2                         );
+HardwareTimer                application::_timer_3          ( 3                         );
+application::voice *         application::_voices           [ 6                         ];
+application::signal          application::_signal_device0   ( PA0,  8, 4                );
+application::button          application::_button_device0   ( PB11, 0                   );
+application::button          application::_button_device1   ( PB10, 1                   );
+application::button          application::_button_device2   ( PB1,  2                   );
+application::button          application::_button_device3   ( PB0,  3                   );
+application::button          application::_button_device4   ( PC15, 4                   );
+application::button          application::_button_device5   ( PC14, 5                   );
+application::signal_source   application::_signal_source0   ( &_signal_device0          );
+application::button_source   application::_button_source0   ( &_button_device0          );
+application::button_source   application::_button_source1   ( &_button_device1          );
+application::button_source   application::_button_source2   ( &_button_device2          );
+application::button_source   application::_button_source3   ( &_button_device3          );
+application::button_source   application::_button_source4   ( &_button_device4          );
+application::button_source   application::_button_source5   ( &_button_device5          );
+application::dac             application::_dac              ( application::I2S_WS, &SPI );
+application::tft             application::_tft(application::TFT_CS, application::TFT_DC );
 application::draw_buffer     application::_draw_buffer;         
 application::combined_source application::_combined_source;
 application::control_source  application::_control_event_source;
@@ -227,10 +227,12 @@ void application::k_rate() {
     case application_event_type::EVT_MASTER_VOLUME:
     {
       uint16_t tmp = ae.parameter;
-
-      if (tmp != _knob0) {
+      
+      if (tmp != _knob0) {        
         _knob0 = tmp;
-        _master_vol = _knob0 / 2048.0;
+        
+        _master_vol = ((_knob0 << 2) - _knob0) >> 1;
+
       }
 
       break;
@@ -298,6 +300,8 @@ void application::s_rate() {
 
   sample_    >>= 1;
   sample_     *= _master_vol;
+  sample_    >>= 12;
+  
   _avg_sample += sample_;
 
   _dac.write_mono(sample_);

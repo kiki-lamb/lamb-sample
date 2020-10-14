@@ -76,7 +76,7 @@ private:
   static            uint16_t             _knob2;
   static            int32_t              _avg_sample;
   static            size_t               _sample_ix;
-  static            double               _master_vol;
+  static            uint16_t             _master_vol;
   static            HardwareTimer        _timer_1; 
   static            HardwareTimer        _timer_2;
   static            HardwareTimer        _timer_3;
