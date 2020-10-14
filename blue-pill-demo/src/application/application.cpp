@@ -31,7 +31,7 @@ application::button          application::_button_device2;
 application::button          application::_button_device3;
 application::button          application::_button_device4;
 application::button          application::_button_device5;
-application::signal_source   application::_signal_source0(&_signal_device0, 1);
+application::signal_source   application::_signal_source0(&_signal_device0, 4);
 application::button_source   application::_button_source0(&_button_device0, 0);
 application::button_source   application::_button_source1(&_button_device1, 1);
 application::button_source   application::_button_source2(&_button_device2, 2);
