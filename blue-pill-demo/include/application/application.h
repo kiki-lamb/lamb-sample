@@ -107,6 +107,10 @@ private:
     control_event const & control_event
   );
 
+  static            application_event    process_signal_event(
+    control_event const & control_event
+  );
+
 public:
   static            void                 setup();
   static            void                 loop();
