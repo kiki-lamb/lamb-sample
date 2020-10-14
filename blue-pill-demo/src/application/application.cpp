@@ -76,6 +76,7 @@ void application::setup_controls() {
 void application::setup_voices() {
   for (size_t ix = 0; ix < 6; ix++) {
     _voices[_voices_map[ix]] = new voice(Samples::data+BLOCK_SIZE*ix, BLOCK_SIZE);
+    _voices[_voices_map[ix]]->phincr = lamb::Tables::generate_phase_increment(S_RATE, 1);
   }
 
   _voices[_voices_map[0]]->amplitude = 0xd0; // 0xb8; // kick
@@ -331,6 +332,7 @@ void application::s_rate() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::generate_phincrs() {
+//  while (true) {
   Serial.print("\n\nGenerating...");
   Serial.println();
   
@@ -350,6 +352,11 @@ void application::generate_phincrs() {
   Serial.print(millis() - start);
   Serial.print(" ms.");
   Serial.println();
+
+  Serial.print("1 hz = ");
+  Serial.print(lamb::Tables::generate_phase_increment(S_RATE, 1));
+  Serial.println();
+// }  
 }
 
 ////////////////////////////////////////////////////////////////////////////////
