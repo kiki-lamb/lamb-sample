@@ -7,7 +7,7 @@ using namespace lamb;
 const uint32_t               application::K_RATE                  { 100                 };
 const uint32_t               application::S_RATE                  { 19000               };
 double                       application::_master_vol             { 100.0               };
-int32_t                      application::_avg_sample             { 0                  };
+int32_t                      application::_avg_sample             { 0                   };
 uint16_t                     application::_knob0                  { 4091                };
 uint16_t                     application::_knob1                  { 4091                };
 uint16_t                     application::_knob2                  { 4091                };
