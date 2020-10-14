@@ -301,9 +301,7 @@ void application::s_rate() {
   _avg_sample += sample_;
 
   _dac.write_mono(sample_);
- 
   _sample_ix  ++;
-  _sample_ix  %= Samples::NUM_ELEMENTS; 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -318,8 +316,6 @@ void application::setup() {
   setup_tft();
   setup_dac();
   setup_timers();
-        
-  delay(500);
 }
   
 ////////////////////////////////////////////////////////////////////////////////
