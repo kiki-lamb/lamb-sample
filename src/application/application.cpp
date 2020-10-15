@@ -93,12 +93,12 @@ void application::setup_voices() {
   Serial.print(lamb::Tables::generate_phase_increment(S_RATE, 1));
   Serial.println();
 
-  _voices[_voices_map[0]]->amplitude = 0xf0; // 0xb8; // kick
-  _voices[_voices_map[1]]->amplitude = 0xf0; // 0xd8; // lo bass
-  _voices[_voices_map[2]]->amplitude = 0xd0; // 0xd8; // hi bass
-  _voices[_voices_map[3]]->amplitude = 0x38; // 0x78; // snare 
-  _voices[_voices_map[4]]->amplitude = 0x90; // closed hat
-  _voices[_voices_map[5]]->amplitude = 0x80; // open hat
+  _voices[_voices_map[0]]->amplitude = 0x80; // 0xb8; // kick
+  _voices[_voices_map[1]]->amplitude = 0xc0; // 0xd8; // lo bass
+  _voices[_voices_map[2]]->amplitude = 0xc0; // 0xd8; // hi bass
+  _voices[_voices_map[3]]->amplitude = 0x60; // 0x78; // snare 
+  _voices[_voices_map[4]]->amplitude = 0x80; // closed hat
+  _voices[_voices_map[5]]->amplitude = 0x0; // open hat
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -275,7 +275,7 @@ bool application::volume(uint12_t const & volume) {
 bool application::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
   const uint8_t control_shift = 9;
   uint8_t       notes_ix      = parameter >> control_shift;
-  uint8_t       transpose     = 22;
+  uint8_t       transpose     = 30;
   uint8_t       phincr_shift  = 6;
   
   static uint8_t notes[8] = {
