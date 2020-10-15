@@ -9,7 +9,7 @@ namespace events {
     APP_EVT_NOT_AVAILABLE = 0,
 
     EVT_TRIGGER = 1,
-    EVT_MASTER_VOLUME = 2,
+    EVT_VOLUME = 2,
     EVT_PITCH = 3,
     EVT_UNKNOWN = 64
   };  

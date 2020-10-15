@@ -6,39 +6,39 @@ using namespace lamb;
 
 //////////////////////////////////////////////////////////////////////////////
 
-const uint32_t               application::K_RATE            { 100                       };
-const uint32_t               application::S_RATE            { 18000                     };
-uint32_t                     application::_phincrs[128]   = { 0                         };
-int32_t                      application::_avg_sample       { 0                         };
-uint16_t                     application::_master_vol       { 2048                      };
-uint16_t                     application::_volume           { 4091                      };
-uint16_t                     application::_knob1            { 4091                      };
-uint16_t                     application::_knob2            { 4091                      };
-size_t                       application::_sample_ix        { 0                         };
-HardwareTimer                application::_timer_1          ( 1                         );
-HardwareTimer                application::_timer_2          ( 2                         );
-HardwareTimer                application::_timer_3          ( 3                         );
-application::voice *         application::_voices           [ 6                         ];
-application::signal          application::_signal_device0   ( PA0,  8, 4                );
-application::signal          application::_signal_device1   ( PA1,  8, 4                );
-application::signal          application::_signal_device2   ( PA2,  8, 4                );
-application::signal_source   application::_signal_source0   ( &_signal_device0          );
-application::signal_source   application::_signal_source1   ( &_signal_device1          );
-application::signal_source   application::_signal_source2   ( &_signal_device2          );
-application::button          application::_button_device0   ( PB11, 0                   );
-application::button          application::_button_device1   ( PB10, 1                   );
-application::button          application::_button_device2   ( PB1,  2                   );
-application::button          application::_button_device3   ( PB0,  3                   );
-application::button          application::_button_device4   ( PC15, 4                   );
-application::button          application::_button_device5   ( PC14, 5                   );
-application::button_source   application::_button_source0   ( &_button_device0          );
-application::button_source   application::_button_source1   ( &_button_device1          );
-application::button_source   application::_button_source2   ( &_button_device2          );
-application::button_source   application::_button_source3   ( &_button_device3          );
-application::button_source   application::_button_source4   ( &_button_device4          );
-application::button_source   application::_button_source5   ( &_button_device5          );
-application::dac             application::_dac              ( application::I2S_WS, &SPI );
-application::tft             application::_tft(application::TFT_CS, application::TFT_DC );
+const uint32_t               application::K_RATE             { 100                       };
+const uint32_t               application::S_RATE             { 18000                     };
+uint32_t                     application::_phincrs[128]   =  { 0                         };
+int32_t                      application::_avg_sample        { 0                         };
+uint16_t                     application::_scaled_volume_b12 { 2048                      };
+uint16_t                     application::_raw_volume_b12    { 4091                      };
+uint16_t                     application::_knob1             { 4091                      };
+uint16_t                     application::_knob2             { 4091                      };
+size_t                       application::_sample_ix         { 0                         };
+HardwareTimer                application::_timer_1           ( 1                         );
+HardwareTimer                application::_timer_2           ( 2                         );
+HardwareTimer                application::_timer_3           ( 3                         );
+application::voice *         application::_voices            [ 6                         ];
+application::signal          application::_signal_device0    ( PA0,  8, 4                );
+application::signal          application::_signal_device1    ( PA1,  8, 4                );
+application::signal          application::_signal_device2    ( PA2,  8, 4                );
+application::signal_source   application::_signal_source0    ( &_signal_device0          );
+application::signal_source   application::_signal_source1    ( &_signal_device1          );
+application::signal_source   application::_signal_source2    ( &_signal_device2          );
+application::button          application::_button_device0    ( PB11, 0                   );
+application::button          application::_button_device1    ( PB10, 1                   );
+application::button          application::_button_device2    ( PB1,  2                   );
+application::button          application::_button_device3    ( PB0,  3                   );
+application::button          application::_button_device4    ( PC15, 4                   );
+application::button          application::_button_device5    ( PC14, 5                   );
+application::button_source   application::_button_source0    ( &_button_device0          );
+application::button_source   application::_button_source1    ( &_button_device1          );
+application::button_source   application::_button_source2    ( &_button_device2          );
+application::button_source   application::_button_source3    ( &_button_device3          );
+application::button_source   application::_button_source4    ( &_button_device4          );
+application::button_source   application::_button_source5    ( &_button_device5          );
+application::dac             application::_dac               ( application::I2S_WS, &SPI );
+application::tft             application::_tft(application::TFT_CS, application::TFT_DC  );
 application::draw_buffer     application::_draw_buffer;         
 application::combined_source application::_combined_source;
 application::control_source  application::_control_event_source;
@@ -151,7 +151,7 @@ application::application_event application::process_signal_event(
   application_event application_event;
 
   if (sig_num == 2) {
-    application_event.type           = application_event_type::EVT_MASTER_VOLUME;
+    application_event.type           = application_event_type::EVT_VOLUME;
     application_event.parameter      = sig_val;
   }
   else if (sig_num == 0) {
@@ -215,7 +215,7 @@ void application::graph() {
   
   _tft.drawFastVLine(tmp_col, 0, 240, ILI9341_BLACK);
 
-  uint16_t              tmp_volume = 119 - map(_volume, 0, 4091, 0, 119);
+  uint16_t              tmp_volume = 119 - map(_raw_volume_b12, 0, 4091, 0, 119);
 
   _tft.drawPixel(tmp_col, tmp_volume, ILI9341_GREEN);
   _tft.drawPixel(tmp_col, 239-tmp_volume, ILI9341_GREEN);
@@ -246,12 +246,35 @@ void application::graph() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-bool application::volume(uint16_t const & volume_) {
-  if (volume_ == _volume) return false;
+bool application::volume(uint16_t const & volume_b12) {
+  if (volume_b12 == _raw_volume_b12) return false;
   
-  _volume = volume_;
+  _raw_volume_b12    = volume_b12;
   
-  _master_vol = ((_volume << 2) - _volume) >> 2;
+  _scaled_volume_b12 = ((_raw_volume_b12 << 2) - _raw_volume_b12) >> 2;
+
+  return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+bool application::pitch(uint16_t const & parameter_b12) {
+  static uint8_t notes[16] = {
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
+  };
+  
+  const uint8_t shift = 8;
+  uint16_t tmp_b12 = parameter_b12;
+  tmp_b12 >>= shift;
+  
+  Serial.print("phincr = ");
+  Serial.print(tmp_b12);
+  Serial.print(" ");
+  Serial.print(_phincrs[tmp_b12] >> 8);
+  Serial.println();
+  
+  _voices[_voices_map[1]]->phincr = _phincrs[notes[tmp_b12]+22] >> 6;
+  _voices[_voices_map[2]]->phincr = _phincrs[notes[tmp_b12]+22] >> 6;
 
   return true;
 }
@@ -272,7 +295,7 @@ void application::k_rate() {
     )
   ) {
     switch (ae.type) {
-    case application_event_type::EVT_MASTER_VOLUME:
+    case application_event_type::EVT_VOLUME:
     {
       volume(ae.parameter);
 
@@ -286,28 +309,7 @@ void application::k_rate() {
     }
     case application_event_type::EVT_PITCH:
     {
-      static uint8_t notes[16] = {
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
-
-//        24, 26, 27, 29, 31, 32, 35,
-//        36, 38, 39, 41, 53, 44, 47,
-//        48, 50
-//      };
-      };
-      
-
-      const uint8_t shift = 8;
-      uint16_t tmp = ae.parameter;
-      tmp >>= shift;
-
-      Serial.print("phincr = ");
-      Serial.print(tmp);
-      Serial.print(" ");
-      Serial.print(_phincrs[tmp] >> 8);
-      Serial.println();
-      
-      _voices[_voices_map[1]]->phincr = _phincrs[notes[tmp]+22] >> 6;
-      _voices[_voices_map[2]]->phincr = _phincrs[notes[tmp]+22] >> 6;
+      pitch(ae.parameter);
       
       break;     
     }
@@ -360,7 +362,7 @@ void application::s_rate() {
     sample_ += _voices[_voices_map[ix]]->play();
   }
 
-  sample_     *= _master_vol;
+  sample_     *= _scaled_volume_b12;
   sample_    >>= 12;
   
   _avg_sample += sample_;

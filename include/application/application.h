@@ -76,13 +76,13 @@ private:
   static            combined_source      _combined_source;
   
   static            control_source       _control_event_source;
-  
-  static            uint16_t             _volume;
+
+  static            uint16_t             _raw_volume_b12;
+  static            uint16_t             _scaled_volume_b12;
   static            uint16_t             _knob1;
   static            uint16_t             _knob2;
   static            int32_t              _avg_sample;
   static            size_t               _sample_ix;
-  static            uint16_t             _master_vol;
   static            HardwareTimer        _timer_1; 
   static            HardwareTimer        _timer_2;
   static            HardwareTimer        _timer_3;
@@ -94,6 +94,7 @@ private:
   static            draw_buffer          _draw_buffer;
 
   static            bool                 volume(uint16_t const & volume_);
+  static            bool                 pitch( uint16_t const & parameter_);
   
   static            void                 k_rate();
   static            void                 s_rate();
