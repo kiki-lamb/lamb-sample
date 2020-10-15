@@ -8,6 +8,7 @@
 
 class application {
 public:
+  typedef uint16_t                                           uint12_t;
   typedef int16_t                                            sample;
   typedef lamb::oneshot_plus                                 voice;
   typedef lamb::device::Adafruit_ILI9341_STM_SPI2            tft;
@@ -77,10 +78,10 @@ private:
   
   static            control_source       _control_event_source;
 
-  static            uint16_t             _raw_volume_b12;
-  static            uint16_t             _scaled_volume_b12;
-  static            uint16_t             _knob1;
-  static            uint16_t             _knob2;
+  static            uint12_t             _raw_volume;
+  static            uint12_t             _scaled_volume;
+  static            uint12_t             _knob1;
+  static            uint12_t             _knob2;
   static            int32_t              _avg_sample;
   static            size_t               _sample_ix;
   static            HardwareTimer        _timer_1; 

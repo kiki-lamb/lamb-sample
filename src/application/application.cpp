@@ -10,8 +10,8 @@ const uint32_t               application::K_RATE             { 100              
 const uint32_t               application::S_RATE             { 18000                     };
 uint32_t                     application::_phincrs[128]   =  { 0                         };
 int32_t                      application::_avg_sample        { 0                         };
-uint16_t                     application::_scaled_volume_b12 { 2048                      };
-uint16_t                     application::_raw_volume_b12    { 4091                      };
+uint12_t                     application::_scaled_volume     { 2048                      };
+uint12_t                     application::_raw_volume        { 4091                      };
 uint16_t                     application::_knob1             { 4091                      };
 uint16_t                     application::_knob2             { 4091                      };
 size_t                       application::_sample_ix         { 0                         };
@@ -215,7 +215,7 @@ void application::graph() {
   
   _tft.drawFastVLine(tmp_col, 0, 240, ILI9341_BLACK);
 
-  uint16_t              tmp_volume = 119 - map(_raw_volume_b12, 0, 4091, 0, 119);
+  uint16_t              tmp_volume = 119 - map(_raw_volume, 0, 4091, 0, 119);
 
   _tft.drawPixel(tmp_col, tmp_volume, ILI9341_GREEN);
   _tft.drawPixel(tmp_col, 239-tmp_volume, ILI9341_GREEN);
@@ -246,35 +246,36 @@ void application::graph() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-bool application::volume(uint16_t const & volume_b12) {
-  if (volume_b12 == _raw_volume_b12) return false;
+bool application::volume(uint12_t const & volume) {
+  if (volume == _raw_volume) return false;
   
-  _raw_volume_b12    = volume_b12;
+  _raw_volume    = volume;
   
-  _scaled_volume_b12 = ((_raw_volume_b12 << 2) - _raw_volume_b12) >> 2;
+  _scaled_volume = ((_raw_volume << 2) - _raw_volume) >> 2;
 
   return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
-bool application::pitch(uint16_t const & parameter_b12) {
+bool application::pitch(uint12_t const & parameter) {
   static uint8_t notes[16] = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
   };
   
   const uint8_t shift = 8;
-  uint16_t tmp_b12 = parameter_b12;
+  uint12_t tmp = parameter;
   tmp_b12 >>= shift;
+  tmp += 22;
   
   Serial.print("phincr = ");
-  Serial.print(tmp_b12);
+  Serial.print(tmp);
   Serial.print(" ");
-  Serial.print(_phincrs[tmp_b12] >> 8);
+  Serial.print(_phincrs[tmp] >> 8);
   Serial.println();
   
-  _voices[_voices_map[1]]->phincr = _phincrs[notes[tmp_b12]+22] >> 6;
-  _voices[_voices_map[2]]->phincr = _phincrs[notes[tmp_b12]+22] >> 6;
+  _voices[_voices_map[1]]->phincr = _phincrs[notes[tmp]] >> 6;
+  _voices[_voices_map[2]]->phincr = _phincrs[notes[tmp]] >> 6;
 
   return true;
 }
