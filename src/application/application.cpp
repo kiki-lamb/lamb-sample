@@ -8,8 +8,10 @@ using namespace lamb::Tables;
 
 //////////////////////////////////////////////////////////////////////////////
 
+const uint8_t                application::NOTE               { 36                        };
+const uint8_t                application::BASS_ROOT_NOTE     { application::NOTE - 4     };
 const uint32_t               application::K_RATE             { 100                       };
-const uint32_t               application::S_RATE             { 17000                     };
+const uint32_t               application::S_RATE             { 44100                     };
 const uint32_t               application::S2_RATE            { application::S_RATE << 1  };
 uint32_t                     application::_phincrs[120]   =  { 0                         };
 int32_t                      application::_avg_sample        { 0                         };
@@ -163,7 +165,7 @@ void application::setup_voices() {
       _voices[_voices_map[ix]] =
         new voice(Samples::data+BLOCK_SIZE*(ix),     BLOCK_SIZE);
       
-      _voices[_voices_map[ix]]->phincr = _phincrs[36];
+      _voices[_voices_map[ix]]->phincr = _phincrs[NOTE];
     }
   }
 
@@ -349,7 +351,6 @@ bool application::volume(uint12_t const & volume) {
 bool application::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
   const uint8_t control_shift = 10;
   uint8_t       notes_ix      = parameter >> control_shift;
-  uint8_t       transpose     = 30;
   
   static uint8_t notes[4] = {
     0, 1, 3, 4, // 6, 8, 9, 11
@@ -367,7 +368,7 @@ bool application::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
   // }
   
   _voices[_voices_map[voice_ix]]->next_phincr =
-    _phincrs[notes[notes_ix] + transpose];
+    _phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
 
   return true;
 }

@@ -42,6 +42,8 @@ public:
   static const      uint32_t             K_RATE;
   static const      uint32_t             S_RATE;
   static const      uint32_t             S2_RATE;
+  static const      uint8_t              NOTE;
+  static const      uint8_t              BASS_ROOT_NOTE;
   
   typedef lamb::events::sources::combine<
     control_event,
