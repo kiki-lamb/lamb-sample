@@ -7,7 +7,7 @@ using namespace lamb;
 //////////////////////////////////////////////////////////////////////////////
 
 const uint32_t               application::K_RATE             { 100                       };
-const uint32_t               application::S_RATE             { 18000                     };
+const uint32_t               application::S_RATE             { 17000                     };
 uint32_t                     application::_phincrs[128]   =  { 0                         };
 int32_t                      application::_avg_sample        { 0                         };
 uint12_t                     application::_scaled_volume     { 2048                      };
@@ -93,12 +93,12 @@ void application::setup_voices() {
   Serial.print(lamb::Tables::generate_phase_increment(S_RATE, 1));
   Serial.println();
 
-  _voices[_voices_map[0]]->amplitude = 0x80; // 0xb8; // kick
-  _voices[_voices_map[1]]->amplitude = 0xc0; // 0xd8; // lo bass
-  _voices[_voices_map[2]]->amplitude = 0xc0; // 0xd8; // hi bass
+  _voices[_voices_map[0]]->amplitude = 0xc0; // 0xb8; // kick
+  _voices[_voices_map[1]]->amplitude = 0xff; // 0xd8; // hi bass
+  _voices[_voices_map[2]]->amplitude = 0xd0; // 0xd8; // lo bass
   _voices[_voices_map[3]]->amplitude = 0x60; // 0x78; // snare 
   _voices[_voices_map[4]]->amplitude = 0x80; // closed hat
-  _voices[_voices_map[5]]->amplitude = 0x0; // open hat
+  _voices[_voices_map[5]]->amplitude = 0x90; // open hat
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -273,13 +273,13 @@ bool application::volume(uint12_t const & volume) {
 ////////////////////////////////////////y//////////////////////////////////////
 
 bool application::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
-  const uint8_t control_shift = 9;
+  const uint8_t control_shift = 10;
   uint8_t       notes_ix      = parameter >> control_shift;
   uint8_t       transpose     = 30;
   uint8_t       phincr_shift  = 6;
   
-  static uint8_t notes[8] = {
-    0, 2, 3, 5, 7, 8, 11, 12
+  static uint8_t notes[4] = {
+    0, 1, 3, 4, // 6, 8, 9, 11
   };
 
   // Serial.print(voice_ix);
