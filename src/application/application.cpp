@@ -291,7 +291,7 @@ bool application::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
   // Serial.print(_phincrs[notes[notes_ix] + transpose] >> phincr_shift);
   // Serial.println();
   
-  _voices[_voices_map[voice_ix]]->phincr =
+  _voices[_voices_map[voice_ix]]->next_phincr =
     _phincrs[notes[notes_ix] + transpose] >> phincr_shift;
 
   return true;
@@ -300,10 +300,11 @@ bool application::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
 //////////////////////////////////////////////////////////////////////////////
 
 void application::k_rate() {
-  static size_t buttons[] =      {  PB11 ,   PB10 ,    PB1 ,   PB0,   PC14 ,  PC15   };
-  static char * button_names[] = { "PB11",  "PB10",   "PB1",  "PB0", "PC14", "PC15"  };
-    
-  uint8_t       trigger_states = 0;
+  static size_t  buttons[]      = {  PB11 ,   PB10 ,    PB1 ,   PB0,   PC14 ,  PC15   };
+  static char *  button_names[] = { "PB11",  "PB10",   "PB1",  "PB0", "PC14", "PC15"  };
+
+  static uint8_t last_trigger_states = 0;
+  uint8_t        trigger_states      = 0;
 
   _control_event_source.poll();
 
@@ -347,27 +348,20 @@ void application::k_rate() {
   }
   
   for (size_t ix = 0; ix < 6; ix++) {
-    if (trigger_states & (1 << ix)) {
-      // Serial.print("Triggered ");
-      // Serial.print(button_names[ix]);
-      
-      if ((ix == 2) || (ix == 3)) {
-        //Serial.print(" ");
-      }
-      
-      // Serial.print(" @ 0x");
-      // Serial.print(_voices[_voices_map[ix]]->amplitude, HEX);
-      // Serial.print(" / ");
-      // Serial.println(ix);
-      
+    if (
+      (trigger_states & (1 << ix)) &&
+      (! (last_trigger_states & (1 << ix)))
+    ) {
       _voices[_voices_map[ix]]->trigger  = true;
+      
       _voices[_voices_map[5]]->trigger  &= ! _voices[_voices_map[4]]->trigger;
-
       
 //      _voices[_voices_map[1]]->trigger  &= ! _voices[_voices_map[2]]->trigger;
 //      _voices[_voices_map[2]]->trigger  &= ! _voices[_voices_map[1]]->trigger;
     }
   }
+
+  last_trigger_states = trigger_states;
 }
 
 
