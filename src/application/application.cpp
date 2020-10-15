@@ -8,11 +8,10 @@ using namespace lamb::Tables;
 
 //////////////////////////////////////////////////////////////////////////////
 
-const uint8_t                application::NOTE               { 48                        };
+const uint8_t                application::NOTE               { 36                        };
 const uint8_t                application::BASS_ROOT_NOTE     { application::NOTE - 4     };
 const uint32_t               application::K_RATE             { 100                       };
 const uint32_t               application::S_RATE             { 88200                     };
-const uint32_t               application::S2_RATE            { application::S_RATE << 1  };
 uint32_t                     application::_phincrs[120]   =  { 0                         };
 int32_t                      application::_avg_sample        { 0                         };
 uint12_t                     application::_scaled_volume     { 2048                      };
@@ -84,7 +83,7 @@ void application::generate_phincrs() {
   
   auto start = millis();
   
-  uint32_t one_hz = generate_phase_increment(S2_RATE, 1);
+  uint32_t one_hz = generate_phase_increment(S_RATE, 1);
   Serial.print("1 hz = ");
   Serial.print(one_hz);
   Serial.println();
@@ -107,7 +106,7 @@ void application::generate_phincrs() {
       Serial.print(" ");
       
       uint32_t tmp_phincr = generate_phase_increment(
-        S2_RATE,
+        S_RATE,
         midi_notes::twelve_tet_data[note]
       );
       
