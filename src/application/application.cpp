@@ -10,7 +10,8 @@ using namespace lamb::Tables;
 
 const uint32_t               application::K_RATE             { 100                       };
 const uint32_t               application::S_RATE             { 17000                     };
-uint32_t                     application::_phincrs[128]   =  { 0                         };
+const uint32_t               application::S2_RATE            { application::S_RATE << 1  };
+uint32_t                     application::_phincrs[120]   =  { 0                         };
 int32_t                      application::_avg_sample        { 0                         };
 uint12_t                     application::_scaled_volume     { 2048                      };
 uint12_t                     application::_raw_volume        { 4091                      };
@@ -75,9 +76,85 @@ void application::setup_controls() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void application::setup_voices() {
-  for (size_t ix = 0; ix < 6; ix++) {
+void application::generate_phincrs() {
+  Serial.print("\n\nGenerating...");
+  Serial.println();
+  
+  auto start = millis();
+  
+  uint32_t one_hz = generate_phase_increment(S2_RATE, 1);
+  Serial.print("1 hz = ");
+  Serial.print(one_hz);
+  Serial.println();
+  
+  for (int8_t octave = -3; octave < 7; octave++) {
+    for (size_t note = 0; note < 12; note++) {
+      size_t write_ix = (octave + 3) * 12 + note;
+      
+      Serial.print("ix ");
+      Serial.print(write_ix);
+      Serial.print(" octave ");
+      Serial.print(octave);
+      Serial.print(" note ");
+      
+      if (note < 10) {
+        Serial.print(" ");
+      }
+      
+      Serial.print(note);
+      Serial.print(" ");
+      
+      uint32_t tmp_phincr = generate_phase_increment(
+        S2_RATE,
+        midi_notes::twelve_tet_data[note]
+      );
+      
+      // Serial.println();
+      
+      if (octave < 0) {
+        // Serial.print("Downshift by ");
+        // Serial.print(octave * -1);
+        // Serial.println();
+        
+        tmp_phincr >>= (octave * -1);
+      }
+      else {
+        // Serial.print("Upshift by ");
+        // Serial.print(octave);
+        // Serial.println();
+        
+        tmp_phincr <<= octave;
+      }
+      
+      Serial.print(tmp_phincr);
+      
+      if (tmp_phincr == one_hz) {
+        Serial.print("                <== 1 hz");
+      }
 
+      Serial.println();
+
+      _phincrs[write_ix] = tmp_phincr;
+    }
+  }
+ 
+  Serial.print("1 hz = ");
+  Serial.print(one_hz);
+  Serial.println();
+  
+  Serial.print("Done after ");
+  Serial.print(millis() - start);
+  Serial.print(" ms.");
+  Serial.println();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void application::setup_voices() {
+  generate_phincrs();
+
+  for (size_t ix = 0; ix < 6; ix++) {
+    
     if (ix == 2) {
       _voices[_voices_map[ix]] =
         new voice(Samples::data+BLOCK_SIZE*(ix - 1), BLOCK_SIZE);
@@ -85,66 +162,10 @@ void application::setup_voices() {
     else {
       _voices[_voices_map[ix]] =
         new voice(Samples::data+BLOCK_SIZE*(ix),     BLOCK_SIZE);
-
-    _voices[_voices_map[ix]]->phincr =
-      generate_phase_increment(S_RATE, 1) >> 1;
-    }
-
-    while (true) {
-      delay(1000);
       
-      Serial.print("1 hz = ");
-      Serial.print(generate_phase_increment(S_RATE, 1));
-      Serial.println();
-
-
-      for (int8_t octave = -4; octave < 6; octave++) {
-        for (size_t note = 0; note < 12; note++) {
-          Serial.print("octave ");
-          Serial.print(octave);
-          Serial.print(" note ");
-
-          if (note < 10) {
-            Serial.print(" ");
-          }
-          
-          Serial.print(note);
-          Serial.print(" ");
-
-          uint32_t tmp_phincr = generate_phase_increment(
-            S_RATE,
-            midi_notes::twelve_tet_data[note]
-          );
-
-          // Serial.println();
-          
-          if (octave < 0) {
-            // Serial.print("Downshift by ");
-            // Serial.print(octave * -1);
-            // Serial.println();
-            
-            tmp_phincr >>= (octave * -1);
-          }
-          else {
-            // Serial.print("Upshift by ");
-            // Serial.print(octave);
-            // Serial.println();
-
-            tmp_phincr <<= octave;
-          }
-          
-          Serial.print(tmp_phincr);          
-          Serial.println();
-        }
-      }
-
-      Serial.println();
+      _voices[_voices_map[ix]]->phincr = _phincrs[36];
     }
   }
- 
-  Serial.print("1 hz = ");
-  Serial.print(generate_phase_increment(S_RATE, 1));
-  Serial.println();
 
   _voices[_voices_map[0]]->amplitude = 0xb0; // 0xb8; // kick
   _voices[_voices_map[1]]->amplitude = 0xff; // 0xd8; // hi bass
@@ -329,23 +350,24 @@ bool application::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
   const uint8_t control_shift = 10;
   uint8_t       notes_ix      = parameter >> control_shift;
   uint8_t       transpose     = 30;
-  uint8_t       phincr_shift  = 6;
   
   static uint8_t notes[4] = {
     0, 1, 3, 4, // 6, 8, 9, 11
   };
 
-  // Serial.print(voice_ix);
-  // Serial.print(" = ");
-  // Serial.print(notes_ix);
-  // Serial.print(" ");
-  // Serial.print(notes[notes_ix] + transpose);
-  // Serial.print(" ");
-  // Serial.print(_phincrs[notes[notes_ix] + transpose] >> phincr_shift);
-  // Serial.println();
+  // if (voice_ix == 1) {
+  //   Serial.print(voice_ix);
+  //   Serial.print(" = ");
+  //   Serial.print(notes_ix);
+  //   Serial.print(" ");
+  //   Serial.print(notes[notes_ix] + transpose);
+  //   Serial.print(" ");
+  //   Serial.print(_phincrs[notes[notes_ix] + transpose]);
+  //   Serial.println();
+  // }
   
   _voices[_voices_map[voice_ix]]->next_phincr =
-    _phincrs[notes[notes_ix] + transpose] >> phincr_shift;
+    _phincrs[notes[notes_ix] + transpose];
 
   return true;
 }
@@ -448,37 +470,10 @@ void application::s_rate() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void application::generate_phincrs() {
-//  while (true) {
-  Serial.print("\n\nGenerating...");
-  Serial.println();
-  
-  auto start = millis();
-  
-  for (uint8_t ix = 0; ix < 128; ix++) {
-    uint32_t phincr = generate_phase_increment(
-      S_RATE << 1,
-      midi_notes::floats_data[ix]
-      );
-    
-    _phincrs[ix] = phincr;
-    
-  }
-  
-  Serial.print("Done after ");
-  Serial.print(millis() - start);
-  Serial.print(" ms.");
-  Serial.println();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 void application::setup() {
-  Serial.begin(115200);
-
-  generate_phincrs();
+  delay(3000);
   
-  // samples are 6013 long.
+  Serial.begin(115200);
   
   setup_voices();
   setup_controls();

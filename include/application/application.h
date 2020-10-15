@@ -41,6 +41,7 @@ public:
   static const      uint32_t             I2S_DATA            = PA7;
   static const      uint32_t             K_RATE;
   static const      uint32_t             S_RATE;
+  static const      uint32_t             S2_RATE;
   
   typedef lamb::events::sources::combine<
     control_event,
@@ -87,8 +88,7 @@ private:
   static            HardwareTimer        _timer_2;
   static            HardwareTimer        _timer_3;
   static            dac                  _dac;
-  static            uint32_t             _phincrs[128];
-  static            uint32_t             _alt_phincrs[128];
+  static            uint32_t             _phincrs[120];
   static            voice *              _voices[6];
   static constexpr  size_t               _voices_map[6] = { 0, 1, 2, 3, 4, 5 };
   static            tft                  _tft;
