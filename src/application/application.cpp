@@ -8,8 +8,8 @@ using namespace lamb::Tables;
 
 //////////////////////////////////////////////////////////////////////////////
 
-const uint8_t                application::NOTE               { 36                        };
-const uint8_t                application::BASS_ROOT_NOTE     { application::NOTE - 4     };
+const uint8_t                application::NOTE               { 33                        };
+const uint8_t                application::BASS_ROOT_NOTE     { application::NOTE - 7     };
 const uint32_t               application::K_RATE             { 100                       };
 const uint32_t               application::S_RATE             { 88200                     };
 uint32_t                     application::_phincrs[120]   =  { 0                         };
@@ -110,21 +110,11 @@ void application::generate_phincrs() {
         midi_notes::twelve_tet_data[note]
       );
       
-      // Serial.println();
-      
       if (octave < 0) {
-        // Serial.print("Downshift by ");
-        // Serial.print(octave * -1);
-        // Serial.println();
-        
-        tmp_phincr >>= (octave * -1);
+         tmp_phincr >>= (octave * -1);
       }
       else {
-        // Serial.print("Upshift by ");
-        // Serial.print(octave);
-        // Serial.println();
-        
-        tmp_phincr <<= octave;
+         tmp_phincr <<= octave;
       }
       
       Serial.print(tmp_phincr);
@@ -168,12 +158,12 @@ void application::setup_voices() {
     }
   }
 
-  _voices[_voices_map[0]]->amplitude = 0xb0; // 0xb8; // kick
-  _voices[_voices_map[1]]->amplitude = 0xff; // 0xd8; // hi bass
-  _voices[_voices_map[2]]->amplitude = 0xd0; // 0xd8; // lo bass
-  _voices[_voices_map[3]]->amplitude = 0x50; // 0x78; // snare 
-  _voices[_voices_map[4]]->amplitude = 0x80; // closed hat
-  _voices[_voices_map[5]]->amplitude = 0x90; // open hat
+  _voices[_voices_map[0]]->amplitude = 0xc0; // 0xb8; // kick
+  _voices[_voices_map[1]]->amplitude = 0xe0; // 0xd8; // hi bass
+  _voices[_voices_map[2]]->amplitude = 0xe0; // 0xd8; // lo bass
+  _voices[_voices_map[3]]->amplitude = 0x40; // 0x78; // snare 
+  _voices[_voices_map[4]]->amplitude = 0xf0; // closed hat
+  _voices[_voices_map[5]]->amplitude = 0xa0; // open hat
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -348,11 +338,11 @@ bool application::volume(uint12_t const & volume) {
 ////////////////////////////////////////y//////////////////////////////////////
 
 bool application::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
-  const uint8_t control_shift = 10;
+  const uint8_t control_shift = 9;
   uint8_t       notes_ix      = parameter >> control_shift;
   
-  static uint8_t notes[4] = {
-    0, 1, 3, 4, // 6, 8, 9, 11
+  static int8_t notes[(0xfff >> control_shift) + 1] = {
+     0, 2, 3, 5, 7, 9, 11, 12
   };
 
   // if (voice_ix == 1) {
