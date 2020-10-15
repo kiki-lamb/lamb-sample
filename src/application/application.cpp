@@ -10,8 +10,8 @@ using namespace lamb::Tables;
 
 const uint8_t                application::NOTE               { 24                        };
 const uint8_t                application::BASS_ROOT_NOTE     { application::NOTE - 6     };
-const uint32_t               application::K_RATE             { 100                       };
-const uint32_t               application::S_RATE             { 88200                     };
+const uint32_t               application::K_RATE             { 80                        };
+const uint32_t               application::S_RATE             { 44100                     };
 uint32_t                     application::_phincrs[120]   =  { 0                         };
 int32_t                      application::_avg_sample        { 0                         };
 uint12_t                     application::_scaled_volume     { 2048                      };
@@ -229,16 +229,20 @@ application::application_event application::process_signal_event(
 
   application_event application_event;
 
-  if (sig_num == 2) {
+  /* if (sig_num == 2) {
     application_event.type           = application_event_type::EVT_VOLUME;
     application_event.parameter      = sig_val;
   }
-  else if (sig_num == 0) {
+  else */ if (sig_num == 2) {
     application_event.type           = application_event_type::EVT_PITCH_1;
     application_event.parameter      = sig_val;
   }
-  else if (sig_num == 1) {
+  else if (sig_num == 0) {
     application_event.type           = application_event_type::EVT_PITCH_2;
+    application_event.parameter      = sig_val;
+  }
+  else if (sig_num == 1) {
+    application_event.type           = application_event_type::EVT_PITCH_3;
     application_event.parameter      = sig_val;
   }
   else {
@@ -349,28 +353,28 @@ bool application::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
      0, 2, 3, 5, 7, 9, 11, 12
   };
 
-   if (voice_ix == 2) {
-     uint16_t tmp_parameter = parameter;
-     tmp_parameter += 15;
-     
-     // Serial.print(tmp_parameter);
-     
-     uint8_t lin = 0;
-     uint12_t mask = 0x800;
-
-     for(uint8_t ix = 0; ix < 8; ix++) {
-       if (mask & tmp_parameter) {
-         lin += 1;
-       }
-       mask >>= 1;
-     }
-
-     // Serial.print(" => ");
-     // Serial.print(lin);
-     // Serial.println();
+    if (voice_ix == 4) {
+      uint16_t tmp_parameter = parameter;
+      tmp_parameter += 15;
    
-     notes_ix = lin;
-   }
+      // Serial.print(tmp_parameter);
+   
+      uint8_t lin = 0;
+      uint12_t mask = 0x800;
+
+      for(uint8_t ix = 0; ix < 8; ix++) {
+        if (mask & tmp_parameter) {
+          lin += 1;
+        }
+        mask >>= 1;
+      }
+
+      // Serial.print(" => ");
+      // Serial.print(lin);
+      // Serial.println();
+   
+      notes_ix = lin;
+    }
    
    // Serial.print(voice_ix);
    // Serial.print(" = ");
@@ -418,13 +422,19 @@ void application::k_rate() {
     }
     case application_event_type::EVT_PITCH_1:
     {
-      // pitch(1, ae.parameter);
+      pitch(3, ae.parameter);
       
       break;     
     }
     case application_event_type::EVT_PITCH_2:
     {
-      // pitch(2, ae.parameter);
+      pitch(4, ae.parameter);
+      
+      break;     
+    }
+    case application_event_type::EVT_PITCH_3:
+    {
+      pitch(5, ae.parameter);
       
       break;     
     }

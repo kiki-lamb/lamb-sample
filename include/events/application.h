@@ -12,6 +12,7 @@ namespace events {
     EVT_VOLUME  = 2,
     EVT_PITCH_1 = 3,
     EVT_PITCH_2 = 4,
+    EVT_PITCH_3 = 5,
     EVT_UNKNOWN = 64
   };  
 
