@@ -8,8 +8,8 @@ using namespace lamb::Tables;
 
 //////////////////////////////////////////////////////////////////////////////
 
-const uint8_t                application::NOTE               { 24                        };
-const uint8_t                application::BASS_ROOT_NOTE     { application::NOTE - 6     };
+const uint8_t                application::NOTE               { 22                        };
+const uint8_t                application::BASS_ROOT_NOTE     { application::NOTE - 5     };
 const uint32_t               application::K_RATE             { 80                        };
 const uint32_t               application::S_RATE             { 44100                     };
 uint32_t                     application::_phincrs[120]   =  { 0                         };
@@ -23,9 +23,9 @@ HardwareTimer                application::_timer_1           ( 1                
 HardwareTimer                application::_timer_2           ( 2                         );
 HardwareTimer                application::_timer_3           ( 3                         );
 application::voice *         application::_voices            [ 6                         ];
-application::signal          application::_signal_device0    ( PA0,  8, 4                );
-application::signal          application::_signal_device1    ( PA1,  8, 6                );
-application::signal          application::_signal_device2    ( PA2,  8, 6                );
+application::signal          application::_signal_device0    ( PA0,  8, 2                );
+application::signal          application::_signal_device1    ( PA1,  8, 2                );
+application::signal          application::_signal_device2    ( PA2,  8, 2                );
 application::signal_source   application::_signal_source0    ( &_signal_device0          );
 application::signal_source   application::_signal_source1    ( &_signal_device1          );
 application::signal_source   application::_signal_source2    ( &_signal_device2          );
@@ -162,12 +162,12 @@ void application::setup_voices() {
     _voices[ix]->amplitude = 0x80;
   }
 
-  // _voices[0]->amplitude = 0xd0; // 0xb8; // kick
-  // _voices[1]->amplitude = 0xf0; // 0xd8; // hi bass
-  // _voices[2]->amplitude = 0xf0; // 0xd8; // lo bass
-  // _voices[3]->amplitude = 0x48; // 0x78; // snare 
-  // _voices[4]->amplitude = 0xff; // closed hat
-  // _voices[5]->amplitude = 0xa0; // open hat
+   _voices[0]->amplitude = 0xc0; // 0xb8; // kick
+   _voices[1]->amplitude = 0x50; // 0xd8; // snare
+   _voices[2]->amplitude = 0x0; // 0xd8; // oh
+   _voices[3]->amplitude = 0xff; // 0x78; // bass
+   _voices[4]->amplitude = 0xff; // bass
+   _voices[5]->amplitude = 0xff; // bass
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -353,41 +353,43 @@ bool application::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
      0, 2, 3, 5, 7, 9, 11, 12
   };
 
-    if (voice_ix == 4) {
-      uint16_t tmp_parameter = parameter;
-      tmp_parameter += 15;
-   
-      // Serial.print(tmp_parameter);
-   
-      uint8_t lin = 0;
-      uint12_t mask = 0x800;
+  // if (voice_ix == 4) {
+  //   uint16_t tmp_parameter = parameter;
+  //   // tmp_parameter += 15;
 
-      for(uint8_t ix = 0; ix < 8; ix++) {
-        if (mask & tmp_parameter) {
-          lin += 1;
-        }
-        mask >>= 1;
-      }
+  //   Serial.print(tmp_parameter);
 
-      // Serial.print(" => ");
-      // Serial.print(lin);
-      // Serial.println();
-   
-      notes_ix = lin;
-    }
-   
-   // Serial.print(voice_ix);
-   // Serial.print(" = ");
-   // Serial.print(notes_ix);
-   // Serial.print(" ");
-   // Serial.print(notes[notes_ix] + BASS_ROOT_NOTE);
-   // Serial.print(" ");
-   // Serial.print(_phincrs[notes[notes_ix] + BASS_ROOT_NOTE]);
-   // Serial.println();
- 
-   _voices[voice_ix]->next_phincr =
-     _phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
+  //   uint8_t lin = 0;
+  //   uint12_t mask = 0x800;
 
+  //   for(uint8_t ix = 0; ix < 8; ix++) {
+  //     if (mask & tmp_parameter) {
+  //       lin += 1;
+  //     }
+  //     mask >>= 1;
+  //   }
+   
+  //   if (lin == 8)
+  //     lin = 7;
+
+  //   Serial.print(" => ");
+  //   Serial.print(lin);
+  //   Serial.print(" ");   
+  //   notes_ix = lin; 
+  // }
+   
+  Serial.print(voice_ix);
+  Serial.print(" = ");
+  Serial.print(notes_ix);
+  Serial.print(" ");
+  Serial.print(notes[notes_ix] + BASS_ROOT_NOTE);
+  Serial.print(" ");
+  Serial.print(_phincrs[notes[notes_ix] + BASS_ROOT_NOTE]);
+  Serial.println();
+  
+  _voices[voice_ix]->next_phincr =
+    _phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
+  
   return true;
 }
 
@@ -453,6 +455,19 @@ void application::k_rate() {
       (! (last_trigger_states & (1 << ix)))
     ) {
       _voices[ix]->trigger  = true;
+
+      if (ix == 3) {
+        _voices[4]->state = false;
+        _voices[5]->state = false;        
+      }
+      else if (ix == 4) {
+        _voices[3]->state = false;
+        _voices[5]->state = false;        
+      }
+      else if (ix == 5) {
+        _voices[3]->state = false;
+        _voices[4]->state = false;        
+      }
     }
   }
 
