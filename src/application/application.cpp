@@ -8,8 +8,8 @@ using namespace lamb::Tables;
 
 //////////////////////////////////////////////////////////////////////////////
 
-const uint8_t                application::NOTE               { 22                        };
-const uint8_t                application::BASS_ROOT_NOTE     { application::NOTE - 5     };
+const uint8_t                application::NOTE               { 36                        };
+const uint8_t                application::BASS_ROOT_NOTE     { application::NOTE - 8     };
 const uint32_t               application::K_RATE             { 80                        };
 const uint32_t               application::S_RATE             { 44100                     };
 uint32_t                     application::_phincrs[120]   =  { 0                         };
@@ -87,10 +87,12 @@ void application::generate_phincrs() {
   Serial.print("1 hz = ");
   Serial.print(one_hz);
   Serial.println();
+
+  const uint8_t middle_octave = 4;
   
-  for (int8_t octave = -3; octave < 7; octave++) {
+  for (int8_t octave = -middle_octave; octave < (10 - middle_octave); octave++) {
     for (size_t note = 0; note < 12; note++) {
-      size_t write_ix = (octave + 3) * 12 + note;
+      size_t write_ix = (octave + middle_octave) * 12 + note;
       
       Serial.print("ix ");
       Serial.print(write_ix);
@@ -162,9 +164,9 @@ void application::setup_voices() {
     _voices[ix]->amplitude = 0x80;
   }
 
-   _voices[0]->amplitude = 0xc0; // 0xb8; // kick
-   _voices[1]->amplitude = 0x50; // 0xd8; // snare
-   _voices[2]->amplitude = 0x0; // 0xd8; // oh
+   _voices[0]->amplitude = 0xd0; // 0xb8; // kick
+   _voices[1]->amplitude = 0x60; // 0xd8; // snare
+   _voices[2]->amplitude = 0x80; // 0xd8; // oh
    _voices[3]->amplitude = 0xff; // 0x78; // bass
    _voices[4]->amplitude = 0xff; // bass
    _voices[5]->amplitude = 0xff; // bass
