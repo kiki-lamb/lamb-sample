@@ -11,7 +11,7 @@ const uint32_t               application::S_RATE            { 18000             
 uint32_t                     application::_phincrs[128]   = { 0                         };
 int32_t                      application::_avg_sample       { 0                         };
 uint16_t                     application::_master_vol       { 2048                      };
-uint16_t                     application::_knob0            { 4091                      };
+uint16_t                     application::_volume           { 4091                      };
 uint16_t                     application::_knob1            { 4091                      };
 uint16_t                     application::_knob2            { 4091                      };
 size_t                       application::_sample_ix        { 0                         };
@@ -78,6 +78,10 @@ void application::setup_voices() {
     _voices[_voices_map[ix]]         = new voice(Samples::data+BLOCK_SIZE*ix, BLOCK_SIZE);
     _voices[_voices_map[ix]]->phincr = lamb::Tables::generate_phase_increment(S_RATE, 1) >> 1;
   }
+
+  Serial.print("1 hz = ");
+  Serial.print(lamb::Tables::generate_phase_increment(S_RATE, 1));
+  Serial.println();
 
   _voices[_voices_map[0]]->amplitude = 0xd0; // 0xb8; // kick
   _voices[_voices_map[1]]->amplitude = 0xe0; // 0xd8; // lo bass
@@ -211,10 +215,10 @@ void application::graph() {
   
   _tft.drawFastVLine(tmp_col, 0, 240, ILI9341_BLACK);
 
-  uint16_t              tmp_knob0 = 119 - map(_knob0, 0, 4091, 0, 119);
+  uint16_t              tmp_volume = 119 - map(_volume, 0, 4091, 0, 119);
 
-  _tft.drawPixel(tmp_col, tmp_knob0, ILI9341_GREEN);
-  _tft.drawPixel(tmp_col, 239-tmp_knob0, ILI9341_GREEN);
+  _tft.drawPixel(tmp_col, tmp_volume, ILI9341_GREEN);
+  _tft.drawPixel(tmp_col, 239-tmp_volume, ILI9341_GREEN);
 
   sample                tmp = _draw_buffer.dequeue();
 
@@ -242,6 +246,18 @@ void application::graph() {
 
 //////////////////////////////////////////////////////////////////////////////
 
+bool application::volume(uint16_t const & volume_) {
+  if (volume_ == _volume) return false;
+  
+  _volume = volume_;
+  
+  _master_vol = ((_volume << 2) - _volume) >> 2;
+
+  return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 void application::k_rate() {
   static size_t buttons[] =      {  PB11 ,   PB10 ,    PB1 ,   PB0,   PC14 ,  PC15   };
   static char * button_names[] = { "PB11",  "PB10",   "PB1",  "PB0", "PC14", "PC15"  };
@@ -258,13 +274,7 @@ void application::k_rate() {
     switch (ae.type) {
     case application_event_type::EVT_MASTER_VOLUME:
     {
-      uint16_t tmp = ae.parameter;
-      
-      if (tmp != _knob0) {        
-        _knob0 = tmp;
-        
-        _master_vol = ((_knob0 << 2) - _knob0) >> 2;
-      }
+      volume(ae.parameter);
 
       break;
     }
@@ -382,11 +392,6 @@ void application::generate_phincrs() {
   Serial.print(millis() - start);
   Serial.print(" ms.");
   Serial.println();
-
-  Serial.print("1 hz = ");
-  Serial.print(lamb::Tables::generate_phase_increment(S_RATE, 1));
-  Serial.println();
-// }  
 }
 
 ////////////////////////////////////////////////////////////////////////////////

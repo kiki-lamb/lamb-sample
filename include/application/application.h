@@ -77,7 +77,7 @@ private:
   
   static            control_source       _control_event_source;
   
-  static            uint16_t             _knob0;
+  static            uint16_t             _volume;
   static            uint16_t             _knob1;
   static            uint16_t             _knob2;
   static            int32_t              _avg_sample;
@@ -92,6 +92,8 @@ private:
   static constexpr  size_t               _voices_map[6] = { 0, 1, 2, 3, 4, 5 };
   static            tft                  _tft;
   static            draw_buffer          _draw_buffer;
+
+  static            bool                 volume(uint16_t const & volume_);
   
   static            void                 k_rate();
   static            void                 s_rate();
