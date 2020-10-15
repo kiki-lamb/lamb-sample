@@ -8,10 +8,10 @@ using namespace lamb::Tables;
 
 //////////////////////////////////////////////////////////////////////////////
 
-const uint8_t                application::NOTE               { 36                        };
+const uint8_t                application::NOTE               { 48                        };
 const uint8_t                application::BASS_ROOT_NOTE     { application::NOTE - 4     };
 const uint32_t               application::K_RATE             { 100                       };
-const uint32_t               application::S_RATE             { 44100                     };
+const uint32_t               application::S_RATE             { 88200                     };
 const uint32_t               application::S2_RATE            { application::S_RATE << 1  };
 uint32_t                     application::_phincrs[120]   =  { 0                         };
 int32_t                      application::_avg_sample        { 0                         };
