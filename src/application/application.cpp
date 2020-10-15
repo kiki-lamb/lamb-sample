@@ -1,8 +1,10 @@
 #include "application/application.h"
 #include <inttypes.h>
 #include <Arduino.h>
+#include <math.h>
 
 using namespace lamb;
+using namespace lamb::Tables;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -85,18 +87,69 @@ void application::setup_voices() {
         new voice(Samples::data+BLOCK_SIZE*(ix),     BLOCK_SIZE);
 
     _voices[_voices_map[ix]]->phincr =
-      lamb::Tables::generate_phase_increment(S_RATE, 1) >> 1;
+      generate_phase_increment(S_RATE, 1) >> 1;
+    }
+
+    while (true) {
+      delay(1000);
+      
+      Serial.print("1 hz = ");
+      Serial.print(generate_phase_increment(S_RATE, 1));
+      Serial.println();
+
+
+      for (int8_t octave = -4; octave < 6; octave++) {
+        for (size_t note = 0; note < 12; note++) {
+          Serial.print("octave ");
+          Serial.print(octave);
+          Serial.print(" note ");
+
+          if (note < 10) {
+            Serial.print(" ");
+          }
+          
+          Serial.print(note);
+          Serial.print(" ");
+
+          uint32_t tmp_phincr = generate_phase_increment(
+            S_RATE,
+            midi_notes::twelve_tet_data[note]
+          );
+
+          // Serial.println();
+          
+          if (octave < 0) {
+            // Serial.print("Downshift by ");
+            // Serial.print(octave * -1);
+            // Serial.println();
+            
+            tmp_phincr >>= (octave * -1);
+          }
+          else {
+            // Serial.print("Upshift by ");
+            // Serial.print(octave);
+            // Serial.println();
+
+            tmp_phincr <<= octave;
+          }
+          
+          Serial.print(tmp_phincr);          
+          Serial.println();
+        }
+      }
+
+      Serial.println();
     }
   }
-
+ 
   Serial.print("1 hz = ");
-  Serial.print(lamb::Tables::generate_phase_increment(S_RATE, 1));
+  Serial.print(generate_phase_increment(S_RATE, 1));
   Serial.println();
 
-  _voices[_voices_map[0]]->amplitude = 0xc0; // 0xb8; // kick
+  _voices[_voices_map[0]]->amplitude = 0xb0; // 0xb8; // kick
   _voices[_voices_map[1]]->amplitude = 0xff; // 0xd8; // hi bass
   _voices[_voices_map[2]]->amplitude = 0xd0; // 0xd8; // lo bass
-  _voices[_voices_map[3]]->amplitude = 0x60; // 0x78; // snare 
+  _voices[_voices_map[3]]->amplitude = 0x50; // 0x78; // snare 
   _voices[_voices_map[4]]->amplitude = 0x80; // closed hat
   _voices[_voices_map[5]]->amplitude = 0x90; // open hat
 }
@@ -403,9 +456,9 @@ void application::generate_phincrs() {
   auto start = millis();
   
   for (uint8_t ix = 0; ix < 128; ix++) {
-    uint32_t phincr = lamb::Tables::generate_phase_increment(
+    uint32_t phincr = generate_phase_increment(
       S_RATE << 1,
-      lamb::midi_notes::floats_data[ix]
+      midi_notes::floats_data[ix]
       );
     
     _phincrs[ix] = phincr;
