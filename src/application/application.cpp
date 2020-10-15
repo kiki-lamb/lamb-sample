@@ -8,7 +8,7 @@ using namespace lamb::Tables;
 
 //////////////////////////////////////////////////////////////////////////////
 
-const uint8_t                application::NOTE               { 33                        };
+const uint8_t                application::NOTE               { 24                        };
 const uint8_t                application::BASS_ROOT_NOTE     { application::NOTE - 6     };
 const uint32_t               application::K_RATE             { 100                       };
 const uint32_t               application::S_RATE             { 88200                     };
@@ -152,19 +152,22 @@ void application::setup_voices() {
 
     Serial.print("Voice #");
     Serial.print(ix);
-    Serial.print(" = ");
+    Serial.print(" @ 0x ");
+    Serial.print((uint32_t)&_voices[ix]);
+    Serial.print(" => 0x");
     Serial.print(((uint32_t)Samples::data+BLOCK_SIZE*_voices_map[ix]), HEX);
     Serial.println();
     
-    _voices[ix]->phincr = _phincrs[NOTE];
+    _voices[ix]->phincr    = _phincrs[NOTE];
+    _voices[ix]->amplitude = 0x80;
   }
 
-  _voices[0]->amplitude = 0xd0; // 0xb8; // kick
-  _voices[1]->amplitude = 0xf0; // 0xd8; // hi bass
-  _voices[2]->amplitude = 0xf0; // 0xd8; // lo bass
-  _voices[3]->amplitude = 0x48; // 0x78; // snare 
-  _voices[4]->amplitude = 0xff; // closed hat
-  _voices[5]->amplitude = 0xa0; // open hat
+  // _voices[0]->amplitude = 0xd0; // 0xb8; // kick
+  // _voices[1]->amplitude = 0xf0; // 0xd8; // hi bass
+  // _voices[2]->amplitude = 0xf0; // 0xd8; // lo bass
+  // _voices[3]->amplitude = 0x48; // 0x78; // snare 
+  // _voices[4]->amplitude = 0xff; // closed hat
+  // _voices[5]->amplitude = 0xa0; // open hat
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -378,7 +381,7 @@ bool application::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
    // Serial.print(_phincrs[notes[notes_ix] + BASS_ROOT_NOTE]);
    // Serial.println();
  
-   _voices[_voices_map[voice_ix]]->next_phincr =
+   _voices[voice_ix]->next_phincr =
      _phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
 
   return true;
@@ -415,13 +418,13 @@ void application::k_rate() {
     }
     case application_event_type::EVT_PITCH_1:
     {
-      pitch(1, ae.parameter);
+      // pitch(1, ae.parameter);
       
       break;     
     }
     case application_event_type::EVT_PITCH_2:
     {
-      pitch(2, ae.parameter);
+      // pitch(2, ae.parameter);
       
       break;     
     }
@@ -439,10 +442,7 @@ void application::k_rate() {
       (trigger_states & (1 << ix)) &&
       (! (last_trigger_states & (1 << ix)))
     ) {
-      _voices[_voices_map[ix]]->trigger  = true;
-      
-//      _voices[_voices_map[1]]->trigger  &= ! _voices[_voices_map[2]]->trigger;
-//      _voices[_voices_map[2]]->trigger  &= ! _voices[_voices_map[1]]->trigger;
+      _voices[ix]->trigger  = true;
     }
   }
 
@@ -466,7 +466,10 @@ void application::s_rate() {
   int32_t sample_ = 0;
   
   for (size_t ix = 0; ix < 6; ix++) {
-    sample_ += _voices[_voices_map[ix]]->play();
+    sample_ += _voices[ix]->play();
+    // Serial.print(ix);
+    // Serial.print(" ");
+    // Serial.println(_voices[ix]->phincr);
   }
 
   sample_     *= _scaled_volume;
