@@ -91,7 +91,7 @@ private:
   static            dac                  _dac;
   static            uint32_t             _phincrs[120];
   static            voice *              _voices[6];
-  static constexpr  size_t               _voices_map[6] = { 0, 1, 1, 3, 4, 5 };
+  static constexpr  size_t               _voices_map[6] = { 0, 1, 2, 3, 4, 5 };
   static            tft                  _tft;
   static            draw_buffer          _draw_buffer;
 

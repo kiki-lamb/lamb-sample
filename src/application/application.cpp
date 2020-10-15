@@ -149,16 +149,22 @@ void application::setup_voices() {
       Samples::data+BLOCK_SIZE*_voices_map[ix],
       BLOCK_SIZE
     );
+
+    Serial.print("Voice #");
+    Serial.print(ix);
+    Serial.print(" = ");
+    Serial.print(((uint32_t)Samples::data+BLOCK_SIZE*_voices_map[ix]), HEX);
+    Serial.println();
     
     _voices[ix]->phincr = _phincrs[NOTE];
   }
 
-  _voices[_voices_map[0]]->amplitude = 0xd0; // 0xb8; // kick
-  _voices[_voices_map[1]]->amplitude = 0xf0; // 0xd8; // hi bass
-  _voices[_voices_map[2]]->amplitude = 0xf0; // 0xd8; // lo bass
-  _voices[_voices_map[3]]->amplitude = 0x48; // 0x78; // snare 
-  _voices[_voices_map[4]]->amplitude = 0xff; // closed hat
-  _voices[_voices_map[5]]->amplitude = 0xa0; // open hat
+  _voices[0]->amplitude = 0xd0; // 0xb8; // kick
+  _voices[1]->amplitude = 0xf0; // 0xd8; // hi bass
+  _voices[2]->amplitude = 0xf0; // 0xd8; // lo bass
+  _voices[3]->amplitude = 0x48; // 0x78; // snare 
+  _voices[4]->amplitude = 0xff; // closed hat
+  _voices[5]->amplitude = 0xa0; // open hat
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -434,8 +440,6 @@ void application::k_rate() {
       (! (last_trigger_states & (1 << ix)))
     ) {
       _voices[_voices_map[ix]]->trigger  = true;
-      
-      _voices[_voices_map[5]]->trigger  &= ! _voices[_voices_map[4]]->trigger;
       
 //      _voices[_voices_map[1]]->trigger  &= ! _voices[_voices_map[2]]->trigger;
 //      _voices[_voices_map[2]]->trigger  &= ! _voices[_voices_map[1]]->trigger;
