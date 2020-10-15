@@ -145,10 +145,12 @@ void application::setup_voices() {
   generate_phincrs();
 
   for (size_t ix = 0; ix < 6; ix++) {
-    _voices[_voices_map[ix]] =
-      new voice(Samples::data+BLOCK_SIZE*(ix),     BLOCK_SIZE);
+    _voices[ix] = new voice(
+      Samples::data+BLOCK_SIZE*_voices_map[ix],
+      BLOCK_SIZE
+    );
     
-    _voices[_voices_map[ix]]->phincr = _phincrs[NOTE];
+    _voices[ix]->phincr = _phincrs[NOTE];
   }
 
   _voices[_voices_map[0]]->amplitude = 0xd0; // 0xb8; // kick
