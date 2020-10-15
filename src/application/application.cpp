@@ -155,7 +155,11 @@ application::application_event application::process_signal_event(
     application_event.parameter      = sig_val;
   }
   else if (sig_num == 0) {
-    application_event.type           = application_event_type::EVT_PITCH;
+    application_event.type           = application_event_type::EVT_PITCH_1;
+    application_event.parameter      = sig_val;
+  }
+  else if (sig_num == 1) {
+    application_event.type           = application_event_type::EVT_PITCH_2;
     application_event.parameter      = sig_val;
   }
   else {
@@ -256,26 +260,27 @@ bool application::volume(uint12_t const & volume) {
   return true;
 }
 
-//////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////y//////////////////////////////////////
 
-bool application::pitch(uint12_t const & parameter) {
-  static uint8_t notes[16] = {
-    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
+bool application::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
+  const uint8_t control_shift = 9;
+  uint8_t       notes_ix      = parameter >> control_shift;
+  uint8_t       transpose     = 28;
+  uint8_t       phincr_shift  = 6;
+  
+  static uint8_t notes[8] = {
+    0, 2, 3, 5, 7, 8, 11, 12
   };
-  
-  const uint8_t shift = 8;
-  uint12_t tmp = parameter;
-  tmp_b12 >>= shift;
-  tmp += 22;
-  
-  Serial.print("phincr = ");
-  Serial.print(tmp);
-  Serial.print(" ");
-  Serial.print(_phincrs[tmp] >> 8);
+
+  Serial.print(voice_ix);
+  Serial.print(" node_ix = ");
+  Serial.print(notes_ix);
+  Serial.print(" phincr = ");
+  Serial.print(_phincrs[notes[notes_ix] + transpose] >> phincr_shift);
   Serial.println();
   
-  _voices[_voices_map[1]]->phincr = _phincrs[notes[tmp]] >> 6;
-  _voices[_voices_map[2]]->phincr = _phincrs[notes[tmp]] >> 6;
+  _voices[_voices_map[voice_ix]]->phincr =
+    _phincrs[notes[notes_ix] + transpose] >> phincr_shift;
 
   return true;
 }
@@ -308,9 +313,15 @@ void application::k_rate() {
       
       break;
     }
-    case application_event_type::EVT_PITCH:
+    case application_event_type::EVT_PITCH_1:
     {
-      pitch(ae.parameter);
+      pitch(1, ae.parameter);
+      
+      break;     
+    }
+    case application_event_type::EVT_PITCH_2:
+    {
+      pitch(2, ae.parameter);
       
       break;     
     }
@@ -363,7 +374,7 @@ void application::s_rate() {
     sample_ += _voices[_voices_map[ix]]->play();
   }
 
-  sample_     *= _scaled_volume_b12;
+  sample_     *= _scaled_volume;
   sample_    >>= 12;
   
   _avg_sample += sample_;

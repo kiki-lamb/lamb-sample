@@ -8,7 +8,6 @@
 
 class application {
 public:
-  typedef uint16_t                                           uint12_t;
   typedef int16_t                                            sample;
   typedef lamb::oneshot_plus                                 voice;
   typedef lamb::device::Adafruit_ILI9341_STM_SPI2            tft;
@@ -94,8 +93,11 @@ private:
   static            tft                  _tft;
   static            draw_buffer          _draw_buffer;
 
-  static            bool                 volume(uint16_t const & volume_);
-  static            bool                 pitch( uint16_t const & parameter_);
+  static            bool                 volume(uint12_t const & volume);
+  static            bool                 pitch(
+    uint8_t const & voice_ix,
+    uint12_t const & parameter
+  );
   
   static            void                 k_rate();
   static            void                 s_rate();
