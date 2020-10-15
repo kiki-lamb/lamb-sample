@@ -127,6 +127,7 @@ private:
     control_event const & control_event
   );
 
+  
 public:
   static            void                 setup();
   static            void                 loop();

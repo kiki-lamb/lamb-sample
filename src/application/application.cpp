@@ -9,7 +9,7 @@ using namespace lamb::Tables;
 //////////////////////////////////////////////////////////////////////////////
 
 const uint8_t                application::NOTE               { 33                        };
-const uint8_t                application::BASS_ROOT_NOTE     { application::NOTE - 7     };
+const uint8_t                application::BASS_ROOT_NOTE     { application::NOTE - 6     };
 const uint32_t               application::K_RATE             { 100                       };
 const uint32_t               application::S_RATE             { 88200                     };
 uint32_t                     application::_phincrs[120]   =  { 0                         };
@@ -158,11 +158,11 @@ void application::setup_voices() {
     }
   }
 
-  _voices[_voices_map[0]]->amplitude = 0xc0; // 0xb8; // kick
-  _voices[_voices_map[1]]->amplitude = 0xe0; // 0xd8; // hi bass
-  _voices[_voices_map[2]]->amplitude = 0xe0; // 0xd8; // lo bass
-  _voices[_voices_map[3]]->amplitude = 0x40; // 0x78; // snare 
-  _voices[_voices_map[4]]->amplitude = 0xf0; // closed hat
+  _voices[_voices_map[0]]->amplitude = 0xd0; // 0xb8; // kick
+  _voices[_voices_map[1]]->amplitude = 0xf0; // 0xd8; // hi bass
+  _voices[_voices_map[2]]->amplitude = 0xf0; // 0xd8; // lo bass
+  _voices[_voices_map[3]]->amplitude = 0x48; // 0x78; // snare 
+  _voices[_voices_map[4]]->amplitude = 0xff; // closed hat
   _voices[_voices_map[5]]->amplitude = 0xa0; // open hat
 }
 
@@ -345,19 +345,40 @@ bool application::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
      0, 2, 3, 5, 7, 9, 11, 12
   };
 
-  // if (voice_ix == 1) {
-  //   Serial.print(voice_ix);
-  //   Serial.print(" = ");
-  //   Serial.print(notes_ix);
-  //   Serial.print(" ");
-  //   Serial.print(notes[notes_ix] + transpose);
-  //   Serial.print(" ");
-  //   Serial.print(_phincrs[notes[notes_ix] + transpose]);
-  //   Serial.println();
-  // }
-  
-  _voices[_voices_map[voice_ix]]->next_phincr =
-    _phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
+   if (voice_ix == 2) {
+     uint16_t tmp_parameter = parameter;
+     tmp_parameter += 15;
+     
+     // Serial.print(tmp_parameter);
+     
+     uint8_t lin = 0;
+     uint12_t mask = 0x800;
+
+     for(uint8_t ix = 0; ix < 8; ix++) {
+       if (mask & tmp_parameter) {
+         lin += 1;
+       }
+       mask >>= 1;
+     }
+
+     // Serial.print(" => ");
+     // Serial.print(lin);
+     // Serial.println();
+   
+     notes_ix = lin;
+   }
+   
+   // Serial.print(voice_ix);
+   // Serial.print(" = ");
+   // Serial.print(notes_ix);
+   // Serial.print(" ");
+   // Serial.print(notes[notes_ix] + BASS_ROOT_NOTE);
+   // Serial.print(" ");
+   // Serial.print(_phincrs[notes[notes_ix] + BASS_ROOT_NOTE]);
+   // Serial.println();
+ 
+   _voices[_voices_map[voice_ix]]->next_phincr =
+     _phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
 
   return true;
 }
