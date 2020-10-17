@@ -8,13 +8,13 @@ using namespace lamb::Tables;
 
 //////////////////////////////////////////////////////////////////////////////
 
-const uint32_t               application::CAPTURE_RATIO      { 3                         };
+const uint32_t               application::CAPTURE_RATIO      { 4                         };
 const uint32_t               application::V_SPACING          { 48                        };
 const uint8_t                application::NOTE               { 36                        };
 const uint8_t                application::BASS_ROOT_NOTE     { application::NOTE - 8     };
 const uint32_t               application::K_RATE             { 80                        };
 const uint32_t               application::S_RATE             { 44100                     };
-uint32_t                     application::_phincrs[120]   =  { 0                         };
+uint32_t                     application::_phincrs[120]    = { 0                         };
 int32_t                      application::_avg_sample        { 0                         };
 uint12_t                     application::_scaled_volume     { 2048                      };
 uint12_t                     application::_raw_volume        { 4091                      };
@@ -452,19 +452,19 @@ void _mix(
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::s_rate() {
-  if ((_sample_ix0 % (1 << CAPTURE_RATIO)) == 0) {
+  if (_sample_ix0 == (1 << CAPTURE_RATIO)) {
     _avg_sample >>= CAPTURE_RATIO;
 
     if (_draw_buffer.writable()) {
       _draw_buffer.enqueue(_avg_sample); // 
     }
-    
+
+    _sample_ix0 = 0;
     _avg_sample = 0;
   }
 
   sample_type_traits<sample>::mix_type sample_ =
     sample_type_traits<sample_type_traits<sample>::mix_type>::silence;
-
 
   MIX(sample_, _voices, VOICES_COUNT);
 
@@ -522,6 +522,8 @@ void application::loop() {
       (int32_t)avg_draw_operations -
       (int32_t)tmp_avg_draw_operations
     );
+    Serial.print(F(", "));
+    Serial.print(_draw_buffer.count());
     Serial.println();
     
     draw_operations                                = 0;
