@@ -84,7 +84,7 @@ void application::generate_phincrs() {
   
   auto start = millis();
 
-  static const uint32_t = S_RATE_2 << 1;
+  static const uint32_t S_RATE_2 = S_RATE << 1;
 
   uint32_t one_hz = generate_phase_increment(S_RATE_2, 1);
   Serial.print(F("1 hz = "));
