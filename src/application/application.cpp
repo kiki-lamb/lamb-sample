@@ -443,7 +443,8 @@ void application::s_rate() {
     _avg_sample = 0;
   }
 
-  sample_type_traits<sample>::mix_type sample_ = 0;
+  sample_type_traits<sample>::mix_type sample_ =
+    sample_type_traits<sample_type_traits<sample>::mix_type>::silence;
   
 #ifdef USE_MIX_FUNCTION  
   sample_    = mix(_voices, voices_count);
