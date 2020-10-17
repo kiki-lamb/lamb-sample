@@ -463,6 +463,7 @@ void application::s_rate() {
   sample_type_traits<sample>::mix_type sample_ =
     sample_type_traits<sample_type_traits<sample>::mix_type>::silence;
 
+
   MIX(sample_, _voices, voices_count);
 
   AMPLIFY(sample_, _scaled_volume, 12);
