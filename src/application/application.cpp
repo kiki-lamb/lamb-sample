@@ -380,15 +380,6 @@ bool application::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
   //   notes_ix = lin; 
   // }
    
-  Serial.print(voice_ix);
-  Serial.print(" = ");
-  Serial.print(notes_ix);
-  Serial.print(" ");
-  Serial.print(notes[notes_ix] + BASS_ROOT_NOTE);
-  Serial.print(" ");
-  Serial.print(_phincrs[notes[notes_ix] + BASS_ROOT_NOTE]);
-  Serial.println();
-  
   _voices[voice_ix]->next_phincr =
     _phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
   
@@ -456,7 +447,7 @@ void application::k_rate() {
       (trigger_states & (1 << ix)) &&
       (! (last_trigger_states & (1 << ix)))
     ) {
-      _voices[ix]->trigger  = true;
+      _voices[ix]->trigger();
 
       if (ix == 3) {
         _voices[4]->state = false;
@@ -525,8 +516,39 @@ void application::setup() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::loop(void) {
+  static uint32_t tenth_seconds                 = 0;
+  static uint32_t draw_operations               = 0;
+
   if (_draw_buffer.readable()) {
     graph();
+    draw_operations ++;
+
+    if (_sample_ix >= (S_RATE / 10)) {
+      tenth_seconds                            += 1;
+      static uint32_t avg_draw_operations       = 0;
+      uint32_t        last_avg_draw_operations  = avg_draw_operations;
+      const uint8_t avging                      = 8;      
+      _sample_ix                                = 0;
+      uint32_t tmp_avg_draw_operations          = avg_draw_operations;
+      avg_draw_operations                      *= avging;
+      avg_draw_operations                      -= tmp_avg_draw_operations;
+      avg_draw_operations                      += draw_operations;
+      avg_draw_operations                      /= avging;    
+
+      Serial.print(tenth_seconds);
+      Serial.print(", ");
+      Serial.print(draw_operations);
+      Serial.print(", ");
+      Serial.print(avg_draw_operations);
+      Serial.print(", ");
+      Serial.print(
+        (int32_t)avg_draw_operations -
+        (int32_t)last_avg_draw_operations
+      );
+      Serial.println();
+
+      draw_operations                           = 0;
+    }
   }
 }
 

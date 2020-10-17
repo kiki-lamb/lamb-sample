@@ -9,7 +9,7 @@
 class application {
 public:
   typedef int16_t                                            sample;
-  typedef lamb::oneshot_plus                                 voice;
+  typedef lamb::oneshot<sample>                              voice;
   typedef lamb::device::Adafruit_ILI9341_STM_SPI2            tft;
   typedef lamb::device::pt8211                               dac;
   typedef lamb::ring_buffer<int16_t, 256>                    draw_buffer;
