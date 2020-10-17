@@ -423,19 +423,6 @@ void application::k_rate() {
       (! (last_trigger_states & (1 << ix)))
     ) {
       _voices[ix]->trigger();
-
-      if (ix == 3) {
-        _voices[4]->state = false;
-        _voices[5]->state = false;        
-      }
-      else if (ix == 4) {
-        _voices[3]->state = false;
-        _voices[5]->state = false;        
-      }
-      else if (ix == 5) {
-        _voices[3]->state = false;
-        _voices[4]->state = false;        
-      }
     }
   }
 
@@ -456,10 +443,10 @@ void application::s_rate() {
     _avg_sample = 0;
   }
 
-  int32_t sample_ = 0;
+  sample_type_traits<sample>::mix_type sample_ = 0;
   
 #ifdef USE_MIX_FUNCTION  
-  sample_ = mix(_voices, voices_count);
+  sample_    = mix(_voices, voices_count);
 #else
   for (size_t ix = 0; ix < voices_count; ix ++) {
     sample_ += _voices[ix]->play();
