@@ -79,13 +79,13 @@ void application::setup_controls() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::generate_phincrs() {
-  Serial.print("\n\nGenerating...");
+  Serial.print(F("\n\nGenerating..."));
   Serial.println();
   
   auto start = millis();
   
   uint32_t one_hz = generate_phase_increment(S_RATE, 1);
-  Serial.print("1 hz = ");
+  Serial.print(F("1 hz = "));
   Serial.print(one_hz);
   Serial.println();
 
@@ -95,18 +95,18 @@ void application::generate_phincrs() {
     for (size_t note = 0; note < 12; note ++) {
       size_t write_ix = (octave + middle_octave) * 12 + note;
       
-      Serial.print("ix ");
+      Serial.print(F("ix "));
       Serial.print(write_ix);
-      Serial.print(" octave ");
+      Serial.print(F(" octave "));
       Serial.print(octave);
-      Serial.print(" note ");
+      Serial.print(F(" note "));
       
       if (note < 10) {
-        Serial.print(" ");
+        Serial.print(' ');
       }
       
       Serial.print(note);
-      Serial.print(" ");
+      Serial.print(' ');
       
       uint32_t tmp_phincr = generate_phase_increment(
         S_RATE,
@@ -123,7 +123,7 @@ void application::generate_phincrs() {
       Serial.print(tmp_phincr);
       
       if (tmp_phincr == one_hz) {
-        Serial.print("                <== 1 hz");
+        Serial.print(F("                <== 1 hz"));
       }
 
       Serial.println();
@@ -132,13 +132,13 @@ void application::generate_phincrs() {
     }
   }
  
-  Serial.print("1 hz = ");
+  Serial.print(F("1 hz = "));
   Serial.print(one_hz);
   Serial.println();
   
-  Serial.print("Done after ");
+  Serial.print(F("Done after "));
   Serial.print(millis() - start);
-  Serial.print(" ms.");
+  Serial.print(F(" ms."));
   Serial.println();
 }
 
@@ -153,11 +153,11 @@ void application::setup_voices() {
       BLOCK_SIZE
     );
 
-    Serial.print("Voice #");
+    Serial.print(F("Voice #"));
     Serial.print(ix);
-    Serial.print(" @ 0x ");
+    Serial.print(F(" @ 0x "));
     Serial.print((uint32_t)&_voices[ix]);
-    Serial.print(" => 0x");
+    Serial.print(F(" => 0x"));
     Serial.print(((uint32_t)Samples::data+BLOCK_SIZE*_voices_map[ix]), HEX);
     Serial.println();
     
@@ -252,9 +252,9 @@ application::application_event application::process_signal_event(
     application_event.type           = application_event_type::APP_EVT_NOT_AVAILABLE;
   }
 
-  // Serial.print("Signal ");
+  // Serial.print(F("Signal "));
   // Serial.print(sig_num);
-  // Serial.print(" = ");
+  // Serial.print(F(" = "));
   // Serial.print (sig_val);
   // Serial.println();
 
@@ -420,7 +420,7 @@ void application::k_rate() {
     }
     default:
     {
-      Serial.print("Unrecognized event: ");
+      Serial.print(F("Unrecognized event: "));
       Serial.print(ae.type);
       Serial.println();
     }
@@ -439,9 +439,7 @@ void application::k_rate() {
   last_trigger_states = trigger_states;
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////
-
 
 static inline __attribute__((always_inline))
 void _mix(
@@ -453,7 +451,9 @@ void _mix(
     out += sources_[ix]->read();
   }
 }
-  
+
+////////////////////////////////////////////////////////////////////////////////
+
 void application::s_rate() {
   if ((_sample_ix0 % (1 << CAPTURE_RATIO)) == 0) {
     _avg_sample >>= CAPTURE_RATIO;
@@ -468,18 +468,10 @@ void application::s_rate() {
   sample_type_traits<sample>::mix_type sample_ =
     sample_type_traits<sample_type_traits<sample>::mix_type>::silence;
 
-#define USE_MIX_FUNCTION
 
-#ifdef USE_MIX_FUNCTION  
-  mix(_voices, voices_count, sample_);
-#else
-  for (size_t ix = 0; ix < voices_count; ix ++) {
-    sample_ += _voices[ix]->play();
-  }
-#endif
-  
-  sample_     *= _scaled_volume;
-  sample_    >>= 12;
+  MIX(sample_, _voices, voices_count);
+
+  AMPLIFY(sample_, _scaled_volume, 12);
   
   _avg_sample += sample_;
 
@@ -506,37 +498,36 @@ void application::setup() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::loop() {
-  static uint32_t tenth_seconds                 = 0;
-  static uint32_t draw_operations               = 0;
+  static uint32_t draw_operations                  = 0;
   
   if (graph())
     draw_operations ++;
   
   if (_sample_ix1 >= (S_RATE / 10)) {
-    _sample_ix1                               = 0;
-
-    tenth_seconds                            += 1;
-    static uint32_t avg_draw_operations       = 0;
-    const uint8_t   avging                    = 8;      
-    uint32_t        tmp_avg_draw_operations   = avg_draw_operations;
-    avg_draw_operations                      *= avging;
-    avg_draw_operations                      -= tmp_avg_draw_operations;
-    avg_draw_operations                      += draw_operations;
-    avg_draw_operations                      /= avging;    
+    static const uint8_t avging                    = 8;      
+    static uint32_t      avg_draw_operations       = 0;
+    static uint32_t      tenth_seconds             = 0;
+    tenth_seconds                                 += 1;
+    _sample_ix1                                    = 0;
+    uint32_t             tmp_avg_draw_operations   = avg_draw_operations;
+    avg_draw_operations                           *= avging;
+    avg_draw_operations                           -= tmp_avg_draw_operations;
+    avg_draw_operations                           += draw_operations;
+    avg_draw_operations                           /= avging;    
     
     Serial.print(tenth_seconds);
-    Serial.print(", ");
+    Serial.print(F(", "));
     Serial.print(draw_operations);
-    Serial.print(", ");
+    Serial.print(F(", "));
     Serial.print(avg_draw_operations);
-    Serial.print(", ");
+    Serial.print(F(", "));
     Serial.print(
       (int32_t)avg_draw_operations -
       (int32_t)tmp_avg_draw_operations
     );
     Serial.println();
     
-    draw_operations                           = 0;
+    draw_operations                                = 0;
   }
 }
 
