@@ -32,9 +32,11 @@ public:
     control_event,
     control_event_type::EVT_BUTTON
     >                                                        button_source;
-
-  static const      uint8_t              voices_count        = 6;
-  static const      uint8_t              event_sources_count = 9;
+  
+  static const      uint8_t              VOICES_COUNT        = 6;
+  static const      size_t               BLOCK_SIZE          =
+    Samples::NUM_ELEMENTS / VOICES_COUNT;
+  static const      uint8_t              EVENT_SOURCES_COUNT = 9;
   static const      uint32_t             TFT_DC              = PA8;
   static const      uint32_t             TFT_CS              = PB12;
   static const      uint32_t             I2S_WS              = PA3;
@@ -44,16 +46,14 @@ public:
   static const      uint32_t             S_RATE;
   static const      uint8_t              NOTE;
   static const      uint8_t              BASS_ROOT_NOTE;
-  
+  static const      uint32_t             CAPTURE_RATIO;
+  static const      uint32_t             V_SPACING;
+
   typedef lamb::events::sources::combine<
     control_event,
-    event_sources_count>                                     combined_source;
+    EVENT_SOURCES_COUNT>                                     combined_source;
 
 private:
-  static const      uint32_t             CAPTURE_RATIO       = 3;
-  static const      size_t               BLOCK_SIZE          = Samples::NUM_ELEMENTS / voices_count;
-  static const      uint32_t             V_SPACING           = 48;  
-
   static            signal               _signal_device0;
   static            signal               _signal_device1;
   static            signal               _signal_device2;
@@ -92,8 +92,8 @@ private:
   static            HardwareTimer        _timer_3;
   static            dac                  _dac;
   static            uint32_t             _phincrs[120];
-  static            voice *              _voices[voices_count];
-  static constexpr  size_t               _voices_map[voices_count] = { 0, 3, 5, 1, 1, 1 };
+  static            voice *              _voices[VOICES_COUNT];
+  static constexpr  size_t               _VOICES_MAP[VOICES_COUNT] = { 0, 3, 5, 1, 1, 1 };
   static            tft                  _tft;
   static            draw_buffer          _draw_buffer;
 

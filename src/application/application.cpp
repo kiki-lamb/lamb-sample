@@ -8,6 +8,8 @@ using namespace lamb::Tables;
 
 //////////////////////////////////////////////////////////////////////////////
 
+const uint32_t               application::CAPTURE_RATIO      { 3                         };
+const uint32_t               application::V_SPACING          { 48                        };
 const uint8_t                application::NOTE               { 36                        };
 const uint8_t                application::BASS_ROOT_NOTE     { application::NOTE - 8     };
 const uint32_t               application::K_RATE             { 80                        };
@@ -23,7 +25,7 @@ size_t                       application::_sample_ix1        { 0                
 HardwareTimer                application::_timer_1           ( 1                         );
 HardwareTimer                application::_timer_2           ( 2                         );
 HardwareTimer                application::_timer_3           ( 3                         );
-application::voice *         application::_voices            [ application::voices_count ];
+application::voice *         application::_voices            [ application::VOICES_COUNT ];
 application::signal          application::_signal_device0    ( PA0,  8, 2                );
 application::signal          application::_signal_device1    ( PA1,  8, 2                );
 application::signal          application::_signal_device2    ( PA2,  8, 2                );
@@ -147,9 +149,9 @@ void application::generate_phincrs() {
 void application::setup_voices() {
   generate_phincrs();
 
-  for (size_t ix = 0; ix < voices_count; ix ++) {
+  for (size_t ix = 0; ix < VOICES_COUNT; ix ++) {
     _voices[ix] = new voice(
-      Samples::data+BLOCK_SIZE*_voices_map[ix],
+      Samples::data+BLOCK_SIZE*_VOICES_MAP[ix],
       BLOCK_SIZE
     );
 
@@ -158,7 +160,7 @@ void application::setup_voices() {
     Serial.print(F(" @ 0x "));
     Serial.print((uint32_t)&_voices[ix]);
     Serial.print(F(" => 0x"));
-    Serial.print(((uint32_t)Samples::data+BLOCK_SIZE*_voices_map[ix]), HEX);
+    Serial.print(((uint32_t)Samples::data+BLOCK_SIZE*_VOICES_MAP[ix]), HEX);
     Serial.println();
     
     _voices[ix]->phincr    = _phincrs[NOTE];
@@ -422,7 +424,7 @@ void application::k_rate() {
     }
   }
   
-  for (size_t ix = 0; ix < voices_count; ix ++) {
+  for (size_t ix = 0; ix < VOICES_COUNT; ix ++) {
     if (
       (trigger_states & (1 << ix)) &&
       (! (last_trigger_states & (1 << ix)))
@@ -464,7 +466,7 @@ void application::s_rate() {
     sample_type_traits<sample_type_traits<sample>::mix_type>::silence;
 
 
-  MIX(sample_, _voices, voices_count);
+  MIX(sample_, _voices, VOICES_COUNT);
 
   AMPLIFY(sample_, _scaled_volume, 12);
   
