@@ -516,7 +516,7 @@ void application::setup() {
   
 ////////////////////////////////////////////////////////////////////////////////
 
-void application::loop(void) {
+void application::loop() {
   static uint32_t tenth_seconds                 = 0;
   static uint32_t draw_operations               = 0;
 
@@ -528,9 +528,9 @@ void application::loop(void) {
       tenth_seconds                            += 1;
       static uint32_t avg_draw_operations       = 0;
       uint32_t        last_avg_draw_operations  = avg_draw_operations;
-      const uint8_t avging                      = 8;      
+      const uint8_t   avging                    = 8;      
       _sample_ix                                = 0;
-      uint32_t tmp_avg_draw_operations          = avg_draw_operations;
+      uint32_t        tmp_avg_draw_operations   = avg_draw_operations;
       avg_draw_operations                      *= avging;
       avg_draw_operations                      -= tmp_avg_draw_operations;
       avg_draw_operations                      += draw_operations;
