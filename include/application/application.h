@@ -12,7 +12,7 @@ public:
   typedef lamb::oneshot<sample>                              voice;
   typedef lamb::device::Adafruit_ILI9341_STM_SPI2            tft;
   typedef lamb::device::pt8211                               dac;
-  typedef lamb::ring_buffer<int16_t, 256>                    draw_buffer;
+  typedef lamb::ring_buffer<sample, 256>                     draw_buffer;
   typedef lamb::controls::button                             button;
   typedef lamb::controls::analog                             signal;
   typedef events::control                                    control_event;
