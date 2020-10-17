@@ -355,31 +355,6 @@ bool application::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
      0, 2, 3, 5, 7, 9, 11, 12
   };
 
-  // if (voice_ix == 4) {
-  //   uint16_t tmp_parameter = parameter;
-  //   // tmp_parameter += 15;
-
-  //   Serial.print(tmp_parameter);
-
-  //   uint8_t lin = 0;
-  //   uint12_t mask = 0x800;
-
-  //   for(uint8_t ix = 0; ix < 8; ix ++) {
-  //     if (mask & tmp_parameter) {
-  //       lin += 1;
-  //     }
-  //     mask >>= 1;
-  //   }
-   
-  //   if (lin == 8)
-  //     lin = 7;
-
-  //   Serial.print(" => ");
-  //   Serial.print(lin);
-  //   Serial.print(" ");   
-  //   notes_ix = lin; 
-  // }
-   
   _voices[voice_ix]->next_phincr =
     _phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
   
@@ -483,18 +458,13 @@ void application::s_rate() {
 
   int32_t sample_ = 0;
   
-  if (true) {
-    for (size_t ix = 0; ix < voices_count; ix ++) {
-      sample_ += _voices[ix]->play();
-      
-      // Serial.print(ix);
-      // Serial.print(" ");
-      // Serial.println(_voices[ix]->phincr);
-    }
+#ifdef USE_MIX_FUNCTION  
+  sample_ = mix(_voices, voices_count);
+#else
+  for (size_t ix = 0; ix < voices_count; ix ++) {
+    sample_ += _voices[ix]->play();
   }
-  else {
-    sample_ = mix(_voices, voices_count);
-  }
+#endif
   
   sample_     *= _scaled_volume;
   sample_    >>= 12;
