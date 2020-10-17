@@ -90,8 +90,8 @@ void application::generate_phincrs() {
 
   const uint8_t middle_octave = 4;
   
-  for (int8_t octave = -middle_octave; octave < (10 - middle_octave); octave++) {
-    for (size_t note = 0; note < 12; note++) {
+  for (int8_t octave = -middle_octave; octave < (10 - middle_octave); octave ++) {
+    for (size_t note = 0; note < 12; note ++) {
       size_t write_ix = (octave + middle_octave) * 12 + note;
       
       Serial.print("ix ");
@@ -146,7 +146,7 @@ void application::generate_phincrs() {
 void application::setup_voices() {
   generate_phincrs();
 
-  for (size_t ix = 0; ix < 6; ix++) {
+  for (size_t ix = 0; ix < 6; ix ++) {
     _voices[ix] = new voice(
       Samples::data+BLOCK_SIZE*_voices_map[ix],
       BLOCK_SIZE
@@ -364,7 +364,7 @@ bool application::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
   //   uint8_t lin = 0;
   //   uint12_t mask = 0x800;
 
-  //   for(uint8_t ix = 0; ix < 8; ix++) {
+  //   for(uint8_t ix = 0; ix < 8; ix ++) {
   //     if (mask & tmp_parameter) {
   //       lin += 1;
   //     }
@@ -442,7 +442,7 @@ void application::k_rate() {
     }
   }
   
-  for (size_t ix = 0; ix < 6; ix++) {
+  for (size_t ix = 0; ix < 6; ix ++) {
     if (
       (trigger_states & (1 << ix)) &&
       (! (last_trigger_states & (1 << ix)))
@@ -483,7 +483,7 @@ void application::s_rate() {
   
   int32_t sample_ = 0;
   
-  for (size_t ix = 0; ix < 6; ix++) {
+  for (size_t ix = 0; ix < 6; ix ++) {
     sample_ += _voices[ix]->play();
     // Serial.print(ix);
     // Serial.print(" ");
@@ -496,6 +496,7 @@ void application::s_rate() {
   _avg_sample += sample_;
 
   _dac.write_mono(sample_);
+
   _sample_ix  ++;
 }
 
