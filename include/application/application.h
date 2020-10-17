@@ -35,8 +35,8 @@ public:
   
   static const      uint8_t              VOICES_COUNT        = 6;
   static const      uint8_t              MIDDLE_OCTAVE       = 4;
-  static const      uint8_t              ROOT_NOTE           = 36;
-  static const      uint8_t              BASS_ROOT_NOTE      = ((uint8_t)(ROOT_NOTE - 0));
+  static const      uint8_t              ROOT_NOTE           = 48;
+  static const      uint8_t              BASS_ROOT_NOTE      = ((uint8_t)(ROOT_NOTE - 12));
   static const      size_t               BLOCK_SIZE          =
     Samples::NUM_ELEMENTS / VOICES_COUNT;
   static const      uint8_t              EVENT_SOURCES_COUNT = 9;

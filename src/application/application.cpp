@@ -84,16 +84,14 @@ void application::generate_phincrs() {
   
   auto start = millis();
   
-  uint32_t one_hz = generate_phase_increment(S_RATE, 1);
+  uint32_t one_hz = generate_phase_increment(S_RATE << 1, 1);
   Serial.print(F("1 hz = "));
   Serial.print(one_hz);
   Serial.println();
 
-  const uint8_t middle_octave = 4;
-  
-  for (int8_t octave = -middle_octave; octave < (10 - middle_octave); octave ++) {
+  for (int8_t octave = -MIDDLE_OCTAVE; octave < (10 - MIDDLE_OCTAVE); octave ++) {
     for (size_t note = 0; note < 12; note ++) {
-      size_t write_ix = (octave + middle_octave) * 12 + note;
+      size_t write_ix = (octave + MIDDLE_OCTAVE) * 12 + note;
       
       Serial.print(F("ix "));
       Serial.print(write_ix);
@@ -109,7 +107,7 @@ void application::generate_phincrs() {
       Serial.print(' ');
       
       uint32_t tmp_phincr = generate_phase_increment(
-        S_RATE,
+        S_RATE << 1,
         midi_notes::twelve_tet_data[note]
       );
       
