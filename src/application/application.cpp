@@ -14,7 +14,7 @@ const uint32_t               application::K_RATE             { 80               
 const uint32_t               application::S_RATE             { 44100                     };
 uint32_t                     application::_phincrs[120]    = { 0                         };
 int32_t                      application::_avg_sample        { 0                         };
-uint12_t                     application::_scaled_volume     { 2048                      };
+uint12_t                     application::_scaled_volume     { 1536                      };
 uint12_t                     application::_raw_volume        { 4091                      };
 uint16_t                     application::_knob1             { 4091                      };
 uint16_t                     application::_knob2             { 4091                      };
@@ -85,7 +85,7 @@ void application::generate_phincrs() {
   auto start = millis();
 
   static const uint32_t = S_RATE_2 << 1;
-  
+
   uint32_t one_hz = generate_phase_increment(S_RATE_2, 1);
   Serial.print(F("1 hz = "));
   Serial.print(one_hz);
