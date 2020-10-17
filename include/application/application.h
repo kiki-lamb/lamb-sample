@@ -34,6 +34,9 @@ public:
     >                                                        button_source;
   
   static const      uint8_t              VOICES_COUNT        = 6;
+  static const      uint8_t              MIDDLE_OCTAVE       = 4;
+  static const      uint8_t              ROOT_NOTE           = 36;
+  static const      uint8_t              BASS_ROOT_NOTE      = ((uint8_t)(ROOT_NOTE - 0));
   static const      size_t               BLOCK_SIZE          =
     Samples::NUM_ELEMENTS / VOICES_COUNT;
   static const      uint8_t              EVENT_SOURCES_COUNT = 9;
@@ -44,8 +47,6 @@ public:
   static const      uint32_t             I2S_DATA            = PA7;
   static const      uint32_t             K_RATE;
   static const      uint32_t             S_RATE;
-  static const      uint8_t              NOTE;
-  static const      uint8_t              BASS_ROOT_NOTE;
   static const      uint32_t             CAPTURE_RATIO;
   static const      uint32_t             V_SPACING;
 

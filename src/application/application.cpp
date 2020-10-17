@@ -10,8 +10,6 @@ using namespace lamb::Tables;
 
 const uint32_t               application::CAPTURE_RATIO      { 4                         };
 const uint32_t               application::V_SPACING          { 48                        };
-const uint8_t                application::NOTE               { 36                        };
-const uint8_t                application::BASS_ROOT_NOTE     { application::NOTE - 8     };
 const uint32_t               application::K_RATE             { 80                        };
 const uint32_t               application::S_RATE             { 44100                     };
 uint32_t                     application::_phincrs[120]    = { 0                         };
@@ -163,7 +161,7 @@ void application::setup_voices() {
     Serial.print(((uint32_t)Samples::data+BLOCK_SIZE*_VOICES_MAP[ix]), HEX);
     Serial.println();
     
-    _voices[ix]->phincr    = _phincrs[NOTE];
+    _voices[ix]->phincr    = _phincrs[ROOT_NOTE];
     _voices[ix]->amplitude = 0x80;
   }
 
