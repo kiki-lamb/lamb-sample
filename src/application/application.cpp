@@ -359,7 +359,7 @@ bool application::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
   uint8_t       notes_ix      = parameter >> control_shift;
   
   static int8_t notes[(0xfff >> control_shift) + 1] = {
-     0, 2, 3, 5, 7, 9, 11, 12
+     0, 2, 3, 5, 7, 8, 11, 12
   };
 
   _voices[voice_ix]->next_phincr =
