@@ -83,8 +83,10 @@ void application::generate_phincrs() {
   Serial.println();
   
   auto start = millis();
+
+  static const uint32_t = S_RATE_2 << 1;
   
-  uint32_t one_hz = generate_phase_increment(S_RATE << 1, 1);
+  uint32_t one_hz = generate_phase_increment(S_RATE_2, 1);
   Serial.print(F("1 hz = "));
   Serial.print(one_hz);
   Serial.println();
@@ -107,7 +109,7 @@ void application::generate_phincrs() {
       Serial.print(' ');
       
       uint32_t tmp_phincr = generate_phase_increment(
-        S_RATE << 1,
+        S_RATE_2,
         midi_notes::twelve_tet_data[note]
       );
       
