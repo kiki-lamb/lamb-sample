@@ -32,7 +32,8 @@ public:
     control_event,
     control_event_type::EVT_BUTTON
     >                                                        button_source;
-  
+
+  static const      uint8_t              voices_count        = 6;
   static const      uint8_t              event_sources_count = 9;
   static const      uint32_t             TFT_DC              = PA8;
   static const      uint32_t             TFT_CS              = PB12;
@@ -50,7 +51,7 @@ public:
 
 private:
   static const      uint32_t             CAPTURE_RATIO       = 3;
-  static const      size_t               BLOCK_SIZE          = Samples::NUM_ELEMENTS / 6;
+  static const      size_t               BLOCK_SIZE          = Samples::NUM_ELEMENTS / voices_count;
   static const      uint32_t             V_SPACING           = 48;  
 
   static            signal               _signal_device0;
@@ -90,8 +91,8 @@ private:
   static            HardwareTimer        _timer_3;
   static            dac                  _dac;
   static            uint32_t             _phincrs[120];
-  static            voice *              _voices[6];
-  static constexpr  size_t               _voices_map[6] = { 0, 3, 5, 1, 1, 1 };
+  static            voice *              _voices[voices_count];
+  static constexpr  size_t               _voices_map[voices_count] = { 0, 3, 5, 1, 1, 1 };
   static            tft                  _tft;
   static            draw_buffer          _draw_buffer;
 

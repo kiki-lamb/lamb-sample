@@ -480,16 +480,22 @@ void application::s_rate() {
     
     _avg_sample = 0;
   }
-  
+
   int32_t sample_ = 0;
   
-  for (size_t ix = 0; ix < 6; ix ++) {
-    sample_ += _voices[ix]->play();
-    // Serial.print(ix);
-    // Serial.print(" ");
-    // Serial.println(_voices[ix]->phincr);
+  if (true) {
+    for (size_t ix = 0; ix < 6; ix ++) {
+      sample_ += _voices[ix]->play();
+      
+      // Serial.print(ix);
+      // Serial.print(" ");
+      // Serial.println(_voices[ix]->phincr);
+    }
   }
-
+  else {
+    sample_ = mix(_voices, 6);
+  }
+  
   sample_     *= _scaled_volume;
   sample_    >>= 12;
   
