@@ -22,7 +22,7 @@ size_t                       application::_sample_ix         { 0                
 HardwareTimer                application::_timer_1           ( 1                         );
 HardwareTimer                application::_timer_2           ( 2                         );
 HardwareTimer                application::_timer_3           ( 3                         );
-application::voice *         application::_voices            [ 6                         ];
+application::voice *         application::_voices            [ application::voices_count ];
 application::signal          application::_signal_device0    ( PA0,  8, 2                );
 application::signal          application::_signal_device1    ( PA1,  8, 2                );
 application::signal          application::_signal_device2    ( PA2,  8, 2                );
@@ -146,7 +146,7 @@ void application::generate_phincrs() {
 void application::setup_voices() {
   generate_phincrs();
 
-  for (size_t ix = 0; ix < 6; ix ++) {
+  for (size_t ix = 0; ix < voices_count; ix ++) {
     _voices[ix] = new voice(
       Samples::data+BLOCK_SIZE*_voices_map[ix],
       BLOCK_SIZE
@@ -298,7 +298,7 @@ application::application_event application::process_button_event(
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::graph() {
-  static      uint16_t  col = 0;
+  static       uint16_t col = 0;
   static const uint16_t col_max = 200; // real max 320
   uint16_t              tmp_col = col+120;
   
@@ -442,7 +442,7 @@ void application::k_rate() {
     }
   }
   
-  for (size_t ix = 0; ix < 6; ix ++) {
+  for (size_t ix = 0; ix < voices_count; ix ++) {
     if (
       (trigger_states & (1 << ix)) &&
       (! (last_trigger_states & (1 << ix)))
@@ -484,7 +484,7 @@ void application::s_rate() {
   int32_t sample_ = 0;
   
   if (true) {
-    for (size_t ix = 0; ix < 6; ix ++) {
+    for (size_t ix = 0; ix < voices_count; ix ++) {
       sample_ += _voices[ix]->play();
       
       // Serial.print(ix);
@@ -493,7 +493,7 @@ void application::s_rate() {
     }
   }
   else {
-    sample_ = mix(_voices, 6);
+    sample_ = mix(_voices, voices_count);
   }
   
   sample_     *= _scaled_volume;
