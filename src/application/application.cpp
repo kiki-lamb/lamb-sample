@@ -299,12 +299,7 @@ application::application_event application::process_button_event(
 ////////////////////////////////////////////////////////////////////////////////
 
 bool application::graph() {
-//  delayMicroseconds(20);
-//  _draw_buffer.dequeue();
-//  return;
-
-  if (! _draw_buffer.readable())
-    return false;
+  if (! _draw_buffer.readable()) return false;
   
   static       uint16_t col = 0;
   static const uint16_t col_max = 200; // real max 320
@@ -467,7 +462,6 @@ void application::s_rate() {
 
   sample_type_traits<sample>::mix_type sample_ =
     sample_type_traits<sample_type_traits<sample>::mix_type>::silence;
-
 
   MIX(sample_, _voices, voices_count);
 
