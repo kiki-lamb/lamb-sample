@@ -446,7 +446,7 @@ void application::s_rate() {
   sample_type_traits<sample>::mix_type sample_ =
     sample_type_traits<sample_type_traits<sample>::mix_type>::silence;
 
-#define USE_MIX_FUNCTION
+// #define USE_MIX_FUNCTION
 
 #ifdef USE_MIX_FUNCTION  
   mix(_voices, voices_count, sample_);
