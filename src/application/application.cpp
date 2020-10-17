@@ -18,7 +18,8 @@ uint12_t                     application::_scaled_volume     { 2048             
 uint12_t                     application::_raw_volume        { 4091                      };
 uint16_t                     application::_knob1             { 4091                      };
 uint16_t                     application::_knob2             { 4091                      };
-size_t                       application::_sample_ix         { 0                         };
+size_t                       application::_sample_ix0        { 0                         };
+size_t                       application::_sample_ix1        { 0                         };
 HardwareTimer                application::_timer_1           ( 1                         );
 HardwareTimer                application::_timer_2           ( 2                         );
 HardwareTimer                application::_timer_3           ( 3                         );
@@ -297,7 +298,14 @@ application::application_event application::process_button_event(
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void application::graph() {
+bool application::graph() {
+//  delayMicroseconds(20);
+//  _draw_buffer.dequeue();
+//  return;
+
+  if (! _draw_buffer.readable())
+    return false;
+  
   static       uint16_t col = 0;
   static const uint16_t col_max = 200; // real max 320
   uint16_t              tmp_col = col+120;
@@ -330,7 +338,9 @@ void application::graph() {
     }
   
   col ++;
-  col %= col_max; 
+  col %= col_max;
+  
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -431,9 +441,21 @@ void application::k_rate() {
 
 
 ////////////////////////////////////////////////////////////////////////////////
+
+
+static inline __attribute__((always_inline))
+void _mix(
+  application::voice ** sources_,
+  size_t const & count,
+  int32_t & out
+) {
+  for (size_t ix = 0; ix < count; ix++) {
+    out += sources_[ix]->read();
+  }
+}
   
 void application::s_rate() {
-  if ((_sample_ix % (1 << CAPTURE_RATIO)) == 0) {
+  if ((_sample_ix0 % (1 << CAPTURE_RATIO)) == 0) {
     _avg_sample >>= CAPTURE_RATIO;
 
     if (_draw_buffer.writable()) {
@@ -446,7 +468,7 @@ void application::s_rate() {
   sample_type_traits<sample>::mix_type sample_ =
     sample_type_traits<sample_type_traits<sample>::mix_type>::silence;
 
-// #define USE_MIX_FUNCTION
+#define USE_MIX_FUNCTION
 
 #ifdef USE_MIX_FUNCTION  
   mix(_voices, voices_count, sample_);
@@ -463,7 +485,8 @@ void application::s_rate() {
 
   _dac.write_mono(sample_);
 
-  _sample_ix  ++;
+  _sample_ix0  ++;
+  _sample_ix1  ++;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -485,37 +508,35 @@ void application::setup() {
 void application::loop() {
   static uint32_t tenth_seconds                 = 0;
   static uint32_t draw_operations               = 0;
-
-  if (_draw_buffer.readable()) {
-    graph();
+  
+  if (graph())
     draw_operations ++;
+  
+  if (_sample_ix1 >= (S_RATE / 10)) {
+    _sample_ix1                               = 0;
 
-    if (_sample_ix >= (S_RATE / 10)) {
-      tenth_seconds                            += 1;
-      static uint32_t avg_draw_operations       = 0;
-      uint32_t        last_avg_draw_operations  = avg_draw_operations;
-      const uint8_t   avging                    = 8;      
-      _sample_ix                                = 0;
-      uint32_t        tmp_avg_draw_operations   = avg_draw_operations;
-      avg_draw_operations                      *= avging;
-      avg_draw_operations                      -= tmp_avg_draw_operations;
-      avg_draw_operations                      += draw_operations;
-      avg_draw_operations                      /= avging;    
-
-      Serial.print(tenth_seconds);
-      Serial.print(", ");
-      Serial.print(draw_operations);
-      Serial.print(", ");
-      Serial.print(avg_draw_operations);
-      Serial.print(", ");
-      Serial.print(
-        (int32_t)avg_draw_operations -
-        (int32_t)last_avg_draw_operations
-      );
-      Serial.println();
-
-      draw_operations                           = 0;
-    }
+    tenth_seconds                            += 1;
+    static uint32_t avg_draw_operations       = 0;
+    const uint8_t   avging                    = 8;      
+    uint32_t        tmp_avg_draw_operations   = avg_draw_operations;
+    avg_draw_operations                      *= avging;
+    avg_draw_operations                      -= tmp_avg_draw_operations;
+    avg_draw_operations                      += draw_operations;
+    avg_draw_operations                      /= avging;    
+    
+    Serial.print(tenth_seconds);
+    Serial.print(", ");
+    Serial.print(draw_operations);
+    Serial.print(", ");
+    Serial.print(avg_draw_operations);
+    Serial.print(", ");
+    Serial.print(
+      (int32_t)avg_draw_operations -
+      (int32_t)tmp_avg_draw_operations
+    );
+    Serial.println();
+    
+    draw_operations                           = 0;
   }
 }
 

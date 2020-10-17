@@ -85,7 +85,8 @@ private:
   static            uint12_t             _knob1;
   static            uint12_t             _knob2;
   static            int32_t              _avg_sample;
-  static            size_t               _sample_ix;
+  static            size_t               _sample_ix0;
+  static            size_t               _sample_ix1;
   static            HardwareTimer        _timer_1; 
   static            HardwareTimer        _timer_2;
   static            HardwareTimer        _timer_3;
@@ -104,7 +105,7 @@ private:
   
   static            void                 k_rate();
   static            void                 s_rate();
-  static            void                 graph();  
+  static            bool                 graph();  
   static            void                 generate_phincrs();
   static            void                 setup_controls();
   static            void                 setup_voices();
