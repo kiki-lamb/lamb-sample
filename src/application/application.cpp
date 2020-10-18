@@ -46,6 +46,7 @@ void application::setup_timers() {
   maple_timer::setup(_timer_1, voices::S_RATE, s_rate);
   maple_timer::setup(_timer_2, K_RATE, k_rate);
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 
 bool application::graph() {
