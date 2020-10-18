@@ -2,7 +2,6 @@
 #include <inttypes.h>
 #include <Arduino.h>
 #include <math.h>
-#include "axoloti_filters.h"
 
 using namespace lamb;
 using namespace lamb::Tables;
