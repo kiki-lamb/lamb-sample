@@ -13,11 +13,9 @@
 
 class application {
 public:
-  typedef int16_t                                            sample;
-  typedef lamb::oneshot<sample>                              voice;
   typedef lamb::device::Adafruit_ILI9341_STM_SPI2            tft;
   typedef lamb::device::pt8211                               dac;
-  typedef lamb::ring_buffer<sample, 32>                      draw_buffer;
+  typedef lamb::ring_buffer<voices::sample, 32>                      draw_buffer;
   typedef events::application                                application_event;
   typedef events::application_event_type                     application_event_type;
   
@@ -49,7 +47,7 @@ private:
   static            HardwareTimer        _timer_3;
   static            dac                  _dac;
   static            uint32_t             _phincrs[120];
-  static            voice *              _voices[VOICES_COUNT];
+  static            voices::voice *              _voices[VOICES_COUNT];
   static constexpr  size_t               _VOICES_MAP[VOICES_COUNT] = { 0, 3, 5, 1, 1, 1 };
   static            tft                  _tft;
   static            draw_buffer          _draw_buffer;

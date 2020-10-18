@@ -21,7 +21,7 @@ size_t                       application::_sample_ix1        { 0                
 HardwareTimer                application::_timer_1           ( 1                         );
 HardwareTimer                application::_timer_2           ( 2                         );
 HardwareTimer                application::_timer_3           ( 3                         );
-application::voice *         application::_voices            [ application::VOICES_COUNT ];
+voices::voice *              application::_voices            [ application::VOICES_COUNT ];
 application::dac             application::_dac               ( application::I2S_WS, &SPI );
 application::tft             application::_tft(application::TFT_CS, application::TFT_DC  );
 application::draw_buffer     application::_draw_buffer;         
@@ -105,7 +105,7 @@ void application::setup_voices() {
   generate_phincrs();
 
   for (size_t ix = 0; ix < VOICES_COUNT; ix ++) {
-    _voices[ix] = new voice(
+    _voices[ix] = new voices::voice(
       Samples::data+BLOCK_SIZE*_VOICES_MAP[ix],
       BLOCK_SIZE
     );
@@ -175,9 +175,9 @@ bool application::graph() {
   _tft.drawPixel(tmp_col, tmp_volume, ILI9341_GREEN);
   _tft.drawPixel(tmp_col, 239-tmp_volume, ILI9341_GREEN);
 
-  sample                tmp = _draw_buffer.dequeue();
+  voices::sample        tmp = _draw_buffer.dequeue();
 
-  sample                tmp_sample = map(tmp, -32768, 32767, -120, 119);
+  voices::sample        tmp_sample = map(tmp, -32768, 32767, -120, 119);
   
   if (tmp_sample > 0)
     _tft.drawFastVLine(
@@ -322,19 +322,6 @@ void application::k_rate() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static inline __attribute__((always_inline))
-void _mix(
-  application::voice ** sources_,
-  size_t const & count,
-  int32_t & out
-) {
-  for (size_t ix = 0; ix < count; ix++) {
-    out += sources_[ix]->read();
-  }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 void application::s_rate() {
   if (_sample_ix0 == (1 << CAPTURE_RATIO)) {
     _avg_sample >>= CAPTURE_RATIO;
@@ -347,16 +334,14 @@ void application::s_rate() {
     _avg_sample = 0;
   }
 
-  sample_type_traits<sample>::mix_type drums_ =
-    sample_type_traits<sample_type_traits<sample>::mix_type>::silence;
+  sample_type_traits<voices::sample>::mix_type drums_ =
+    sample_type_traits<sample_type_traits<voices::sample>::mix_type>::silence;
 
-  sample_type_traits<sample>::mix_type bass_ =
-    sample_type_traits<sample_type_traits<sample>::mix_type>::silence;
+  sample_type_traits<voices::sample>::mix_type bass_ =
+    sample_type_traits<sample_type_traits<voices::sample>::mix_type>::silence;
 
   auto v = _voices;
   v += 3;
-//  v++;
-//  v++;
 
   MIX(drums_, _voices,     3);
 
