@@ -11,7 +11,6 @@ using namespace lamb::Tables;
 const uint32_t               application::CAPTURE_RATIO      { 4                         };
 const uint32_t               application::V_SPACING          { 48                        };
 const uint32_t               application::K_RATE             { 80                        };
-const uint32_t               application::S_RATE             { 44100                     };
 int32_t                      application::_avg_sample        { 0                         };
 size_t                       application::_sample_ix0        { 0                         };
 size_t                       application::_sample_ix1        { 0                         };
@@ -21,72 +20,6 @@ HardwareTimer                application::_timer_3           ( 3                
 application::dac             application::_dac               ( application::I2S_WS, &SPI );
 application::tft             application::_tft(application::TFT_CS, application::TFT_DC  );
 application::draw_buffer     application::_draw_buffer;         
-
-////////////////////////////////////////////////////////////////////////////////
-
-void application::generate_phincrs() {
-  Serial.print(F("\n\nGenerating..."));
-  Serial.println();
-  
-  auto start = millis();
-
-  static const uint32_t S_RATE_2 = S_RATE << 1;
-
-  uint32_t one_hz = generate_phase_increment(S_RATE_2, 1);
-  Serial.print(F("1 hz = "));
-  Serial.print(one_hz);
-  Serial.println();
-
-  for (int8_t octave = -MIDDLE_OCTAVE; octave < (10 - MIDDLE_OCTAVE); octave ++) {
-    for (size_t note = 0; note < 12; note ++) {
-      size_t write_ix = (octave + MIDDLE_OCTAVE) * 12 + note;
-      
-      Serial.print(F("ix "));
-      Serial.print(write_ix);
-      Serial.print(F(" octave "));
-      Serial.print(octave);
-      Serial.print(F(" note "));
-      
-      if (note < 10) {
-        Serial.print(' ');
-      }
-      
-      Serial.print(note);
-      Serial.print(' ');
-      
-      uint32_t tmp_phincr = generate_phase_increment(
-        S_RATE_2,
-        midi_notes::twelve_tet_data[note]
-      );
-      
-      if (octave < 0) {
-         tmp_phincr >>= (octave * -1);
-      }
-      else {
-         tmp_phincr <<= octave;
-      }
-      
-      Serial.print(tmp_phincr);
-      
-      if (tmp_phincr == one_hz) {
-        Serial.print(F("                <== 1 hz"));
-      }
-
-      Serial.println();
-
-      voices::phincrs[write_ix] = tmp_phincr;
-    }
-  }
- 
-  Serial.print(F("1 hz = "));
-  Serial.print(one_hz);
-  Serial.println();
-  
-  Serial.print(F("Done after "));
-  Serial.print(millis() - start);
-  Serial.print(F(" ms."));
-  Serial.println();
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -98,7 +31,7 @@ void application::setup_voices() {
   lpf.set_f(255);
   lpf.set_q(0);
   
-  generate_phincrs();
+  voices::generate_phincrs();
 
   for (size_t ix = 0; ix < voices::COUNT; ix ++) {
     voices::items[ix] = new voices::voice(
@@ -152,7 +85,7 @@ void application::setup_dac() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::setup_timers() {
-  maple_timer::setup(_timer_1, S_RATE, s_rate);
+  maple_timer::setup(_timer_1, voices::S_RATE, s_rate);
   maple_timer::setup(_timer_2, K_RATE, k_rate);
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -356,7 +289,7 @@ void application::loop() {
     draw_operations ++;
   
 #ifdef LOG_DRAW_RATES
-  if (_sample_ix1 >= (S_RATE / 10)) {
+  if (_sample_ix1 >= (voices::S_RATE / 10)) {
     static const uint8_t avging                    = 8;      
     static uint32_t      avg_draw_operations       = 0;
     static uint32_t      tenth_seconds             = 0;

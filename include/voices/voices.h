@@ -9,7 +9,9 @@ class voices {
 public:
   typedef int16_t                                             sample;
   typedef lamb::oneshot<sample>                               voice;
-
+  
+  static const      uint32_t             S_RATE;
+  static const      uint8_t              MIDDLE_OCTAVE      = 4;
   static const      uint8_t              ROOT_NOTE          = 46;
   static const      uint8_t              BASS_ROOT_NOTE     = ((uint8_t)(ROOT_NOTE - 0));
   static const      uint8_t              COUNT              = 6;
@@ -22,7 +24,8 @@ public:
   static            uint32_t             phincrs[120];
   static            uint12_t             raw_volume;
   static            uint12_t             scaled_volume;
-
+  
+  static            void                 generate_phincrs();
   static            bool                 set_volume(uint12_t const & volume);
   static            bool                 set_pitch(
     uint8_t  const & voice_ix,
