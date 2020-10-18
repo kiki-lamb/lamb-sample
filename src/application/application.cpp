@@ -20,7 +20,6 @@ size_t                       application::_sample_ix1        { 0                
 HardwareTimer                application::_timer_1           ( 1                         );
 HardwareTimer                application::_timer_2           ( 2                         );
 HardwareTimer                application::_timer_3           ( 3                         );
-voices::voice *              application::_voices            [ voices::COUNT      ];
 application::dac             application::_dac               ( application::I2S_WS, &SPI );
 application::tft             application::_tft(application::TFT_CS, application::TFT_DC  );
 application::draw_buffer     application::_draw_buffer;         
@@ -104,7 +103,7 @@ void application::setup_voices() {
   generate_phincrs();
 
   for (size_t ix = 0; ix < voices::COUNT; ix ++) {
-    _voices[ix] = new voices::voice(
+    voices::items[ix] = new voices::voice(
       Samples::data+voices::BLOCK_SIZE*voices::MAP[ix],
       voices::BLOCK_SIZE
     );
@@ -112,25 +111,25 @@ void application::setup_voices() {
     Serial.print(F("Voice #"));
     Serial.print(ix);
     Serial.print(F(" @ 0x "));
-    Serial.print((uint32_t)&_voices[ix]);
+    Serial.print((uint32_t)&voices::items[ix]);
     Serial.print(F(" => 0x"));
     Serial.print(((uint32_t)Samples::data+voices::BLOCK_SIZE*voices::MAP[ix]), HEX);
     Serial.println();
     
-    _voices[ix]->phincr    = voices::phincrs[ROOT_NOTE];
-    _voices[ix]->amplitude = 0x80;
+    voices::items[ix]->phincr    = voices::phincrs[ROOT_NOTE];
+    voices::items[ix]->amplitude = 0x80;
   }
 
-   _voices[0]->amplitude = 0xf0; // 0xb8; // kick
-   _voices[1]->amplitude = 0x40; // 0xd8; // snare
-   _voices[2]->amplitude = 0x80; // 0xd8; // oh
-   _voices[3]->amplitude = 0xe0; // 0x78; // bass
-   _voices[4]->amplitude = 0xe0; // bass
-   _voices[5]->amplitude = 0xe0; // bass
+   voices::items[0]->amplitude = 0xf0; // 0xb8; // kick
+   voices::items[1]->amplitude = 0x40; // 0xd8; // snare
+   voices::items[2]->amplitude = 0x80; // 0xd8; // oh
+   voices::items[3]->amplitude = 0xe0; // 0x78; // bass
+   voices::items[4]->amplitude = 0xe0; // bass
+   voices::items[5]->amplitude = 0xe0; // bass
 
-   _voices[3]->phincr = voices::phincrs[BASS_ROOT_NOTE +  0   ];
-   _voices[4]->phincr = voices::phincrs[BASS_ROOT_NOTE +  0   ];
-   _voices[5]->phincr = voices::phincrs[BASS_ROOT_NOTE - 12   ];
+   voices::items[3]->phincr = voices::phincrs[BASS_ROOT_NOTE +  0   ];
+   voices::items[4]->phincr = voices::phincrs[BASS_ROOT_NOTE +  0   ];
+   voices::items[5]->phincr = voices::phincrs[BASS_ROOT_NOTE - 12   ];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -222,7 +221,7 @@ bool application::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
      0, 2, 3, 5, 7, 8, 10, 12
   };
 
-  _voices[voice_ix]->next_phincr =
+  voices::items[voice_ix]->next_phincr =
     voices::phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
   
   return true;
@@ -305,12 +304,12 @@ void application::k_rate() {
       (trigger_states & (1 << ix)) &&
       (! (last_trigger_states & (1 << ix)))
     ) {
-      _voices[ix]->trigger();
+      voices::items[ix]->trigger();
 
       if (ix >= 3) {
-        _voices[3]->stop();
-        _voices[4]->stop();
-        _voices[5]->stop();
+        voices::items[3]->stop();
+        voices::items[4]->stop();
+        voices::items[5]->stop();
       }
       
     }
@@ -339,10 +338,10 @@ void application::s_rate() {
   sample_type_traits<voices::sample>::mix_type bass_ =
     sample_type_traits<sample_type_traits<voices::sample>::mix_type>::silence;
 
-  auto v = _voices;
+  auto v = voices::items;
   v += 3;
 
-  MIX(drums_, _voices,     3);
+  MIX(drums_, voices::items,     3);
 
   MIX(bass_,  v, 3);
 

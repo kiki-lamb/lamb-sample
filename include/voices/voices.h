@@ -16,6 +16,7 @@ public:
   static const      size_t               BLOCK_SIZE         =
     Samples::NUM_ELEMENTS / COUNT;
 
+  static            voice *              items[COUNT];
   static constexpr  size_t               MAP[COUNT] = { 0, 3, 5, 1, 1, 1 };
 
 };
