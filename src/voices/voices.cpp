@@ -7,6 +7,44 @@ uint12_t             voices::scaled_volume     { 1500                      };
 uint12_t             voices::raw_volume        { 4091                      };
 const uint32_t       voices::S_RATE            { 44100                     };
 
+////////////////////////////////////////////////////////////////////////////////
+
+void voices::setup() {
+  lpf.set_f(255);
+  lpf.set_q(0);
+  
+  generate_phincrs();
+
+  for (size_t ix = 0; ix < COUNT; ix ++) {
+    items[ix] = new voice(
+      Samples::data+BLOCK_SIZE*MAP[ix],
+      BLOCK_SIZE
+    );
+
+    Serial.print(F("Voice #"));
+    Serial.print(ix);
+    Serial.print(F(" @ 0x "));
+    Serial.print((uint32_t)&items[ix]);
+    Serial.print(F(" => 0x"));
+    Serial.print(((uint32_t)Samples::data+BLOCK_SIZE*MAP[ix]), HEX);
+    Serial.println();
+    
+    items[ix]->phincr    = phincrs[ROOT_NOTE];
+    items[ix]->amplitude = 0x80;
+  }
+
+   items[0]->amplitude = 0xf0; // 0xb8; // kick
+   items[1]->amplitude = 0x40; // 0xd8; // snare
+   items[2]->amplitude = 0x80; // 0xd8; // oh
+   items[3]->amplitude = 0xe0; // 0x78; // bass
+   items[4]->amplitude = 0xe0; // bass
+   items[5]->amplitude = 0xe0; // bass
+
+   items[3]->phincr = phincrs[BASS_ROOT_NOTE +  0   ];
+   items[4]->phincr = phincrs[BASS_ROOT_NOTE +  0   ];
+   items[5]->phincr = phincrs[BASS_ROOT_NOTE - 12   ];
+}
+
 //////////////////////////////////////////////////////////////////////////////
 
 voices::sample voices::read() {

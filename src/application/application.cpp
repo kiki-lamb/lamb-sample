@@ -20,45 +20,7 @@ HardwareTimer                application::_timer_3           ( 3                
 application::dac             application::_dac               ( application::I2S_WS, &SPI );
 application::tft             application::_tft(application::TFT_CS, application::TFT_DC  );
 application::draw_buffer     application::_draw_buffer;         
-
-////////////////////////////////////////////////////////////////////////////////
-
-void application::setup_voices() {
-  voices::lpf.set_f(255);
-  voices::lpf.set_q(0);
-  
-  voices::generate_phincrs();
-
-  for (size_t ix = 0; ix < voices::COUNT; ix ++) {
-    voices::items[ix] = new voices::voice(
-      Samples::data+voices::BLOCK_SIZE*voices::MAP[ix],
-      voices::BLOCK_SIZE
-    );
-
-    Serial.print(F("Voice #"));
-    Serial.print(ix);
-    Serial.print(F(" @ 0x "));
-    Serial.print((uint32_t)&voices::items[ix]);
-    Serial.print(F(" => 0x"));
-    Serial.print(((uint32_t)Samples::data+voices::BLOCK_SIZE*voices::MAP[ix]), HEX);
-    Serial.println();
-    
-    voices::items[ix]->phincr    = voices::phincrs[voices::ROOT_NOTE];
-    voices::items[ix]->amplitude = 0x80;
-  }
-
-   voices::items[0]->amplitude = 0xf0; // 0xb8; // kick
-   voices::items[1]->amplitude = 0x40; // 0xd8; // snare
-   voices::items[2]->amplitude = 0x80; // 0xd8; // oh
-   voices::items[3]->amplitude = 0xe0; // 0x78; // bass
-   voices::items[4]->amplitude = 0xe0; // bass
-   voices::items[5]->amplitude = 0xe0; // bass
-
-   voices::items[3]->phincr = voices::phincrs[voices::BASS_ROOT_NOTE +  0   ];
-   voices::items[4]->phincr = voices::phincrs[voices::BASS_ROOT_NOTE +  0   ];
-   voices::items[5]->phincr = voices::phincrs[voices::BASS_ROOT_NOTE - 12   ];
-}
-
+ 
 ////////////////////////////////////////////////////////////////////////////////
       
 void application::setup_tft() {
@@ -248,7 +210,7 @@ void application::setup() {
   
   Serial.begin(115200);
   
-  setup_voices();
+  voices::setup();
   ::controls::setup();
   setup_tft();
   setup_dac();

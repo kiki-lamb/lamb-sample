@@ -37,6 +37,7 @@ public:
   );
 
   static            sample               read();
+  static            void                 setup();
   
   static lamb::lowpass_filter lpf;
 

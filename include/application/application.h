@@ -17,7 +17,6 @@ public:
   typedef controls::application_event                        application_event;
   typedef controls::application_event_type                   application_event_type;
   
-  static const      uint8_t              EVENT_SOURCES_COUNT = 9;
   static const      uint32_t             TFT_DC              = PA8;
   static const      uint32_t             TFT_CS              = PB12;
   static const      uint32_t             I2S_WS              = PA3;
@@ -42,7 +41,6 @@ private:
   static            void                 k_rate();
   static            void                 s_rate();
   static            bool                 graph();  
-  static            void                 setup_voices();
   static            void                 setup_tft();
   static            void                 setup_dac();
   static            void                 setup_timers();
