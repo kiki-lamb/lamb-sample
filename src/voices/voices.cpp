@@ -112,8 +112,8 @@ void voices::setup() {
 //////////////////////////////////////////////////////////////////////////////
 
 voices::sample voices::read() {
-  mix_type mixed = silence;
-  mix_type bass  = silence;
+  mix_type mixed = SILENCE;
+  mix_type bass  = SILENCE;
 
   auto v  = _items;
   v      += 3;

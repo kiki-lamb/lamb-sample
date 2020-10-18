@@ -5,6 +5,8 @@
 #include "samples/samples.h"
 // #include "samples/pluck.h"
 
+////////////////////////////////////////////////////////////////////////////////
+
 class voices {
 public:
   typedef int16_t                                             sample;
@@ -13,7 +15,7 @@ public:
 
   static const      uint32_t             S_RATE;
   static const      uint8_t              COUNT              = 6;
-  static const      mix_type             silence            =
+  static const      mix_type             SILENCE            =
     lamb::sample_type_traits<mix_type>::silence;
   
 private:
@@ -52,3 +54,9 @@ public:
 };
 
 #endif
+
+////////////////////////////////////////////////////////////////////////////////
+
+/* Local Variables:  */
+/* fill-column: 100  */
+/* End:              */

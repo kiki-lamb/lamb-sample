@@ -140,7 +140,7 @@ void application::s_rate() {
     _avg_sample >>= CAPTURE_RATIO;
 
     if (_draw_buffer.writable()) {
-      _draw_buffer.enqueue(_avg_sample); // 
+      _draw_buffer.enqueue(_avg_sample);
     }
 
     _sample_ix0 = 0;
