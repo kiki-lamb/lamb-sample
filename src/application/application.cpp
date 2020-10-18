@@ -231,32 +231,11 @@ void application::s_rate() {
     _avg_sample = 0;
   }
 
-  sample_type_traits<voices::sample>::mix_type drums_ =
-    sample_type_traits<sample_type_traits<voices::sample>::mix_type>::silence;
+  auto s = voices::read();
 
-  sample_type_traits<voices::sample>::mix_type bass_ =
-    sample_type_traits<sample_type_traits<voices::sample>::mix_type>::silence;
+  _avg_sample += s;
 
-  auto v = voices::items;
-  v += 3;
-
-  MIX(drums_, voices::items,     3);
-
-  MIX(bass_,  v, 3);
-
-  bass_ >>= 2;
-  
-  bass_ = voices::lpf.process(bass_);
-
-  drums_ >>= 2;
-  
-  drums_ += bass_;
-  
-  AMPLIFY(drums_, voices::scaled_volume, 9);
-  
-  _avg_sample += drums_;
-
-  _dac.write_mono(drums_);
+  _dac.write_mono(s);
 
   _sample_ix0  ++;
   _sample_ix1  ++;

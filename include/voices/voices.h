@@ -9,6 +9,10 @@ class voices {
 public:
   typedef int16_t                                             sample;
   typedef lamb::oneshot<sample>                               voice;
+  typedef typename lamb::sample_type_traits<sample>::mix_type mix_type;
+
+  static const      mix_type             silence            =
+    lamb::sample_type_traits<mix_type>::silence;
   
   static const      uint32_t             S_RATE;
   static const      uint8_t              MIDDLE_OCTAVE      = 4;
@@ -32,6 +36,8 @@ public:
     uint12_t const & parameter
   );
 
+  static            sample               read();
+  
   static lamb::lowpass_filter lpf;
 
 };

@@ -1,10 +1,33 @@
 #include "voices/voices.h"
 
-uint32_t          voices::phincrs[120]    = { 0                         };
-voices::voice *   voices::items             [ voices::COUNT             ];
-uint12_t          voices::scaled_volume     { 1500                      };
-uint12_t          voices::raw_volume        { 4091                      };
-const uint32_t    voices::S_RATE            { 44100                     };
+lamb::lowpass_filter voices::lpf;
+uint32_t             voices::phincrs[120]    = { 0                         };
+voices::voice *      voices::items             [ voices::COUNT             ];
+uint12_t             voices::scaled_volume     { 1500                      };
+uint12_t             voices::raw_volume        { 4091                      };
+const uint32_t       voices::S_RATE            { 44100                     };
+
+//////////////////////////////////////////////////////////////////////////////
+
+voices::sample voices::read() {
+  mix_type mixed = silence;
+  mix_type bass  = silence;
+
+  auto v  = items;
+  v      += 3;
+
+  MIX(mixed, items, 3);
+  MIX(bass , v,     3);
+
+  bass  >>= 2;  
+  bass    = lpf.process(bass );
+  mixed >>= 2;  
+  mixed  += bass ;
+  
+  AMPLIFY(mixed, scaled_volume, 9);
+
+  return mixed;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 
