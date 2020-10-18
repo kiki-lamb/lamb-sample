@@ -116,11 +116,13 @@ void application::k_rate() {
     {
       uint8_t parameter = ae.parameter;
 
-      if (voices::filter_f() < 12) {
-        parameter = min(parameter, 248);
-      }
-      else if (voices::filter_f() < 8) {
+      if (voices::filter_f() <= 8) {
+        Serial.println("Drop 2.");
         parameter = min(parameter, 240);
+      }
+      else if (voices::filter_f() <= 12) {
+        Serial.println("Drop 1.");
+        parameter = min(parameter, 248);
       }
       
       voices::filter_q(parameter);
