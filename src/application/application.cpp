@@ -12,7 +12,6 @@ const uint32_t               application::CAPTURE_RATIO      { 4                
 const uint32_t               application::V_SPACING          { 48                        };
 const uint32_t               application::K_RATE             { 80                        };
 const uint32_t               application::S_RATE             { 44100                     };
-uint32_t                     application::_phincrs[120]    = { 0                         };
 int32_t                      application::_avg_sample        { 0                         };
 uint12_t                     application::_scaled_volume     { 1500                      };
 uint12_t                     application::_raw_volume        { 4091                      };
@@ -78,7 +77,7 @@ void application::generate_phincrs() {
 
       Serial.println();
 
-      _phincrs[write_ix] = tmp_phincr;
+      voices::phincrs[write_ix] = tmp_phincr;
     }
   }
  
@@ -118,7 +117,7 @@ void application::setup_voices() {
     Serial.print(((uint32_t)Samples::data+voices::BLOCK_SIZE*voices::MAP[ix]), HEX);
     Serial.println();
     
-    _voices[ix]->phincr    = _phincrs[ROOT_NOTE];
+    _voices[ix]->phincr    = voices::phincrs[ROOT_NOTE];
     _voices[ix]->amplitude = 0x80;
   }
 
@@ -129,9 +128,9 @@ void application::setup_voices() {
    _voices[4]->amplitude = 0xe0; // bass
    _voices[5]->amplitude = 0xe0; // bass
 
-   _voices[3]->phincr = _phincrs[BASS_ROOT_NOTE +  0   ];
-   _voices[4]->phincr = _phincrs[BASS_ROOT_NOTE +  0   ];
-   _voices[5]->phincr = _phincrs[BASS_ROOT_NOTE - 12   ];
+   _voices[3]->phincr = voices::phincrs[BASS_ROOT_NOTE +  0   ];
+   _voices[4]->phincr = voices::phincrs[BASS_ROOT_NOTE +  0   ];
+   _voices[5]->phincr = voices::phincrs[BASS_ROOT_NOTE - 12   ];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -224,7 +223,7 @@ bool application::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
   };
 
   _voices[voice_ix]->next_phincr =
-    _phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
+    voices::phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
   
   return true;
 }

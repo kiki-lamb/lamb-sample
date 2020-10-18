@@ -10,6 +10,8 @@ public:
   typedef int16_t                                             sample;
   typedef lamb::oneshot<sample>                               voice;
 
+  static            uint32_t             phincrs[120];
+
   static const      uint8_t              COUNT              = 6;
   static const      size_t               BLOCK_SIZE         =
     Samples::NUM_ELEMENTS / COUNT;

@@ -41,7 +41,6 @@ private:
   static            HardwareTimer        _timer_2;
   static            HardwareTimer        _timer_3;
   static            dac                  _dac;
-  static            uint32_t             _phincrs[120];
   static            voices::voice *      _voices[voices::COUNT];
   static            tft                  _tft;
   static            draw_buffer          _draw_buffer;

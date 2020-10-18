@@ -1,1 +1,3 @@
 #include "voices/voices.h"
+
+uint32_t     voices::phincrs[120]    = { 0};
