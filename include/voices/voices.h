@@ -32,6 +32,8 @@ public:
     uint12_t const & parameter
   );
 
+  static lamb::lowpass_filter lpf;
+
 };
 
 #endif

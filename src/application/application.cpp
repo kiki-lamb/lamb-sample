@@ -21,15 +21,11 @@ application::dac             application::_dac               ( application::I2S_
 application::tft             application::_tft(application::TFT_CS, application::TFT_DC  );
 application::draw_buffer     application::_draw_buffer;         
 
-///////////////////////////////////////////////////////////////////////////////
-
-lamb::lowpass_filter lpf;
-
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::setup_voices() {
-  lpf.set_f(255);
-  lpf.set_q(0);
+  voices::lpf.set_f(255);
+  voices::lpf.set_q(0);
   
   voices::generate_phincrs();
 
@@ -176,20 +172,20 @@ void application::k_rate() {
     }
     case application_event_type::EVT_FILTER_F_1:
     {
-      lpf.set_f(ae.parameter);
+      voices::lpf.set_f(ae.parameter);
       
       break;     
     }
     case application_event_type::EVT_FILTER_Q_1:
     {
-      if      (lpf.f > 80) 
-        lpf.set_q(min(250, ae.parameter));
-      else if (lpf.f > 60) 
-        lpf.set_q(min(240, ae.parameter));
-      else if (lpf.f > 40) 
-        lpf.set_q(min(230, ae.parameter));
+      if      (voices::lpf.f > 80) 
+        voices::lpf.set_q(min(250, ae.parameter));
+      else if (voices::lpf.f > 60) 
+        voices::lpf.set_q(min(240, ae.parameter));
+      else if (voices::lpf.f > 40) 
+        voices::lpf.set_q(min(230, ae.parameter));
       else 
-        lpf.set_q(min(220, ae.parameter));
+        voices::lpf.set_q(min(220, ae.parameter));
       
       break;     
     }
@@ -250,7 +246,7 @@ void application::s_rate() {
 
   bass_ >>= 2;
   
-  bass_ = lpf.process(bass_);
+  bass_ = voices::lpf.process(bass_);
 
   drums_ >>= 2;
   
