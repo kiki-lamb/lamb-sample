@@ -26,8 +26,8 @@ public:
   static constexpr  size_t               MAP[COUNT] = { 0, 3, 5, 1, 1, 1 };
 
   static            uint32_t             phincrs[120];
-  static            uint12_t             raw_volume;
-  static            uint12_t             scaled_volume;
+  static            uint12_t             _raw_volume;
+  static            uint12_t             _scaled_volume;
   
   static            void                 generate_phincrs();
   static            bool                 volume(uint12_t const & volume);
@@ -36,6 +36,8 @@ public:
     uint12_t const & parameter
   );
   
+  static            uint12_t             raw_volume();
+  static            uint12_t             scaled_volume();
   static            void                 filter_f(uint8_t const & f_);
   static            void                 filter_q(uint8_t const & q_);
   static            uint8_t              filter_f();

@@ -57,7 +57,10 @@ bool application::graph() {
   
   _tft.drawFastVLine(tmp_col, 0, 240, ILI9341_BLACK);
 
-  uint16_t              tmp_volume = 119 - map(voices::raw_volume, 0, 4091, 0, 119);
+  uint16_t              tmp_volume = 119 - map(
+    voices::raw_volume(),
+    0, 4091, 0, 119
+  );
 
   _tft.drawPixel(tmp_col, tmp_volume, ILI9341_GREEN);
   _tft.drawPixel(tmp_col, 239-tmp_volume, ILI9341_GREEN);

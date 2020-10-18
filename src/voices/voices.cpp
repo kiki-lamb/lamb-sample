@@ -1,11 +1,22 @@
 #include "voices/voices.h"
 
-lamb::lowpass_filter voices::lpf;
+const uint32_t       voices::S_RATE            { 44100                     };
 uint32_t             voices::phincrs[120]    = { 0                         };
 voices::voice *      voices::items             [ voices::COUNT             ];
-uint12_t             voices::scaled_volume     { 1500                      };
-uint12_t             voices::raw_volume        { 4091                      };
-const uint32_t       voices::S_RATE            { 44100                     };
+uint12_t             voices::_scaled_volume    { 1500                      };
+uint12_t             voices::_raw_volume       { 4091                      };
+lamb::lowpass_filter voices::lpf;
+
+////////////////////////////////////////////////////////////////////////////////
+
+uint12_t voices::raw_volume() {
+  return _raw_volume;
+}
+////////////////////////////////////////////////////////////////////////////////
+
+uint12_t voices::scaled_volume() {
+  return _scaled_volume;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -86,7 +97,7 @@ voices::sample voices::read() {
   mixed >>= 2;  
   mixed  += bass ;
   
-  AMPLIFY(mixed, scaled_volume, 9);
+  AMPLIFY(mixed, _scaled_volume, 9);
 
   return mixed;
 }
@@ -94,11 +105,11 @@ voices::sample voices::read() {
 //////////////////////////////////////////////////////////////////////////////
 
 bool voices::volume(uint12_t const & volume) {
-  if (volume == raw_volume) return false;
+  if (volume == _raw_volume) return false;
   
-  raw_volume    = volume;
+  _raw_volume    = volume;
   
-  scaled_volume = ((raw_volume << 2) - raw_volume) >> 2;
+  _scaled_volume = ((_raw_volume << 2) - _raw_volume) >> 2;
 
   return true;
 }
