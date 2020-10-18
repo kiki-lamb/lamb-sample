@@ -20,32 +20,6 @@ HardwareTimer                application::_timer_3           ( 3                
 application::dac             application::_dac               ( application::I2S_WS, &SPI );
 application::tft             application::_tft(application::TFT_CS, application::TFT_DC  );
 application::draw_buffer     application::_draw_buffer;         
- 
-////////////////////////////////////////////////////////////////////////////////
-      
-void application::setup_tft() {
-  _tft.begin();
-  _tft.setRotation(3);
-  _tft.setTextColor(ILI9341_WHITE);  
-  _tft.setTextSize(2);
-  _tft.fillScreen(ILI9341_BLACK);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-
-void application::setup_dac() {
-  SPI.begin();
-  
-  _dac.setup();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void application::setup_timers() {
-  maple_timer::setup(_timer_1, voices::S_RATE, s_rate);
-  maple_timer::setup(_timer_2, K_RATE, k_rate);
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -205,6 +179,33 @@ void application::s_rate() {
 
   _sample_ix0  ++;
   _sample_ix1  ++;
+}
+
+ 
+////////////////////////////////////////////////////////////////////////////////
+      
+void application::setup_tft() {
+  _tft.begin();
+  _tft.setRotation(3);
+  _tft.setTextColor(ILI9341_WHITE);  
+  _tft.setTextSize(2);
+  _tft.fillScreen(ILI9341_BLACK);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+void application::setup_dac() {
+  SPI.begin();
+  
+  _dac.setup();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void application::setup_timers() {
+  maple_timer::setup(_timer_1, voices::S_RATE, s_rate);
+  maple_timer::setup(_timer_2, K_RATE, k_rate);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
