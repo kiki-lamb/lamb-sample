@@ -5,6 +5,7 @@
 #include <Arduino.h>
 #include "lamb.h"
 #include "controls/controls.h"
+#include "voices/voices.h"
 #include "samples/samples.h"
 // #include "samples/pluck.h"
 #include "events/control.h"
