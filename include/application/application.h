@@ -13,9 +13,9 @@ class application {
 public:
   typedef lamb::device::Adafruit_ILI9341_STM_SPI2            tft;
   typedef lamb::device::pt8211                               dac;
-  typedef lamb::ring_buffer<voices::sample, 32>                      draw_buffer;
-  typedef events::application                                application_event;
-  typedef events::application_event_type                     application_event_type;
+  typedef lamb::ring_buffer<voices::sample, 32>              draw_buffer;
+  typedef controls::application_event                        application_event;
+  typedef controls::application_event_type                   application_event_type;
   
   static const      uint8_t              MIDDLE_OCTAVE       = 4;
   static const      uint8_t              ROOT_NOTE           = 46;
