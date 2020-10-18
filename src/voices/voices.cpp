@@ -5,8 +5,8 @@
 const uint32_t       voices::S_RATE            { 44100                     };
 voices::voice *      voices::_items            [ voices::COUNT             ];
 uint32_t             voices::_phincrs[120]   = { 0                         };
-uint12_t             voices::_volume           { 2000                      };
-uint12_t             voices::_scaled_volume    { 1500                      };
+uint12_t             voices::_volume           { 2400                      };
+uint12_t             voices::_scaled_volume    { voices::_volume * 3 / 4   };
 lamb::lowpass_filter voices::_lpf;
 
 ////////////////////////////////////////////////////////////////////////////////
