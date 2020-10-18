@@ -3,7 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 const uint32_t       voices::S_RATE            { 44100                     };
-voices::voice *      voices::_items             [ voices::COUNT             ];
+voices::voice *      voices::_items            [ voices::COUNT             ];
 uint32_t             voices::_phincrs[120]   = { 0                         };
 uint12_t             voices::_scaled_volume    { 1500                      };
 uint12_t             voices::_raw_volume       { 4091                      };
