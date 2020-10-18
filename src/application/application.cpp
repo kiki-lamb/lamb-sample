@@ -104,7 +104,7 @@ void application::k_rate() {
     switch (ae.type) {
     case application_event_type::EVT_VOLUME:
     {
-      voices::set_volume(ae.parameter);
+      voices::volume(ae.parameter);
 
       break;
     }
@@ -116,38 +116,38 @@ void application::k_rate() {
     }
     case application_event_type::EVT_PITCH_1:
     {
-      voices::set_pitch(3, ae.parameter);
+      voices::pitch(3, ae.parameter);
       
       break;     
     }
     case application_event_type::EVT_PITCH_2:
     {
-      voices::set_pitch(4, ae.parameter);
+      voices::pitch(4, ae.parameter);
       
       break;     
     }
     case application_event_type::EVT_PITCH_3:
     {
-      voices::set_pitch(5, ae.parameter);
+      voices::pitch(5, ae.parameter);
       
       break;     
     }
     case application_event_type::EVT_FILTER_F_1:
     {
-      voices::lpf.set_f(ae.parameter);
+      voices::filter_f(ae.parameter);
       
       break;     
     }
     case application_event_type::EVT_FILTER_Q_1:
     {
-      if      (voices::lpf.f > 80) 
-        voices::lpf.set_q(min(250, ae.parameter));
-      else if (voices::lpf.f > 60) 
-        voices::lpf.set_q(min(240, ae.parameter));
-      else if (voices::lpf.f > 40) 
-        voices::lpf.set_q(min(230, ae.parameter));
+      if      (voices::filter_f() > 80) 
+        voices::filter_q(min(250, ae.parameter));
+      else if (voices::filter_f() > 60) 
+        voices::filter_q(min(240, ae.parameter));
+      else if (voices::filter_f() > 40) 
+        voices::filter_q(min(230, ae.parameter));
       else 
-        voices::lpf.set_q(min(220, ae.parameter));
+        voices::filter_q(min(220, ae.parameter));
       
       break;     
     }

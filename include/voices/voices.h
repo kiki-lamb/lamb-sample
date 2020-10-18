@@ -30,12 +30,17 @@ public:
   static            uint12_t             scaled_volume;
   
   static            void                 generate_phincrs();
-  static            bool                 set_volume(uint12_t const & volume);
-  static            bool                 set_pitch(
+  static            bool                 volume(uint12_t const & volume);
+  static            bool                 pitch(
     uint8_t  const & voice_ix,
     uint12_t const & parameter
   );
-
+  
+  static            void                 filter_f(uint8_t const & f_);
+  static            void                 filter_q(uint8_t const & q_);
+  static            uint8_t              filter_f();
+  static            uint8_t              filter_q();
+  
   static            sample               read();
   static            void                 setup();
   

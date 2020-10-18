@@ -9,6 +9,30 @@ const uint32_t       voices::S_RATE            { 44100                     };
 
 ////////////////////////////////////////////////////////////////////////////////
 
+uint8_t voices::filter_f() {
+  return lpf.f;
+}
+  
+////////////////////////////////////////////////////////////////////////////////
+
+uint8_t voices::filter_q() {
+  return lpf.q;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void voices::filter_f(uint8_t const & f_) {
+  lpf.f = f_;
+}
+  
+////////////////////////////////////////////////////////////////////////////////
+
+void voices::filter_q(uint8_t const & q_) {
+  lpf.q = q_;
+}
+  
+////////////////////////////////////////////////////////////////////////////////
+
 void voices::setup() {
   lpf.set_f(255);
   lpf.set_q(0);
@@ -69,7 +93,7 @@ voices::sample voices::read() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-bool voices::set_volume(uint12_t const & volume) {
+bool voices::volume(uint12_t const & volume) {
   if (volume == raw_volume) return false;
   
   raw_volume    = volume;
@@ -79,9 +103,9 @@ bool voices::set_volume(uint12_t const & volume) {
   return true;
 }
 
-////////////////////////////////////////y//////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
-bool voices::set_pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
+bool voices::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
   const uint8_t control_shift = 9;
   uint8_t       notes_ix      = parameter >> control_shift;
   
@@ -89,8 +113,8 @@ bool voices::set_pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
      0, 2, 3, 5, 7, 8, 10, 12
   };
 
-  voices::items[voice_ix]->next_phincr =
-    voices::phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
+  items[voice_ix]->next_phincr =
+    phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
   
   return true;
 }
