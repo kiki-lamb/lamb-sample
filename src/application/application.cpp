@@ -16,65 +16,15 @@ uint32_t                     application::_phincrs[120]    = { 0                
 int32_t                      application::_avg_sample        { 0                         };
 uint12_t                     application::_scaled_volume     { 1800                      };
 uint12_t                     application::_raw_volume        { 4091                      };
-uint16_t                     application::_knob1             { 4091                      };
-uint16_t                     application::_knob2             { 4091                      };
 size_t                       application::_sample_ix0        { 0                         };
 size_t                       application::_sample_ix1        { 0                         };
 HardwareTimer                application::_timer_1           ( 1                         );
 HardwareTimer                application::_timer_2           ( 2                         );
 HardwareTimer                application::_timer_3           ( 3                         );
 application::voice *         application::_voices            [ application::VOICES_COUNT ];
-application::signal          application::_signal_device0    ( PA0,  8, 2                );
-application::signal          application::_signal_device1    ( PA1,  8, 2                );
-application::signal          application::_signal_device2    ( PA2,  8, 2                );
-application::signal_source   application::_signal_source0    ( &_signal_device0          );
-application::signal_source   application::_signal_source1    ( &_signal_device1          );
-application::signal_source   application::_signal_source2    ( &_signal_device2          );
-application::button          application::_button_device0    ( PB11, 0                   );
-application::button          application::_button_device1    ( PB10, 1                   );
-application::button          application::_button_device2    ( PB1,  2                   );
-application::button          application::_button_device3    ( PB0,  3                   );
-application::button          application::_button_device4    ( PC15, 4                   );
-application::button          application::_button_device5    ( PC14, 5                   );
-application::button_source   application::_button_source0    ( &_button_device0          );
-application::button_source   application::_button_source1    ( &_button_device1          );
-application::button_source   application::_button_source2    ( &_button_device2          );
-application::button_source   application::_button_source3    ( &_button_device3          );
-application::button_source   application::_button_source4    ( &_button_device4          );
-application::button_source   application::_button_source5    ( &_button_device5          );
 application::dac             application::_dac               ( application::I2S_WS, &SPI );
 application::tft             application::_tft(application::TFT_CS, application::TFT_DC  );
 application::draw_buffer     application::_draw_buffer;         
-application::combined_source application::_combined_source;
-application::control_source  application::_control_event_source;
-
-//////////////////////////////////////////////////////////////////////////////
-
-void application::setup_controls() {
-  _signal_device0      .setup();
-  _signal_device1      .setup();
-  _signal_device2      .setup();
-      
-  _button_device0      .setup();
-  _button_device1      .setup();
-  _button_device2      .setup();
-  _button_device3      .setup();
-  _button_device4      .setup();
-  _button_device5      .setup();
-
-  _combined_source     .sources[0]  = &_signal_source0;
-  _combined_source     .sources[1]  = &_signal_source1;
-  _combined_source     .sources[2]  = &_signal_source2;
-
-  _combined_source     .sources[3]  = &_button_source0;
-  _combined_source     .sources[4]  = &_button_source1;
-  _combined_source     .sources[5]  = &_button_source2;
-  _combined_source     .sources[6]  = &_button_source3;
-  _combined_source     .sources[7]  = &_button_source4;
-  _combined_source     .sources[8]  = &_button_source5;
-
-  _control_event_source.source      = &_combined_source;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -209,102 +159,6 @@ void application::setup_timers() {
   maple_timer::setup(_timer_1, S_RATE, s_rate);
   maple_timer::setup(_timer_2, K_RATE, k_rate);
 }
-
-////////////////////////////////////////////////////////////////////////////////
-
-application::application_event application::process_control_event(
-  application::control_event const & control_event
-) {
-  application_event application_event;
-  application_event.type = application_event_type::EVT_UNKNOWN;
-
-  switch (control_event.type) {
-  case control_event_type::CTL_EVT_NOT_AVAILABLE:
-    application_event.type = application_event_type::APP_EVT_NOT_AVAILABLE;    
-    return application_event;
-    
-  case control_event_type::EVT_SIGNAL:
-    return process_signal_event(control_event);
-
-  case control_event_type::EVT_BUTTON:
-    return process_button_event(control_event);  
-  }
-  
-  return application_event;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-application::application_event application::process_signal_event(
-  application::control_event const & control_event
-) {
-  uint16_t sig_val = control_event.parameter & 0x0fff;
-  uint8_t  sig_num = (control_event.parameter& 0xf000) >> 12;
-
-  application_event application_event;
-
-  if (sig_num == 2) {
-    application_event.type           = application_event_type::EVT_PITCH_1;
-    application_event.parameter      = sig_val;
-  }
-  else if (sig_num == 0) {
-    // application_event.type           = application_event_type::EVT_PITCH_2;
-    application_event.type           = application_event_type::EVT_FILTER_Q_1;
-    application_event.parameter      = sig_val >> 4;
-  }
-  else if (sig_num == 1) {
-    // application_event.type           = application_event_type::EVT_PITCH_3;
-    application_event.type           = application_event_type::EVT_FILTER_F_1;
-    application_event.parameter      = sig_val >> 4;
-  }
-  else {
-    application_event.type           = application_event_type::APP_EVT_NOT_AVAILABLE;
-  }
-
-  // Serial.print(F("Signal "));
-  // Serial.print(sig_num);
-  // Serial.print(F(" = "));
-  // Serial.print (sig_val);
-  // Serial.println();
-
-  return application_event;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-application::application_event application::process_encoder_event(
-  application::control_event const & control_event
-) {
-  application_event application_event;
-  application_event.type           = application_event_type::EVT_UNKNOWN;
-
-  Serial.println("Don't know how to process encoders yet!");
-
-  return application_event;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-application::application_event application::process_button_event(
-  application::control_event const & control_event
-) {
-  application_event application_event;
-  application_event.type           = application_event_type::EVT_UNKNOWN;
-  uint8_t           button_number  = control_event.parameter_hi();
-  int8_t            button_state   = (int8_t)control_event.parameter_lo(); 
-  
-  // Serial.print(F("Button event, number: "));
-  // Serial.print(button_number);
-  // Serial.print(F(", state: "));
-  // Serial.print(button_state);
-  // Serial.println();
-
-  application_event.type      = application_event_type::EVT_TRIGGER;
-  application_event.parameter = button_number;
-  
-  return application_event;
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 bool application::graph() {
@@ -537,7 +391,7 @@ void application::setup() {
   Serial.begin(115200);
   
   setup_voices();
-  setup_controls();
+  controls::setup();
   setup_tft();
   setup_dac();
   setup_timers();
