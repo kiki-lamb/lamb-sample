@@ -18,8 +18,6 @@ public:
   typedef controls::application_event_type                   application_event_type;
   
   static const      uint8_t              MIDDLE_OCTAVE       = 4;
-  static const      uint8_t              ROOT_NOTE           = 46;
-  static const      uint8_t              BASS_ROOT_NOTE      = ((uint8_t)(ROOT_NOTE - 0));
   static const      uint8_t              EVENT_SOURCES_COUNT = 9;
   static const      uint32_t             TFT_DC              = PA8;
   static const      uint32_t             TFT_CS              = PB12;
@@ -32,8 +30,6 @@ public:
   static const      uint32_t             V_SPACING;
 
 private:
-  static            uint12_t             _raw_volume;
-  static            uint12_t             _scaled_volume;
   static            int32_t              _avg_sample;
   static            size_t               _sample_ix0;
   static            size_t               _sample_ix1;
@@ -44,11 +40,6 @@ private:
   static            tft                  _tft;
   static            draw_buffer          _draw_buffer;
 
-  static            bool                 volume(uint12_t const & volume);
-  static            bool                 pitch(
-    uint8_t  const & voice_ix,
-    uint12_t const & parameter
-  );
   
   static            void                 k_rate();
   static            void                 s_rate();

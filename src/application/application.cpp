@@ -13,8 +13,6 @@ const uint32_t               application::V_SPACING          { 48               
 const uint32_t               application::K_RATE             { 80                        };
 const uint32_t               application::S_RATE             { 44100                     };
 int32_t                      application::_avg_sample        { 0                         };
-uint12_t                     application::_scaled_volume     { 1500                      };
-uint12_t                     application::_raw_volume        { 4091                      };
 size_t                       application::_sample_ix0        { 0                         };
 size_t                       application::_sample_ix1        { 0                         };
 HardwareTimer                application::_timer_1           ( 1                         );
@@ -116,7 +114,7 @@ void application::setup_voices() {
     Serial.print(((uint32_t)Samples::data+voices::BLOCK_SIZE*voices::MAP[ix]), HEX);
     Serial.println();
     
-    voices::items[ix]->phincr    = voices::phincrs[ROOT_NOTE];
+    voices::items[ix]->phincr    = voices::phincrs[voices::ROOT_NOTE];
     voices::items[ix]->amplitude = 0x80;
   }
 
@@ -127,9 +125,9 @@ void application::setup_voices() {
    voices::items[4]->amplitude = 0xe0; // bass
    voices::items[5]->amplitude = 0xe0; // bass
 
-   voices::items[3]->phincr = voices::phincrs[BASS_ROOT_NOTE +  0   ];
-   voices::items[4]->phincr = voices::phincrs[BASS_ROOT_NOTE +  0   ];
-   voices::items[5]->phincr = voices::phincrs[BASS_ROOT_NOTE - 12   ];
+   voices::items[3]->phincr = voices::phincrs[voices::BASS_ROOT_NOTE +  0   ];
+   voices::items[4]->phincr = voices::phincrs[voices::BASS_ROOT_NOTE +  0   ];
+   voices::items[5]->phincr = voices::phincrs[voices::BASS_ROOT_NOTE - 12   ];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -168,7 +166,7 @@ bool application::graph() {
   
   _tft.drawFastVLine(tmp_col, 0, 240, ILI9341_BLACK);
 
-  uint16_t              tmp_volume = 119 - map(_raw_volume, 0, 4091, 0, 119);
+  uint16_t              tmp_volume = 119 - map(voices::raw_volume, 0, 4091, 0, 119);
 
   _tft.drawPixel(tmp_col, tmp_volume, ILI9341_GREEN);
   _tft.drawPixel(tmp_col, 239-tmp_volume, ILI9341_GREEN);
@@ -201,34 +199,6 @@ bool application::graph() {
 
 //////////////////////////////////////////////////////////////////////////////
 
-bool application::volume(uint12_t const & volume) {
-  if (volume == _raw_volume) return false;
-  
-  _raw_volume    = volume;
-  
-  _scaled_volume = ((_raw_volume << 2) - _raw_volume) >> 2;
-
-  return true;
-}
-
-////////////////////////////////////////y//////////////////////////////////////
-
-bool application::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
-  const uint8_t control_shift = 9;
-  uint8_t       notes_ix      = parameter >> control_shift;
-  
-  static int8_t notes[(0xfff >> control_shift) + 1] = {
-     0, 2, 3, 5, 7, 8, 10, 12
-  };
-
-  voices::items[voice_ix]->next_phincr =
-    voices::phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
-  
-  return true;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
 void application::k_rate() {
   static size_t  buttons[]      = {  PB11 ,   PB10 ,    PB1 ,   PB0,   PC14 ,  PC15   };
   static char *  button_names[] = { "PB11",  "PB10",   "PB1",  "PB0", "PC14", "PC15"  };
@@ -243,7 +213,7 @@ void application::k_rate() {
     switch (ae.type) {
     case application_event_type::EVT_VOLUME:
     {
-      volume(ae.parameter);
+      voices::set_volume(ae.parameter);
 
       break;
     }
@@ -255,19 +225,19 @@ void application::k_rate() {
     }
     case application_event_type::EVT_PITCH_1:
     {
-      pitch(3, ae.parameter);
+      voices::set_pitch(3, ae.parameter);
       
       break;     
     }
     case application_event_type::EVT_PITCH_2:
     {
-      pitch(4, ae.parameter);
+      voices::set_pitch(4, ae.parameter);
       
       break;     
     }
     case application_event_type::EVT_PITCH_3:
     {
-      pitch(5, ae.parameter);
+      voices::set_pitch(5, ae.parameter);
       
       break;     
     }
@@ -353,7 +323,7 @@ void application::s_rate() {
   
   drums_ += bass_;
   
-  AMPLIFY(drums_, _scaled_volume, 9);
+  AMPLIFY(drums_, voices::scaled_volume, 9);
   
   _avg_sample += drums_;
 
