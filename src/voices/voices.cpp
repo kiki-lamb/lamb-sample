@@ -1,11 +1,13 @@
 #include "voices/voices.h"
 
+////////////////////////////////////////////////////////////////////////////////
+
 const uint32_t       voices::S_RATE            { 44100                     };
-uint32_t             voices::phincrs[120]    = { 0                         };
 voices::voice *      voices::items             [ voices::COUNT             ];
+uint32_t             voices::_phincrs[120]   = { 0                         };
 uint12_t             voices::_scaled_volume    { 1500                      };
 uint12_t             voices::_raw_volume       { 4091                      };
-lamb::lowpass_filter voices::lpf;
+lamb::lowpass_filter voices::_lpf;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -21,32 +23,32 @@ uint12_t voices::scaled_volume() {
 ////////////////////////////////////////////////////////////////////////////////
 
 uint8_t voices::filter_f() {
-  return lpf.f;
+  return _lpf.f;
 }
   
 ////////////////////////////////////////////////////////////////////////////////
 
 uint8_t voices::filter_q() {
-  return lpf.q;
+  return _lpf.q;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void voices::filter_f(uint8_t const & f_) {
-  lpf.f = f_;
+  _lpf.f = f_;
 }
   
 ////////////////////////////////////////////////////////////////////////////////
 
 void voices::filter_q(uint8_t const & q_) {
-  lpf.q = q_;
+  _lpf.q = q_;
 }
   
 ////////////////////////////////////////////////////////////////////////////////
 
 void voices::setup() {
-  lpf.set_f(255);
-  lpf.set_q(0);
+  _lpf.set_f(255);
+  _lpf.set_q(0);
   
   generate_phincrs();
 
@@ -64,7 +66,7 @@ void voices::setup() {
     Serial.print(((uint32_t)Samples::data+BLOCK_SIZE*MAP[ix]), HEX);
     Serial.println();
     
-    items[ix]->phincr    = phincrs[ROOT_NOTE];
+    items[ix]->phincr    = _phincrs[ROOT_NOTE];
     items[ix]->amplitude = 0x80;
   }
 
@@ -75,9 +77,9 @@ void voices::setup() {
    items[4]->amplitude = 0xe0; // bass
    items[5]->amplitude = 0xe0; // bass
 
-   items[3]->phincr = phincrs[BASS_ROOT_NOTE +  0   ];
-   items[4]->phincr = phincrs[BASS_ROOT_NOTE +  0   ];
-   items[5]->phincr = phincrs[BASS_ROOT_NOTE - 12   ];
+   items[3]->phincr = _phincrs[BASS_ROOT_NOTE +  0   ];
+   items[4]->phincr = _phincrs[BASS_ROOT_NOTE +  0   ];
+   items[5]->phincr = _phincrs[BASS_ROOT_NOTE - 12   ];
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -93,7 +95,7 @@ voices::sample voices::read() {
   MIX(bass , v,     3);
 
   bass  >>= 2;  
-  bass    = lpf.process(bass );
+  bass    = _lpf.process(bass );
   mixed >>= 2;  
   mixed  += bass ;
   
@@ -125,7 +127,7 @@ bool voices::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
   };
 
   items[voice_ix]->next_phincr =
-    phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
+    _phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
   
   return true;
 }
@@ -182,7 +184,7 @@ void voices::generate_phincrs() {
 
       Serial.println();
 
-      voices::phincrs[write_ix] = tmp_phincr;
+      voices::_phincrs[write_ix] = tmp_phincr;
     }
   }
  
@@ -196,3 +198,4 @@ void voices::generate_phincrs() {
   Serial.println();
 }
 
+////////////////////////////////////////////////////////////////////////////////
