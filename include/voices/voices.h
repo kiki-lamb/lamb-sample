@@ -28,17 +28,16 @@ private:
 
   static            lamb::lowpass_filter _lpf;  
   static            uint32_t             _phincrs[120];
-  static            uint12_t             _raw_volume;
+  static            uint12_t             _volume;
   static            uint12_t             _scaled_volume;
   static            voice *              _items[COUNT];
-  static            uint8_t              _trigger_states;
   
   static            void                 generate_phincrs();  
   
 public:
   static            void                 trigger(uint8_t const & ix);
   static            voice &              item(size_t const & ix);  
-  static            uint12_t             raw_volume();
+  static            uint12_t             volume();
   static            uint12_t             scaled_volume();
   static            void                 filter_f(uint8_t const & f_);
   static            void                 filter_q(uint8_t const & q_);

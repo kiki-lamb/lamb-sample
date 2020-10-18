@@ -33,7 +33,7 @@ bool application::graph() {
   _tft.drawFastVLine(tmp_col, 0, 240, ILI9341_BLACK);
 
   uint16_t              tmp_volume = 119 - map(
-    voices::raw_volume(),
+    voices::volume(),
     0, 4091, 0, 119
   );
 
@@ -147,9 +147,9 @@ void application::s_rate() {
     _avg_sample = 0;
   }
 
-  voices::mix_type s = voices::read();
+  voices::mix s = voices::read();
 
-  _avg_sample += s;
+  _avg_sample  += s;
 
   _dac.write_mono(s);
 
