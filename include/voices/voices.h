@@ -7,8 +7,15 @@
 
 class voices {
 public:
-  static const      uint8_t              COUNT              = 6;
+  typedef int16_t                                             sample;
+  typedef lamb::oneshot<sample>                               voice;
+  typedef typename lamb::sample_type_traits<sample>::mix_type mix_type;
 
+  static const      uint32_t             S_RATE;
+  static const      uint8_t              COUNT              = 6;
+  static const      mix_type             silence            =
+    lamb::sample_type_traits<mix_type>::silence;
+  
 private:
   static constexpr  size_t               MAP[COUNT]         = { 0, 3, 5, 1, 1, 1 };
   static const      uint8_t              MIDDLE_OCTAVE      = 4;
@@ -21,20 +28,12 @@ private:
   static            uint32_t             _phincrs[120];
   static            uint12_t             _raw_volume;
   static            uint12_t             _scaled_volume;
+  static            voice *              _items[COUNT];
   
   static            void                 generate_phincrs();  
 
 public:
-  typedef int16_t                                             sample;
-  typedef lamb::oneshot<sample>                               voice;
-  typedef typename lamb::sample_type_traits<sample>::mix_type mix_type;
-
-  static const      uint32_t             S_RATE;
-  static const      mix_type             silence            =
-    lamb::sample_type_traits<mix_type>::silence;
-
-  static            voice *              items[COUNT];
-
+  static            voice &              item(size_t const & ix);  
   static            uint12_t             raw_volume();
   static            uint12_t             scaled_volume();
   static            void                 filter_f(uint8_t const & f_);

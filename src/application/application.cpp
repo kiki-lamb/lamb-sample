@@ -169,12 +169,12 @@ void application::k_rate() {
       (trigger_states & (1 << ix)) &&
       (! (last_trigger_states & (1 << ix)))
     ) {
-      voices::items[ix]->trigger();
+      voices::item(ix).trigger();
 
       if (ix >= 3) {
-        voices::items[3]->stop();
-        voices::items[4]->stop();
-        voices::items[5]->stop();
+        voices::item(3).stop();
+        voices::item(4).stop();
+        voices::item(5).stop();
       }
       
     }
