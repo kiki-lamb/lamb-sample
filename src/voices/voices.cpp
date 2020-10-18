@@ -11,60 +11,6 @@ lamb::lowpass_filter voices::_lpf;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void voices::trigger(uint8_t const & ix) {
-    item(ix).trigger();
-
-#ifdef LOG_TRIGGERS
-    Serial.print("Trigger ");
-    Serial.print(ix);
-    Serial.println();
-#endif
-    
-    if (ix >= 3) {
-      voices::item(3).stop();
-      voices::item(4).stop();
-      voices::item(5).stop();
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-voices::voice & voices::item(size_t const & ix) {
-  return *(_items[ix]);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-uint12_t voices::volume() {
-  return _volume;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-uint8_t voices::filter_f() {
-  return _lpf.f;
-}
-  
-////////////////////////////////////////////////////////////////////////////////
-
-uint8_t voices::filter_q() {
-  return _lpf.q;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void voices::filter_f(uint8_t const & f_) {
-  _lpf.f = f_;
-}
-  
-////////////////////////////////////////////////////////////////////////////////
-
-void voices::filter_q(uint8_t const & q_) {
-  _lpf.q = q_;
-}
-  
-////////////////////////////////////////////////////////////////////////////////
-
 void voices::setup() {
   _lpf.set_f(255);
   _lpf.set_q(0);
@@ -99,54 +45,6 @@ void voices::setup() {
   item(3).phincr = _phincrs[BASS_ROOT_NOTE +  0   ];
   item(4).phincr = _phincrs[BASS_ROOT_NOTE +  0   ];
   item(5).phincr = _phincrs[BASS_ROOT_NOTE - 12   ];
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-voices::sample voices::read() {
-  mix mixed = SILENCE;
-  mix bass  = SILENCE;
-  auto v    = _items;
-
-  v        += 3;
-
-  MIX(mixed, _items, 3);
-  MIX(bass , v,      3);
-
-  bass    >>= 2;  
-  bass      = _lpf.process(bass );
-  mixed   >>= 2;  
-  mixed    += bass ;
-  
-  AMPLIFY(mixed, _scaled_volume, 9);
-
-  return mixed;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
-bool voices::volume(uint12_t const & volume) {
-  if (volume == _volume) return false;
-  
-  _volume    = volume;
-  
-  return true;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-bool voices::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
-  const uint8_t control_shift = 9;
-  uint8_t       notes_ix      = parameter >> control_shift;
-  
-  static int8_t notes[(0xfff >> control_shift) + 1] = {
-     0, 2, 3, 5, 7, 8, 10, 12
-  };
-
-  item(voice_ix).next_phincr =
-    _phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
-  
-  return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -213,6 +111,108 @@ void voices::generate_phincrs() {
   Serial.print(millis() - start);
   Serial.print(F(" ms."));
   Serial.println();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void voices::trigger(uint8_t const & ix) {
+    item(ix).trigger();
+
+#ifdef LOG_TRIGGERS
+    Serial.print("Trigger ");
+    Serial.print(ix);
+    Serial.println();
+#endif
+    
+    if (ix >= 3) {
+      voices::item(3).stop();
+      voices::item(4).stop();
+      voices::item(5).stop();
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+voices::voice & voices::item(size_t const & ix) {
+  return *(_items[ix]);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+uint12_t voices::volume() {
+  return _volume;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+uint8_t voices::filter_f() {
+  return _lpf.f;
+}
+  
+////////////////////////////////////////////////////////////////////////////////
+
+uint8_t voices::filter_q() {
+  return _lpf.q;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void voices::filter_f(uint8_t const & f_) {
+  _lpf.f = f_;
+}
+  
+////////////////////////////////////////////////////////////////////////////////
+
+void voices::filter_q(uint8_t const & q_) {
+  _lpf.q = q_;
+}
+  
+//////////////////////////////////////////////////////////////////////////////
+
+bool voices::volume(uint12_t const & volume) {
+  if (volume == _volume) return false;
+  
+  _volume    = volume;
+  
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool voices::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
+  const uint8_t control_shift = 9;
+  uint8_t       notes_ix      = parameter >> control_shift;
+  
+  static int8_t notes[(0xfff >> control_shift) + 1] = {
+     0, 2, 3, 5, 7, 8, 10, 12
+  };
+
+  item(voice_ix).next_phincr =
+    _phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
+  
+  return true;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+voices::sample voices::read() {
+  mix mixed = SILENCE;
+  mix bass  = SILENCE;
+  auto v    = _items;
+
+  v        += 3;
+
+  MIX(mixed, _items, 3);
+  MIX(bass , v,      3);
+
+  bass    >>= 2;  
+  bass      = _lpf.process(bass );
+  mixed   >>= 2;  
+  mixed    += bass ;
+  
+  AMPLIFY(mixed, _scaled_volume, 9);
+
+  return mixed;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
