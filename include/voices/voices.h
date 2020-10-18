@@ -33,12 +33,11 @@ private:
   static            voice *              _items[COUNT];
   
   static            void                 generate_phincrs();  
+  static            voice &              item(size_t const & ix);  
   
 public:
   static            void                 trigger(uint8_t const & ix);
-  static            voice &              item(size_t const & ix);  
   static            uint12_t             volume();
-  static            uint12_t             scaled_volume();
   static            void                 filter_f(uint8_t const & f_);
   static            void                 filter_q(uint8_t const & q_);
   static            uint8_t              filter_f();

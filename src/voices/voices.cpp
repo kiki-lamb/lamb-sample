@@ -2,11 +2,11 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const uint32_t       voices::S_RATE            { 44100                     };
-voices::voice *      voices::_items            [ voices::COUNT             ];
-uint32_t             voices::_phincrs[120]   = { 0                         };
-uint12_t             voices::_volume           { 2400                      };
-uint12_t             voices::_scaled_volume    { voices::_volume * 3 / 4   };
+const uint32_t       voices::S_RATE            { 44100                               };
+voices::voice *      voices::_items            [ voices::COUNT                       ];
+uint32_t             voices::_phincrs[120]   = { 0                                   };
+uint12_t             voices::_volume           { 2400                                };
+uint12_t             voices::_scaled_volume    { (uint12_t)(voices::_volume * 3 / 4) };
 lamb::lowpass_filter voices::_lpf;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -37,11 +37,6 @@ voices::voice & voices::item(size_t const & ix) {
 
 uint12_t voices::volume() {
   return _volume;
-}
-////////////////////////////////////////////////////////////////////////////////
-
-uint12_t voices::scaled_volume() {
-  return _scaled_volume;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -85,25 +80,25 @@ void voices::setup() {
     Serial.print(F("Voice #"));
     Serial.print(ix);
     Serial.print(F(" @ 0x "));
-    Serial.print((uint32_t)&_items[ix]);
+    Serial.print((uint32_t) &item(ix));
     Serial.print(F(" => 0x"));
     Serial.print(((uint32_t)Samples::data+BLOCK_SIZE*MAP[ix]), HEX);
     Serial.println();
     
-    _items[ix]->phincr    = _phincrs[ROOT_NOTE];
-    _items[ix]->amplitude = 0x80;
+    item(ix).phincr    = _phincrs[ROOT_NOTE];
+    item(ix).amplitude = 0x80;
   }
 
-   _items[0]->amplitude = 0xf0; // 0xb8; // kick
-   _items[1]->amplitude = 0x40; // 0xd8; // snare
-   _items[2]->amplitude = 0x80; // 0xd8; // oh
-   _items[3]->amplitude = 0xe0; // 0x78; // bass
-   _items[4]->amplitude = 0xe0; // bass
-   _items[5]->amplitude = 0xe0; // bass
+  item(0).amplitude = 0xf0; // 0xb8; // kick
+  item(1).amplitude = 0x40; // 0xd8; // snare
+  item(2).amplitude = 0x80; // 0xd8; // oh
+  item(3).amplitude = 0xe0; // 0x78; // bass
+  item(4).amplitude = 0xe0; // bass
+  item(5).amplitude = 0xe0; // bass
 
-   _items[3]->phincr = _phincrs[BASS_ROOT_NOTE +  0   ];
-   _items[4]->phincr = _phincrs[BASS_ROOT_NOTE +  0   ];
-   _items[5]->phincr = _phincrs[BASS_ROOT_NOTE - 12   ];
+  item(3).phincr = _phincrs[BASS_ROOT_NOTE +  0   ];
+  item(4).phincr = _phincrs[BASS_ROOT_NOTE +  0   ];
+  item(5).phincr = _phincrs[BASS_ROOT_NOTE - 12   ];
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -148,7 +143,7 @@ bool voices::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
      0, 2, 3, 5, 7, 8, 10, 12
   };
 
-  _items[voice_ix]->next_phincr =
+  item(voice_ix).next_phincr =
     _phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
   
   return true;
@@ -221,3 +216,7 @@ void voices::generate_phincrs() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+/* Local Variables:  */
+/* fill-column: 100  */
+/* End:              */

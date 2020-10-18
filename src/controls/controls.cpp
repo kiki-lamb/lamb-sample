@@ -83,6 +83,9 @@ controls::application_event controls::process_control_event(
 
   case control_event_type::EVT_BUTTON:
     return process_button_event(control_event);  
+
+  case control_event_type::EVT_ENCODER:
+    return process_encoder_event(control_event);  
   }
   
   return application_event;
@@ -148,9 +151,10 @@ controls::application_event controls::process_button_event(
   application_event application_event;
   application_event.type           = application_event_type::EVT_UNKNOWN;
   uint8_t           button_number  = control_event.parameter_hi();
-  int8_t            button_state   = (int8_t)control_event.parameter_lo(); 
 
 #ifdef LOG_BUTTONS
+  int8_t            button_state   = (int8_t)control_event.parameter_lo(); 
+
   Serial.print(F("Button event, number: "));
   Serial.print(button_number);
   Serial.print(F(", state: "));
