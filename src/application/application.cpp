@@ -14,7 +14,7 @@ const uint32_t               application::K_RATE             { 80               
 const uint32_t               application::S_RATE             { 44100                     };
 uint32_t                     application::_phincrs[120]    = { 0                         };
 int32_t                      application::_avg_sample        { 0                         };
-uint12_t                     application::_scaled_volume     { 1800                      };
+uint12_t                     application::_scaled_volume     { 1500                      };
 uint12_t                     application::_raw_volume        { 4091                      };
 size_t                       application::_sample_ix0        { 0                         };
 size_t                       application::_sample_ix1        { 0                         };
@@ -402,6 +402,7 @@ void application::loop() {
   if (graph())
     draw_operations ++;
   
+#ifdef LOG_DRAW_RATES
   if (_sample_ix1 >= (S_RATE / 10)) {
     static const uint8_t avging                    = 8;      
     static uint32_t      avg_draw_operations       = 0;
@@ -430,6 +431,7 @@ void application::loop() {
     
     draw_operations                                = 0;
   }
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////

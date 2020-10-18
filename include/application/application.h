@@ -17,8 +17,6 @@ public:
   typedef lamb::device::Adafruit_ILI9341_STM_SPI2            tft;
   typedef lamb::device::pt8211                               dac;
   typedef lamb::ring_buffer<sample, 32>                      draw_buffer;
-  typedef events::control                                    control_event;
-  typedef events::control_event_type                         control_event_type;
   typedef events::application                                application_event;
   typedef events::application_event_type                     application_event_type;
   
