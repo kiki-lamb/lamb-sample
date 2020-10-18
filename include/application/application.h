@@ -6,8 +6,6 @@
 #include "lamb.h"
 #include "controls/controls.h"
 #include "voices/voices.h"
-#include "samples/samples.h"
-// #include "samples/pluck.h"
 #include "events/control.h"
 #include "events/application.h"
 
@@ -19,12 +17,9 @@ public:
   typedef events::application                                application_event;
   typedef events::application_event_type                     application_event_type;
   
-  static const      uint8_t              VOICES_COUNT        = 6;
   static const      uint8_t              MIDDLE_OCTAVE       = 4;
   static const      uint8_t              ROOT_NOTE           = 46;
   static const      uint8_t              BASS_ROOT_NOTE      = ((uint8_t)(ROOT_NOTE - 0));
-  static const      size_t               BLOCK_SIZE          =
-    Samples::NUM_ELEMENTS / VOICES_COUNT;
   static const      uint8_t              EVENT_SOURCES_COUNT = 9;
   static const      uint32_t             TFT_DC              = PA8;
   static const      uint32_t             TFT_CS              = PB12;
@@ -47,8 +42,7 @@ private:
   static            HardwareTimer        _timer_3;
   static            dac                  _dac;
   static            uint32_t             _phincrs[120];
-  static            voices::voice *              _voices[VOICES_COUNT];
-  static constexpr  size_t               _VOICES_MAP[VOICES_COUNT] = { 0, 3, 5, 1, 1, 1 };
+  static            voices::voice *      _voices[voices::COUNT];
   static            tft                  _tft;
   static            draw_buffer          _draw_buffer;
 

@@ -21,7 +21,7 @@ size_t                       application::_sample_ix1        { 0                
 HardwareTimer                application::_timer_1           ( 1                         );
 HardwareTimer                application::_timer_2           ( 2                         );
 HardwareTimer                application::_timer_3           ( 3                         );
-voices::voice *              application::_voices            [ application::VOICES_COUNT ];
+voices::voice *              application::_voices            [ voices::COUNT      ];
 application::dac             application::_dac               ( application::I2S_WS, &SPI );
 application::tft             application::_tft(application::TFT_CS, application::TFT_DC  );
 application::draw_buffer     application::_draw_buffer;         
@@ -104,10 +104,10 @@ void application::setup_voices() {
   
   generate_phincrs();
 
-  for (size_t ix = 0; ix < VOICES_COUNT; ix ++) {
+  for (size_t ix = 0; ix < voices::COUNT; ix ++) {
     _voices[ix] = new voices::voice(
-      Samples::data+BLOCK_SIZE*_VOICES_MAP[ix],
-      BLOCK_SIZE
+      Samples::data+voices::BLOCK_SIZE*voices::MAP[ix],
+      voices::BLOCK_SIZE
     );
 
     Serial.print(F("Voice #"));
@@ -115,7 +115,7 @@ void application::setup_voices() {
     Serial.print(F(" @ 0x "));
     Serial.print((uint32_t)&_voices[ix]);
     Serial.print(F(" => 0x"));
-    Serial.print(((uint32_t)Samples::data+BLOCK_SIZE*_VOICES_MAP[ix]), HEX);
+    Serial.print(((uint32_t)Samples::data+voices::BLOCK_SIZE*voices::MAP[ix]), HEX);
     Serial.println();
     
     _voices[ix]->phincr    = _phincrs[ROOT_NOTE];
@@ -301,7 +301,7 @@ void application::k_rate() {
     }
   }
   
-  for (size_t ix = 0; ix < VOICES_COUNT; ix ++) {
+  for (size_t ix = 0; ix < voices::COUNT; ix ++) {
     if (
       (trigger_states & (1 << ix)) &&
       (! (last_trigger_states & (1 << ix)))
