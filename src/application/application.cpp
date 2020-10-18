@@ -69,12 +69,6 @@ bool application::graph() {
 //////////////////////////////////////////////////////////////////////////////
 
 void application::k_rate() {
-  static size_t  buttons[]      = {  PB11 ,   PB10 ,    PB1 ,   PB0,   PC14 ,  PC15   };
-  static char *  button_names[] = { "PB11",  "PB10",   "PB1",  "PB0", "PC14", "PC15"  };
-
-  static uint8_t last_trigger_states = 0;
-  uint8_t        trigger_states      = 0;
-
   ::controls::poll();
 
   while(application_event ae = ::controls::dequeue_event())
@@ -88,7 +82,7 @@ void application::k_rate() {
     }
     case application_event_type::EVT_TRIGGER:
     {
-      trigger_states |= 1 << ae.parameter;
+      voices::trigger(ae.parameter);
       
       break;
     }
@@ -137,24 +131,6 @@ void application::k_rate() {
     }
     }
   }
-  
-  for (size_t ix = 0; ix < voices::COUNT; ix ++) {
-    if (
-      (trigger_states & (1 << ix)) &&
-      (! (last_trigger_states & (1 << ix)))
-    ) {
-      voices::item(ix).trigger();
-
-      if (ix >= 3) {
-        voices::item(3).stop();
-        voices::item(4).stop();
-        voices::item(5).stop();
-      }
-      
-    }
-  }
-
-  last_trigger_states = trigger_states;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -171,7 +147,7 @@ void application::s_rate() {
     _avg_sample = 0;
   }
 
-  auto s = voices::read();
+  voices::mix_type s = voices::read();
 
   _avg_sample += s;
 
@@ -180,7 +156,6 @@ void application::s_rate() {
   _sample_ix0  ++;
   _sample_ix1  ++;
 }
-
  
 ////////////////////////////////////////////////////////////////////////////////
       

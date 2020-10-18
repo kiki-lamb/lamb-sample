@@ -7,7 +7,28 @@ voices::voice *      voices::_items            [ voices::COUNT             ];
 uint32_t             voices::_phincrs[120]   = { 0                         };
 uint12_t             voices::_scaled_volume    { 1500                      };
 uint12_t             voices::_raw_volume       { 4091                      };
+uint8_t              voices::_trigger_states   { 0 };
 lamb::lowpass_filter voices::_lpf;
+
+////////////////////////////////////////////////////////////////////////////////
+
+void voices::trigger(uint8_t const & ix) {
+  if (! (_trigger_states & (1 << ix))) {
+    item(ix).trigger();
+
+    Serial.print("Trigger ");
+    Serial.print(ix);
+    Serial.println();
+    
+    if (ix >= 3) {
+      voices::item(3).stop();
+      voices::item(4).stop();
+      voices::item(5).stop();
+    }
+
+    _trigger_states = (1 << ix);
+  }    
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
