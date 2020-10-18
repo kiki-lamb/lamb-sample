@@ -11,12 +11,12 @@ class voices {
 public:
   typedef int16_t                                             sample;
   typedef lamb::oneshot<sample>                               voice;
-  typedef typename lamb::sample_type_traits<sample>::mix_type mix_type;
+  typedef typename lamb::sample_type_traits<sample>::mix_type mix;
 
   static const      uint32_t             S_RATE;
   static const      uint8_t              COUNT              = 6;
-  static const      mix_type             SILENCE            =
-    lamb::sample_type_traits<mix_type>::silence;
+  static const      mix                  SILENCE            =
+    lamb::sample_type_traits<mix>::silence;
   
 private:
   static constexpr  size_t               MAP[COUNT]         = { 0, 3, 5, 1, 1, 1 };

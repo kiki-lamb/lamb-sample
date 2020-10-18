@@ -112,19 +112,19 @@ void voices::setup() {
 //////////////////////////////////////////////////////////////////////////////
 
 voices::sample voices::read() {
-  mix_type mixed = SILENCE;
-  mix_type bass  = SILENCE;
+  mix mixed = SILENCE;
+  mix bass  = SILENCE;
+  auto v    = _items;
 
-  auto v  = _items;
-  v      += 3;
+  v        += 3;
 
   MIX(mixed, _items, 3);
-  MIX(bass , v,     3);
+  MIX(bass , v,      3);
 
-  bass  >>= 2;  
-  bass    = _lpf.process(bass );
-  mixed >>= 2;  
-  mixed  += bass ;
+  bass    >>= 2;  
+  bass      = _lpf.process(bass );
+  mixed   >>= 2;  
+  mixed    += bass ;
   
   AMPLIFY(mixed, _scaled_volume, 9);
 
