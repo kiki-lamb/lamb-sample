@@ -1,12 +1,14 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
+#include <inttypes.h>
+#include <Arduino.h>
 #include "lamb.h"
-#include "samples.h"
-// #include "pluck.h"
+#include "controls/controls.h"
+#include "samples/samples.h"
+// #include "samples/pluck.h"
 #include "events/control.h"
 #include "events/application.h"
-#include "controls/controls.h"
 
 class application {
 public:
@@ -63,7 +65,6 @@ private:
   static            void                 s_rate();
   static            bool                 graph();  
   static            void                 generate_phincrs();
-  static            void                 setup_controls();
   static            void                 setup_voices();
   static            void                 setup_tft();
   static            void                 setup_dac();

@@ -238,13 +238,10 @@ void application::k_rate() {
   static uint8_t last_trigger_states = 0;
   uint8_t        trigger_states      = 0;
 
-  _control_event_source.poll();
+  ::controls::poll();
 
-  while(
-    application_event ae = process_control_event(
-      _control_event_source.dequeue_event()
-    )
-  ) {
+  while(application_event ae = ::controls::dequeue_event())
+  {
     switch (ae.type) {
     case application_event_type::EVT_VOLUME:
     {
@@ -391,7 +388,7 @@ void application::setup() {
   Serial.begin(115200);
   
   setup_voices();
-  controls::setup();
+  ::controls::setup();
   setup_tft();
   setup_dac();
   setup_timers();

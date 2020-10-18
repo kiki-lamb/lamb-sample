@@ -1,8 +1,7 @@
-#ifndef CONTROLS_H
-#define CONTROLS_H
+#ifndef BP_DRUM_CONTROLS_H
+#define BP_DRUM_CONTROLS_H
 
 #include "lamb.h"
-// #include "pluck.h"
 #include "events/control.h"
 #include "events/application.h"
 
