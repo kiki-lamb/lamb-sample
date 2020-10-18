@@ -12,7 +12,8 @@ public:
   typedef int16_t                                             sample;
   typedef lamb::oneshot<sample>                               voice;
   typedef typename lamb::sample_type_traits<sample>::mix_type mix;
-
+  typedef lamb::lowpass_filter<sample>                        filter;
+  
   static const      uint32_t             S_RATE;
   static const      uint8_t              COUNT              = 6;
   static const      mix                  SILENCE            =
@@ -28,7 +29,7 @@ private:
   static const      size_t               BLOCK_SIZE         =
     Samples::NUM_ELEMENTS / COUNT;
 
-  static            lamb::lowpass_filter _lpf;  
+  static            filter               _lpf;  
   static            uint32_t             _phincrs[120];
   static            uint12_t             _volume;
   static            uint12_t             _scaled_volume;

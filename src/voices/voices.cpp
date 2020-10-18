@@ -7,13 +7,13 @@ voices::voice *      voices::_items            [ voices::COUNT                  
 uint32_t             voices::_phincrs[120]   = { 0                                   };
 uint12_t             voices::_volume           { 2000                                };
 uint12_t             voices::_scaled_volume    { (uint12_t)(voices::_volume * 3 / 4) };
-lamb::lowpass_filter voices::_lpf;
+voices::filter       voices::_lpf;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void voices::setup() {
-  _lpf.set_f(255);
-  _lpf.set_q(0);
+  _lpf.freq(255);
+  _lpf.q(0);
   
   generate_phincrs();
 
@@ -146,13 +146,13 @@ uint12_t voices::volume() {
 ////////////////////////////////////////////////////////////////////////////////
 
 uint8_t voices::filter_f() {
-  return _lpf.f;
+  return _lpf.freq();
 }
   
 ////////////////////////////////////////////////////////////////////////////////
 
 uint8_t voices::filter_q() {
-  return _lpf.q;
+  return _lpf.q();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -162,7 +162,7 @@ void voices::filter_f(uint8_t const & f_) {
   Serial.print(f_);
   Serial.println();
   
-  _lpf.set_f(f_);
+  _lpf.freq(f_);
 }
   
 ////////////////////////////////////////////////////////////////////////////////
@@ -172,7 +172,7 @@ void voices::filter_q(uint8_t const & q_) {
   Serial.print(q_);
   Serial.println();
 
-  _lpf.set_q(q_);
+  _lpf.q(q_);
 }
   
 //////////////////////////////////////////////////////////////////////////////
