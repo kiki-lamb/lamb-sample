@@ -2,6 +2,7 @@
 #include <inttypes.h>
 #include <Arduino.h>
 #include <math.h>
+#include "axoloti_filters.h"
 
 using namespace lamb;
 using namespace lamb::Tables;
@@ -14,7 +15,7 @@ const uint32_t               application::K_RATE             { 80               
 const uint32_t               application::S_RATE             { 44100                     };
 uint32_t                     application::_phincrs[120]    = { 0                         };
 int32_t                      application::_avg_sample        { 0                         };
-uint12_t                     application::_scaled_volume     { 1536                      };
+uint12_t                     application::_scaled_volume     { 1800                      };
 uint12_t                     application::_raw_volume        { 4091                      };
 uint16_t                     application::_knob1             { 4091                      };
 uint16_t                     application::_knob2             { 4091                      };
@@ -142,9 +143,16 @@ void application::generate_phincrs() {
   Serial.println();
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+lamb::lowpass_filter lpf;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::setup_voices() {
+  lpf.set_f(255);
+  lpf.set_q(0);
+  
   generate_phincrs();
 
   for (size_t ix = 0; ix < VOICES_COUNT; ix ++) {
@@ -165,12 +173,16 @@ void application::setup_voices() {
     _voices[ix]->amplitude = 0x80;
   }
 
-   _voices[0]->amplitude = 0xd0; // 0xb8; // kick
-   _voices[1]->amplitude = 0x60; // 0xd8; // snare
+   _voices[0]->amplitude = 0xf0; // 0xb8; // kick
+   _voices[1]->amplitude = 0x40; // 0xd8; // snare
    _voices[2]->amplitude = 0x80; // 0xd8; // oh
-   _voices[3]->amplitude = 0xff; // 0x78; // bass
-   _voices[4]->amplitude = 0xff; // bass
-   _voices[5]->amplitude = 0xff; // bass
+   _voices[3]->amplitude = 0xe0; // 0x78; // bass
+   _voices[4]->amplitude = 0xe0; // bass
+   _voices[5]->amplitude = 0xe0; // bass
+
+   _voices[3]->phincr = _phincrs[BASS_ROOT_NOTE +  0   ];
+   _voices[4]->phincr = _phincrs[BASS_ROOT_NOTE +  0   ];
+   _voices[5]->phincr = _phincrs[BASS_ROOT_NOTE - 12   ];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -232,21 +244,19 @@ application::application_event application::process_signal_event(
 
   application_event application_event;
 
-  /* if (sig_num == 2) {
-    application_event.type           = application_event_type::EVT_VOLUME;
-    application_event.parameter      = sig_val;
-  }
-  else */ if (sig_num == 2) {
+  if (sig_num == 2) {
     application_event.type           = application_event_type::EVT_PITCH_1;
     application_event.parameter      = sig_val;
   }
   else if (sig_num == 0) {
-    application_event.type           = application_event_type::EVT_PITCH_2;
-    application_event.parameter      = sig_val;
+    // application_event.type           = application_event_type::EVT_PITCH_2;
+    application_event.type           = application_event_type::EVT_FILTER_Q_1;
+    application_event.parameter      = sig_val >> 4;
   }
   else if (sig_num == 1) {
-    application_event.type           = application_event_type::EVT_PITCH_3;
-    application_event.parameter      = sig_val;
+    // application_event.type           = application_event_type::EVT_PITCH_3;
+    application_event.type           = application_event_type::EVT_FILTER_F_1;
+    application_event.parameter      = sig_val >> 4;
   }
   else {
     application_event.type           = application_event_type::APP_EVT_NOT_AVAILABLE;
@@ -413,6 +423,25 @@ void application::k_rate() {
       
       break;     
     }
+    case application_event_type::EVT_FILTER_F_1:
+    {
+      lpf.set_f(ae.parameter);
+      
+      break;     
+    }
+    case application_event_type::EVT_FILTER_Q_1:
+    {
+      if      (lpf.f > 80) 
+        lpf.set_q(min(250, ae.parameter));
+      else if (lpf.f > 60) 
+        lpf.set_q(min(240, ae.parameter));
+      else if (lpf.f > 40) 
+        lpf.set_q(min(230, ae.parameter));
+      else 
+        lpf.set_q(min(220, ae.parameter));
+      
+      break;     
+    }
     default:
     {
       Serial.print(F("Unrecognized event: "));
@@ -428,6 +457,13 @@ void application::k_rate() {
       (! (last_trigger_states & (1 << ix)))
     ) {
       _voices[ix]->trigger();
+
+      if (ix >= 3) {
+        _voices[3]->stop();
+        _voices[4]->stop();
+        _voices[5]->stop();
+      }
+      
     }
   }
 
@@ -461,16 +497,34 @@ void application::s_rate() {
     _avg_sample = 0;
   }
 
-  sample_type_traits<sample>::mix_type sample_ =
+  sample_type_traits<sample>::mix_type drums_ =
     sample_type_traits<sample_type_traits<sample>::mix_type>::silence;
 
-  MIX(sample_, _voices, VOICES_COUNT);
+  sample_type_traits<sample>::mix_type bass_ =
+    sample_type_traits<sample_type_traits<sample>::mix_type>::silence;
 
-  AMPLIFY(sample_, _scaled_volume, 12);
+  auto v = _voices;
+  v += 3;
+//  v++;
+//  v++;
+
+  MIX(drums_, _voices,     3);
+
+  MIX(bass_,  v, 3);
+
+  bass_ >>= 2;
   
-  _avg_sample += sample_;
+  bass_ = lpf.process(bass_);
 
-  _dac.write_mono(sample_);
+  drums_ >>= 2;
+  
+  drums_ += bass_;
+  
+  AMPLIFY(drums_, _scaled_volume, 9);
+  
+  _avg_sample += drums_;
+
+  _dac.write_mono(drums_);
 
   _sample_ix0  ++;
   _sample_ix1  ++;

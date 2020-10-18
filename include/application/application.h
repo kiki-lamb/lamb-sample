@@ -13,7 +13,7 @@ public:
   typedef lamb::oneshot<sample>                              voice;
   typedef lamb::device::Adafruit_ILI9341_STM_SPI2            tft;
   typedef lamb::device::pt8211                               dac;
-  typedef lamb::ring_buffer<sample, 256>                     draw_buffer;
+  typedef lamb::ring_buffer<sample, 32>                      draw_buffer;
   typedef lamb::controls::button                             button;
   typedef lamb::controls::analog                             signal;
   typedef events::control                                    control_event;
@@ -36,8 +36,8 @@ public:
   
   static const      uint8_t              VOICES_COUNT        = 6;
   static const      uint8_t              MIDDLE_OCTAVE       = 4;
-  static const      uint8_t              ROOT_NOTE           = 48;
-  static const      uint8_t              BASS_ROOT_NOTE      = ((uint8_t)(ROOT_NOTE - 12));
+  static const      uint8_t              ROOT_NOTE           = 46;
+  static const      uint8_t              BASS_ROOT_NOTE      = ((uint8_t)(ROOT_NOTE - 0));
   static const      size_t               BLOCK_SIZE          =
     Samples::NUM_ELEMENTS / VOICES_COUNT;
   static const      uint8_t              EVENT_SOURCES_COUNT = 9;
