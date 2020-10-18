@@ -19,6 +19,8 @@ public:
     lamb::sample_type_traits<mix>::silence;
   
 private:
+  voices() = default;
+  
   static constexpr  size_t               MAP[COUNT]         = { 0, 3, 5, 1, 1, 1 };
   static const      uint8_t              MIDDLE_OCTAVE      = 4;
   static const      uint8_t              ROOT_NOTE          = 46;

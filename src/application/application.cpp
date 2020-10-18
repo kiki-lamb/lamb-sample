@@ -112,6 +112,12 @@ void application::k_rate() {
     }
     case application_event_type::EVT_FILTER_Q_1:
     {
+      const uint12_t breaks[][3] = {
+        { 1, 2, 3, },
+        { 1, 2, 3, },
+        { 1, 2, 3, }
+      };
+
       if      (voices::filter_f() > 80) 
         voices::filter_q(min(250, ae.parameter));
       else if (voices::filter_f() > 60) 

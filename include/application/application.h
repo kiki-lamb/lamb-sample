@@ -29,6 +29,8 @@ public:
   static const      uint32_t             V_SPACING;
 
 private:
+  application() = default;
+  
   static            int32_t              _avg_sample;
   static            size_t               _sample_ix0;
   static            size_t               _sample_ix1;
