@@ -106,26 +106,24 @@ void application::k_rate() {
     }
     case application_event_type::EVT_FILTER_F_1:
     {
+      uint8_t param = ae.parameter;
+
       voices::filter_f(ae.parameter);
       
       break;     
     }
     case application_event_type::EVT_FILTER_Q_1:
     {
-      const uint12_t breaks[][3] = {
-        { 1, 2, 3, },
-        { 1, 2, 3, },
-        { 1, 2, 3, }
-      };
+      uint8_t parameter = ae.parameter;
 
-      if      (voices::filter_f() > 80) 
-        voices::filter_q(min(250, ae.parameter));
-      else if (voices::filter_f() > 60) 
-        voices::filter_q(min(240, ae.parameter));
-      else if (voices::filter_f() > 40) 
-        voices::filter_q(min(230, ae.parameter));
-      else 
-        voices::filter_q(min(220, ae.parameter));
+      if (voices::filter_f() < 12) {
+        parameter = min(parameter, 248);
+      }
+      else if (voices::filter_f() < 8) {
+        parameter = min(parameter, 240);
+      }
+      
+      voices::filter_q(parameter);
       
       break;     
     }

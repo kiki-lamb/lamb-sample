@@ -5,7 +5,7 @@
 const uint32_t       voices::S_RATE            { 44100                               };
 voices::voice *      voices::_items            [ voices::COUNT                       ];
 uint32_t             voices::_phincrs[120]   = { 0                                   };
-uint12_t             voices::_volume           { 2400                                };
+uint12_t             voices::_volume           { 2000                                };
 uint12_t             voices::_scaled_volume    { (uint12_t)(voices::_volume * 3 / 4) };
 lamb::lowpass_filter voices::_lpf;
 
@@ -35,16 +35,16 @@ void voices::setup() {
     item(ix).amplitude = 0x80;
   }
 
-  item(0).amplitude = 0xf0; // 0xb8; // kick
-  item(1).amplitude = 0x40; // 0xd8; // snare
-  item(2).amplitude = 0x80; // 0xd8; // oh
+  item(0).amplitude = 0xb0; // 0xb8; // kick
+  item(1).amplitude = 0x30; // 0xd8; // snare
+  item(2).amplitude = 0x60; // 0xd8; // oh
   item(3).amplitude = 0xe0; // 0x78; // bass
   item(4).amplitude = 0xe0; // bass
   item(5).amplitude = 0xe0; // bass
 
-  item(3).phincr = _phincrs[BASS_ROOT_NOTE +  0   ];
-  item(4).phincr = _phincrs[BASS_ROOT_NOTE +  0   ];
-  item(5).phincr = _phincrs[BASS_ROOT_NOTE - 12   ];
+  item(3).phincr = _phincrs[BASS_ROOT_NOTE -  2   ];
+  item(4).phincr = _phincrs[BASS_ROOT_NOTE +  1   ];
+  item(5).phincr = _phincrs[BASS_ROOT_NOTE -  0   ];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -158,13 +158,21 @@ uint8_t voices::filter_q() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void voices::filter_f(uint8_t const & f_) {
-  _lpf.f = f_;
+  Serial.print("F: ");
+  Serial.print(f_);
+  Serial.println();
+  
+  _lpf.set_f(f_);
 }
   
 ////////////////////////////////////////////////////////////////////////////////
 
 void voices::filter_q(uint8_t const & q_) {
-  _lpf.q = q_;
+  Serial.print("Q: ");
+  Serial.print(q_);
+  Serial.println();
+
+  _lpf.set_q(q_);
 }
   
 //////////////////////////////////////////////////////////////////////////////
