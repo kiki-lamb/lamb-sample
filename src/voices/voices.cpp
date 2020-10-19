@@ -2,11 +2,11 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const uint32_t       voices::S_RATE            { 44100                               };
-voices::voice *      voices::_items            [ voices::COUNT                       ];
-uint32_t             voices::_phincrs[120]   = { 0                                   };
-uint12_t             voices::_volume           { 2000                                };
-uint12_t             voices::_scaled_volume    { (uint12_t)(voices::_volume * 3 / 4) };
+const uint32_t       voices::S_RATE            { 44100                                    };
+voices::voice *      voices::_items            [ voices::COUNT                            ];
+lamb::q0n32_t        voices::_phincrs[120]   = { 0                                        };
+lamb::q0n12_t        voices::_volume           { 2000                                     };
+lamb::q0n12_t        voices::_scaled_volume    { (lamb::q0n12_t)(voices::_volume * 3 / 4) };
 voices::filter       voices::_lpf;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -139,25 +139,25 @@ voices::voice & voices::item(size_t const & ix) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-uint12_t voices::volume() {
+lamb::q0n12_t voices::volume() {
   return _volume;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-uint8_t voices::filter_f() {
+lamb::q0n8_t voices::filter_f() {
   return _lpf.freq();
 }
   
 ////////////////////////////////////////////////////////////////////////////////
 
-uint8_t voices::filter_q() {
+lamb::q0n8_t voices::filter_q() {
   return _lpf.q();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void voices::filter_f(uint8_t const & f_) {
+void voices::filter_f(lamb::q0n8_t const & f_) {
   Serial.print("F: ");
   Serial.print(f_);
   Serial.println();
@@ -167,7 +167,7 @@ void voices::filter_f(uint8_t const & f_) {
   
 ////////////////////////////////////////////////////////////////////////////////
 
-void voices::filter_q(uint8_t const & q_) {
+void voices::filter_q(lamb::q0n8_t const & q_) {
   Serial.print("Q: ");
   Serial.print(q_);
   Serial.println();
@@ -177,7 +177,7 @@ void voices::filter_q(uint8_t const & q_) {
   
 //////////////////////////////////////////////////////////////////////////////
 
-bool voices::volume(uint12_t const & volume) {
+bool voices::volume(lamb::q0n12_t const & volume) {
   if (volume == _volume) return false;
   
   _volume    = volume;
@@ -187,7 +187,7 @@ bool voices::volume(uint12_t const & volume) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool voices::pitch(uint8_t const & voice_ix, uint12_t const & parameter) {
+bool voices::pitch(uint8_t const & voice_ix, lamb::q0n12_t const & parameter) {
   const uint8_t control_shift = 9;
   uint8_t       notes_ix      = parameter >> control_shift;
   
