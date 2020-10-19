@@ -106,7 +106,7 @@ void application::k_rate() {
     }
     case application_event_type::EVT_FILTER_F_1:
     {
-      uint8_t param = ae.parameter;
+      lamm::q0n8_t param = ae.parameter;
 
       voices::filter_f(ae.parameter);
       
@@ -114,7 +114,7 @@ void application::k_rate() {
     }
     case application_event_type::EVT_FILTER_Q_1:
     {
-      uint8_t parameter = ae.parameter;
+      lamm::q0n8_t parameter = ae.parameter;
 
       if (voices::filter_f() <= 4) {
         parameter = min(parameter, 222);
