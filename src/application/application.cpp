@@ -4,7 +4,8 @@
 #include <math.h>
 
 using namespace lamb;
-using namespace lamb::Tables;
+
+using namespace lamb::tables;
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -106,29 +107,27 @@ void application::k_rate() {
     }
     case application_event_type::EVT_FILTER_F_1:
     {
-      lamb::q0n8_t param = ae.parameter;
-
       voices::filter_f(ae.parameter);
       
       break;     
     }
     case application_event_type::EVT_FILTER_Q_1:
     {
-      lamb::q0n8_t parameter = ae.parameter;
+     lamb::u0q8::value_type parameter = ae.parameter;
 
-      if (voices::filter_f() <= 4) {
-        parameter = min(parameter, 222);
-      }
-      else if (voices::filter_f() <= 8) {
-        parameter = min(parameter, 240);
-      }
-      else if (voices::filter_f() <= 12) {
-        parameter = min(parameter, 248);
-      }
-      
-      voices::filter_q(parameter);
-      
-      break;     
+     if (voices::filter_f() <= 4) {
+      parameter = min(parameter, 222);
+     }
+     else if (voices::filter_f() <= 8) {
+      parameter = min(parameter, 240);
+     }
+     else if (voices::filter_f() <= 12) {
+      parameter = min(parameter, 248);
+     }
+     
+     voices::filter_q(parameter);
+     
+     break;     
     }
     default:
     {
@@ -186,8 +185,8 @@ void application::setup_dac() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::setup_timers() {
-  maple_timer::setup(_timer_1, voices::S_RATE, s_rate);
-  maple_timer::setup(_timer_2, K_RATE, k_rate);
+ device::maple_timer::setup(_timer_1, voices::S_RATE, s_rate);
+ device::maple_timer::setup(_timer_2, K_RATE, k_rate);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
