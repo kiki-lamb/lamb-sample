@@ -10,10 +10,11 @@
 
 class voices {
 public:
- typedef lamb::s0q15::value_type                                         sample;
-  typedef lamb::oneshot<sample>                               voice;
- typedef typename lamb::sample_type_traits<sample>::mix_type mix;
-  typedef lamb::lowpass<sample>                        filter;
+ typedef lamb::s0q15                                          sample_q;
+ typedef sample_q::value_type                                 sample;
+ typedef lamb::oneshot<sample>                                voice;
+ typedef typename lamb::sample_type_traits<sample>::mix_type  mix;
+ typedef lamb::lowpass<sample>                                filter;
   
   static const      uint32_t             S_RATE;
   static const      uint8_t              COUNT              = 6;
