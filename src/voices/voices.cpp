@@ -9,15 +9,15 @@ using namespace lamb;
 const uint32_t       voices::S_RATE            { 48000                                       };
 voices::voice *      voices::_items            [ voices::COUNT                               ];
 u0q32::value_type    voices::_phincrs[120]   = { 0                                           };
-u0q16::value_type    voices::_volume           { 2000                                        };
+u0q16::value_type    voices::_volume           { 1000                                        };
 u0q16::value_type    voices::_scaled_volume    { u0q16::value_type(voices::_volume * 3 / 4)  };
 voices::filter       voices::_lpf;
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void voices::setup() {
- _lpf.freq(255);
- _lpf.res(0);
+ _lpf.freq(u17q15(1000));
+ _lpf.res(u16q16(0));
   
  generate_phincrs();
 
@@ -149,38 +149,57 @@ u0q16::value_type voices::volume() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-voices::filter::control_t voices::filter_f() {
- return _lpf.freq();
+uint32_t voices::filter_f() {
+// return 0;
+ 
+ return _lpf.freq().value;
 }
   
 ////////////////////////////////////////////////////////////////////////////////
 
-voices::filter::control_t voices::filter_q() {
- return _lpf.res();
+uint32_t voices::filter_q() {
+ 
+ return _lpf.res().value; // .value;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void voices::filter_f(u0q16::value_type const & f_) {
- Serial.print("F: ");
- Serial.print(f_);
- Serial.print(" ");
- Serial.print(f_ >> 4);
- Serial.println();
+void voices::filter_f(u0q16 const & x) {
+ // Serial.print("F: ");
+ // Serial.print(x);
+ // Serial.print(" ");
+
+// uint32_t tmp = x >> 4;
  
- _lpf.freq(f_ >> 4);
+ // Serial.print(tmp);
+ // Serial.println();
+
+ _lpf.freq(x);
 }
   
 ////////////////////////////////////////////////////////////////////////////////
 
-void voices::filter_q(u0q16::value_type const & q_) {
- Serial.print("Q: ");
- Serial.print(q_);
- Serial.print(" ");
- Serial.print(q_ >> 4);
- Serial.println();
+void voices::filter_q(u0q16 const & x) {
+ // Serial.print("Q: ");
+ // Serial.print(x);
+ // Serial.print(" ");
+
+ //uint32_t tmp = x; // >> 4;
  
- _lpf.res(q_ >> 4);
+ // if (tmp <= 4) {
+ //  tmp = min(tmp, 224);
+ // }
+ // else if (tmp <= 8) {
+ //  tmp = min(tmp, 240);
+ // }
+ // else if (tmp <= 12) {
+ //  tmp = min(tmp, 248);
+ // }
+
+ // Serial.print(tmp);
+ // Serial.println();
+ 
+ _lpf.res(x);
 }
   
 //////////////////////////////////////////////////////////////////////////////
@@ -215,16 +234,15 @@ voices::sample voices::read() {
  mix mixed = SILENCE;
  mix bass  = SILENCE;
  auto v    = _items;
-
  v        += 3;
 
  MIX(mixed, _items, 3);
  MIX(bass , v,      3);
 
- bass    >>= 2;  
- bass      = _lpf.process(filter::io_t(bass)).value;
- mixed   >>= 2;  
- mixed    += bass ;
+ bass    >>= 1;  
+ bass      = _lpf.process(s0q15(bass)).value;
+ mixed   >>= 1;  
+ mixed    += bass;
   
  AMPLIFY(mixed, _scaled_volume, 9);
 

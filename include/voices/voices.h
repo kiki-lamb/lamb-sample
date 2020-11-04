@@ -14,7 +14,7 @@ public:
  typedef sample_q::value_type                                 sample;
  typedef lamb::oneshot<sample>                                voice;
  typedef typename lamb::sample_type_traits<sample>::mix_type  mix;
- typedef lamb::lowpass                                        filter;
+ typedef lamb::lowpass<lamb::s0q31>                           filter;
   
  static const      uint32_t             S_RATE;
  static const      uint8_t              COUNT              = 6;
@@ -43,10 +43,10 @@ private:
 public:
  static            void                 trigger(uint8_t const & ix);
  static            lamb::u0q16::value_type        volume();
- static            void                 filter_f(lamb::u0q16::value_type const & f_);
- static            void                 filter_q(lamb::u0q16::value_type const & q_);
- static            lamb::u0q8::value_type         filter_f();
- static            lamb::u0q8::value_type         filter_q();  
+ static            void                 filter_f(lamb::u0q16 const & f_);
+ static            void                 filter_q(lamb::u0q16 const & q_);
+ static            uint32_t             filter_f();
+ static            uint32_t             filter_q();  
  static            sample               read();
  static            void                 setup();
  static            bool                 volume(uint12_t const & volume);

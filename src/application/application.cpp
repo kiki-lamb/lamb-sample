@@ -89,7 +89,7 @@ void application::k_rate() {
   }
   case application_event_type::EVT_PITCH_1:
   {
-   voices::pitch(3, ae.parameter);
+   voices::pitch(0, ae.parameter);
       
    break;     
   }
@@ -107,41 +107,18 @@ void application::k_rate() {
   }
   case application_event_type::EVT_FILTER_F_1:
   {
-   lamb::u0q16::value_type parameter = ae.parameter; // 12 sig bits
-     
-   // Serial.print("fparam ");
-   // Serial.println(parameter);
-     
-   voices::filter_f(ae.parameter);
+   lamb::u0q16 parameter(ae.parameter << 4); // 12 sig bits to 16
+
+   // Serial.print("F: ");
+   // Serial.println(parameter.value);
+   
+   voices::filter_f(parameter);
      
    break;     
   }
   case application_event_type::EVT_FILTER_Q_1:
   {
-   lamb::u0q16::value_type parameter = ae.parameter; // 12 sig bits
-
-   // Serial.print("qparam ");
-   // Serial.println(parameter);
-     
-   // if (voices::filter_f() <= 4) {
-   //  parameter = min(parameter, 222);
-   // }
-   // else if (voices::filter_f() <= 8) {
-   //  parameter = min(parameter, 240);
-   // }
-   // else if (voices::filter_f() <= 12) {
-   //  parameter = min(parameter, 248);
-   // }
-
-   if (voices::filter_f() <= 64) {
-    parameter = min(parameter, 3552);
-   }
-   else if (voices::filter_f() <= 96) {
-    parameter = min(parameter, 3840);
-   }
-   else if (voices::filter_f() <= 128) {
-    parameter = min(parameter, 3968);
-   }
+   lamb::u0q16 parameter(ae.parameter << 4); // 12 sig bits to 16
      
    voices::filter_q(parameter);
      
