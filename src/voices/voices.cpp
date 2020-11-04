@@ -149,13 +149,13 @@ u0q16::value_type voices::volume() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-u0q8::value_type voices::filter_f() {
+voices::filter::control_t voices::filter_f() {
  return _lpf.freq();
 }
   
 ////////////////////////////////////////////////////////////////////////////////
 
-u0q8::value_type voices::filter_q() {
+voices::filter::control_t voices::filter_q() {
  return _lpf.q();
 }
 
