@@ -240,7 +240,7 @@ voices::sample voices::read() {
  MIX(bass , v,      3);
 
  bass    >>= 1;  
- bass      = _lpf.process(s0q15(bass)).value;
+ bass      = _lpf.process(s0q15(bass) * 3 >> 2).value;
  mixed   >>= 1;  
  mixed    += bass;
   
