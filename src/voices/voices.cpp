@@ -17,7 +17,7 @@ voices::filter       voices::_lpf;
 
 void voices::setup() {
  _lpf.freq(255);
- _lpf.q(0);
+ _lpf.res(0);
   
  generate_phincrs();
 
@@ -156,7 +156,7 @@ voices::filter::control_t voices::filter_f() {
 ////////////////////////////////////////////////////////////////////////////////
 
 voices::filter::control_t voices::filter_q() {
- return _lpf.q();
+ return _lpf.res();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -180,7 +180,7 @@ void voices::filter_q(u0q16::value_type const & q_) {
  Serial.print(q_ >> 4);
  Serial.println();
  
- _lpf.q(q_ >> 4);
+ _lpf.res(q_ >> 4);
 }
   
 //////////////////////////////////////////////////////////////////////////////
