@@ -218,7 +218,7 @@ voices::sample voices::read() {
   MIX(bass , v,      3);
 
   bass    >>= 2;  
-  bass      = _lpf.process(bass );
+  bass      = _lpf.process(filter::io_t(bass)).value;
   mixed   >>= 2;  
   mixed    += bass ;
   
