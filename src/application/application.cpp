@@ -89,7 +89,7 @@ void application::k_rate() {
   }
   case application_event_type::EVT_PITCH_1:
   {
-   voices::pitch(0, ae.parameter);
+   voices::pitch(3, ae.parameter);
       
    break;     
   }
