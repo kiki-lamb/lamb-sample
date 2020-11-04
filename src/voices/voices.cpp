@@ -161,22 +161,22 @@ u0q8::value_type voices::filter_q() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void voices::filter_f(u0q8::value_type const & f_) {
-  // Serial.print("F: ");
-  // Serial.print(f_);
-  // Serial.println();
+void voices::filter_f(u0q16::value_type const & f_) {
+  Serial.print("F: ");
+  Serial.print(f_);
+  Serial.println();
   
-  _lpf.freq(f_);
+  _lpf.freq(f_ >> 4);
 }
   
 ////////////////////////////////////////////////////////////////////////////////
 
-void voices::filter_q(u0q8::value_type const & q_) {
-//  Serial.print("Q: ");
-//  Serial.print(q_);
-//  Serial.println();
+void voices::filter_q(u0q16::value_type const & q_) {
+ Serial.print("Q: ");
+ Serial.print(q_);
+ Serial.println();
 
-  _lpf.q(q_);
+ _lpf.q(q_ >> 4);
 }
   
 //////////////////////////////////////////////////////////////////////////////

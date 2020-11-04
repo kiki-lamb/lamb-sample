@@ -43,8 +43,8 @@ private:
 public:
  static            void                 trigger(uint8_t const & ix);
  static            lamb::u0q16::value_type        volume();
- static            void                 filter_f(lamb::u0q8::value_type const & f_);
- static            void                 filter_q(lamb::u0q8::value_type const & q_);
+ static            void                 filter_f(lamb::u0q16::value_type const & f_);
+ static            void                 filter_q(lamb::u0q16::value_type const & q_);
  static            lamb::u0q8::value_type         filter_f();
  static            lamb::u0q8::value_type         filter_q();  
  static            sample               read();

@@ -106,14 +106,12 @@ controls::application_event controls::process_signal_event(
     application_event.parameter      = sig_val;
   }
   else if (sig_num == 0) {
-    // application_event.type           = application_event_type::EVT_PITCH_2;
     application_event.type           = application_event_type::EVT_FILTER_Q_1;
-    application_event.parameter      = sig_val >> 4;
+    application_event.parameter      = sig_val;
   }
   else if (sig_num == 1) {
-    // application_event.type           = application_event_type::EVT_PITCH_3;
-    application_event.type           = application_event_type::EVT_FILTER_F_1;
-    application_event.parameter      = sig_val >> 4;
+   application_event.type           = application_event_type::EVT_FILTER_F_1;
+    application_event.parameter      = sig_val;
   }
   else {
     application_event.type           = application_event_type::APP_EVT_NOT_AVAILABLE;
