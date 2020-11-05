@@ -169,7 +169,7 @@ void voices::filter_f(u0q16 const & x) {
  // Serial.print(x);
  // Serial.print(" ");
 
-// uint32_t tmp = x >> 4;
+ // uint32_t tmp = x >> 4;
  
  // Serial.print(tmp);
  // Serial.println();
@@ -239,8 +239,8 @@ voices::sample voices::read() {
  MIX(mixed, _items, 3);
  MIX(bass , v,      3);
 
- bass    >>= 1;  
- bass      = _lpf.process(s0q15(bass) * 3 >> 2).value;
+ bass      = _lpf.process(s0q15(bass) * s0q15(49152)).value;
+// bass      = _lpf.process(s0q15(bass)).value;
  mixed   >>= 1;  
  mixed    += bass;
   
