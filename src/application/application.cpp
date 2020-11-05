@@ -189,7 +189,7 @@ void application::setup_timers() {
 void application::setup() {
  delay(3000);
   
- Serial.begin(115200);
+ Serial.begin(64000000);
   
  voices::setup();
  ::controls::setup();
