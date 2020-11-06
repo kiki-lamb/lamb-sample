@@ -35,20 +35,20 @@ void voices::setup() {
   Serial.print(((uint32_t)Samples::data+BLOCK_SIZE*MAP[ix]), HEX);
   Serial.println();
     
-  item(ix).phincr    = _phincrs[ROOT_NOTE];
-  item(ix).amplitude = 0x80;
+  item(ix).phincr    = u0q32(_phincrs[ROOT_NOTE]);
+  item(ix).amplitude = u0q8(0x80);
  }
 
- item(0).amplitude = 0xb0; // 0xb8; // kick
- item(1).amplitude = 0x30; // 0xd8; // snare
- item(2).amplitude = 0x60; // 0xd8; // oh
- item(3).amplitude = 0xe0; // 0x78; // bass
- item(4).amplitude = 0xe0; // bass
- item(5).amplitude = 0xe0; // bass
+ item(0).amplitude = u0q8(0xb0); // 0xb8; // kick
+ item(1).amplitude = u0q8(0x30); // 0xd8; // snare
+ item(2).amplitude = u0q8(0x60); // 0xd8; // oh
+ item(3).amplitude = u0q8(0xe0); // 0x78; // bass
+ item(4).amplitude = u0q8(0xe0); // bass
+ item(5).amplitude = u0q8(0xe0); // bass
 
- item(3).phincr = _phincrs[BASS_ROOT_NOTE -  2   ];
- item(4).phincr = _phincrs[BASS_ROOT_NOTE +  1   ];
- item(5).phincr = _phincrs[BASS_ROOT_NOTE -  0   ];
+ item(3).phincr = u0q32(_phincrs[BASS_ROOT_NOTE -  2   ]);
+ item(4).phincr = u0q32(_phincrs[BASS_ROOT_NOTE +  1   ]);
+ item(5).phincr = u0q32(_phincrs[BASS_ROOT_NOTE -  0   ]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -223,9 +223,9 @@ bool voices::pitch(uint8_t const & voice_ix, u0q16::value_type const & parameter
  };
 
  item(voice_ix).next_phincr =
-  _phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
-  
- return true;
+  u0q32(_phincrs[notes[notes_ix] + BASS_ROOT_NOTE]);
+
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -236,8 +236,8 @@ voices::sample voices::read() {
  auto v    = _items;
  v        += 3;
 
- MIX(mixed, _items, 3);
- MIX(bass , v,      3);
+ MIX_Q(mixed, _items, 3);
+ MIX_Q(bass , v,      3);
 
 // bass      = _lpf.process(s0q15(bass)).value;
 // return bass;

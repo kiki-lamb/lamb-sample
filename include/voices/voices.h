@@ -12,9 +12,9 @@ class voices {
 public:
  typedef lamb::s0q15                                          sample_q;
  typedef sample_q::value_type                                 sample;
- typedef lamb::oneshot<sample>                                voice;
+ typedef lamb::oneshot<sample, sample_q>                      voice;
  typedef typename lamb::sample_type_traits<sample>::mix_type  mix;
- typedef lamb::lowpass<lamb::s0q31>                           filter;
+ typedef lamb::filters::basic<>                               filter;
   
  static const      uint32_t             S_RATE;
  static const      uint8_t              COUNT              = 6;
@@ -26,7 +26,7 @@ private:
   
  static constexpr  size_t               MAP[COUNT]         = { 0, 3, 5, 1, 1, 1 };
  static const      uint8_t              MIDDLE_OCTAVE      = 4;
- static const      uint8_t              ROOT_NOTE          = 45;
+ static const      uint8_t              ROOT_NOTE          = 44;
  static const      uint8_t              BASS_ROOT_NOTE     = ((uint8_t)(ROOT_NOTE - 6));
  static const      size_t               BLOCK_SIZE         =
   Samples::NUM_ELEMENTS / COUNT;

@@ -20,7 +20,7 @@ public:
   static const      uint32_t             TFT_DC              = PA8;
   static const      uint32_t             TFT_CS              = PB12;
 
-  static const      uint32_t             I2S_WS              = PA3;
+  static const      uint32_t             I2S_WS              = PB6;
   static const      uint32_t             I2S_BCK             = PA5;
   static const      uint32_t             I2S_DATA            = PA7;
 

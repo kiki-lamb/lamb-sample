@@ -193,6 +193,14 @@ void application::setup() {
   
  voices::setup();
  ::controls::setup();
+
+ afio_remap(AFIO_REMAP_USART1);
+ afio_cfg_debug_ports (AFIO_DEBUG_SW_ONLY);
+ afio_remap (AFIO_REMAP_SPI1);
+ gpio_set_mode (GPIOB, 3, GPIO_AF_OUTPUT_PP);
+ gpio_set_mode (GPIOB, 4, GPIO_INPUT_FLOATING);
+ gpio_set_mode (GPIOB, 5, GPIO_AF_OUTPUT_PP);
+ 
  setup_tft();
  setup_dac();
  setup_timers();
