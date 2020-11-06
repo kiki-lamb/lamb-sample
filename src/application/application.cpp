@@ -208,7 +208,7 @@ void application::loop() {
   
 #ifdef LOG_DRAW_RATES
  if (_sample_ix1 >= (voices::S_RATE / 10)) {
-  static const uint8_t avging                    = 9;      
+  static const uint8_t avging                    = 10;      
   static uint32_t      avg_draw_operations       = 0;
   static uint32_t      tenth_seconds             = 0;
   tenth_seconds                                 += 1;
