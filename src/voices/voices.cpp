@@ -6,7 +6,7 @@ using namespace lamb;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const uint32_t       voices::S_RATE            { 48000L                                     };
+const uint32_t       voices::S_RATE            { 48000L                                      };
 voices::voice *      voices::_items            [ voices::COUNT                               ];
 u0q32::value_type    voices::_phincrs[120]   = { 0                                           };
 u0q16::value_type    voices::_volume           { 1000                                        };

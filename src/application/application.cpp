@@ -9,7 +9,7 @@ using namespace lamb::tables;
 
 //////////////////////////////////////////////////////////////////////////////
 
-const uint32_t               application::CAPTURE_RATIO      { 3                         };
+const uint32_t               application::CAPTURE_RATIO      { 4                         };
 const uint32_t               application::V_SPACING          { 48                        };
 const uint32_t               application::K_RATE             { 80                        };
 int32_t                      application::_avg_sample        { 0                         };
