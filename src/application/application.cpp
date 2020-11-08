@@ -30,15 +30,15 @@ bool application::graph() {
  voices::sample        tmp = _draw_buffer.dequeue() >> 8;
 
  static       uint16_t col = 0;
- static const uint16_t col_max = 200; // real max 320
- uint16_t              tmp_col = col+120;
+// static const uint16_t col_max = 200; // real max 320
+ uint16_t              tmp_col = col & 0xff;
   
  _tft.drawFastVLine(tmp_col, 0, 240, ILI9341_BLACK);
 
  uint16_t              tmp_volume = 119 - (voices::volume() >> 4);
 
- _tft.drawPixel(tmp_col, tmp_volume,     ILI9341_GREEN);
- _tft.drawPixel(tmp_col, 239-tmp_volume, ILI9341_GREEN);
+ // _tft.drawPixel(tmp_col, tmp_volume,     ILI9341_GREEN);
+ // _tft.drawPixel(tmp_col, 239-tmp_volume, ILI9341_GREEN);
   
  if (tmp > 0)
   _tft.drawFastVLine(
@@ -56,7 +56,7 @@ bool application::graph() {
   }
   
  col ++;
- col %= col_max;
+// col %= col_max;
   
  return true;
 }
