@@ -2,9 +2,9 @@
 
 //////////////////////////////////////////////////////////////////////////////
 
-controls::signal          controls::_signal_device0    ( PA0,  8, 2                );
-controls::signal          controls::_signal_device1    ( PA1,  8, 2                );
-controls::signal          controls::_signal_device2    ( PA2,  8, 2                );
+controls::signal          controls::_signal_device0    ( PA3,  8, 2                );
+controls::signal          controls::_signal_device1    ( PA4,  8, 2                );
+controls::signal          controls::_signal_device2    ( PA6,  8, 2                );
 controls::signal_source   controls::_signal_source0    ( &_signal_device0          );
 controls::signal_source   controls::_signal_source1    ( &_signal_device1          );
 controls::signal_source   controls::_signal_source2    ( &_signal_device2          );
@@ -101,16 +101,16 @@ controls::application_event controls::process_signal_event(
 
   application_event application_event;
 
-  if (sig_num == 1) {
+  if (sig_num == 6) {
     application_event.type           = application_event_type::EVT_PITCH_1;
     application_event.parameter      = sig_val;
   }
-  else if (sig_num == 0) {
-    application_event.type           = application_event_type::EVT_FILTER_Q_1;
+  else if (sig_num == 3) {
+    application_event.type           = application_event_type::EVT_FILTER_F_1;
     application_event.parameter      = sig_val;
   }
-  else if (sig_num == 2) {
-   application_event.type           = application_event_type::EVT_FILTER_F_1;
+  else if (sig_num == 4) {
+   application_event.type           = application_event_type::EVT_FILTER_Q_1;
     application_event.parameter      = sig_val;
   }
   else {

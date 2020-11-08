@@ -6,7 +6,7 @@ using namespace lamb;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const uint32_t       voices::S_RATE            { 48000                                       };
+const uint32_t       voices::S_RATE            { 48000L                                     };
 voices::voice *      voices::_items            [ voices::COUNT                               ];
 u0q32::value_type    voices::_phincrs[120]   = { 0                                           };
 u0q16::value_type    voices::_volume           { 1000                                        };
@@ -165,13 +165,10 @@ uint32_t voices::filter_q() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void voices::filter_f(u0q16 const & x) {
-  Serial.print("F: ");
-  Serial.print(x.value);
-  Serial.print(" ");
- // uint32_t tmp = x >> 4;
- 
- // Serial.print(tmp);
-  Serial.println();
+  // Serial.print("F: ");
+  // Serial.print(x.value);
+  // Serial.print(" ");
+  // Serial.println();
  
  _lpf.freq(x);
 }
@@ -179,24 +176,10 @@ void voices::filter_f(u0q16 const & x) {
 ////////////////////////////////////////////////////////////////////////////////
 
 void voices::filter_q(u0q16 const & x) {
- Serial.print("Q: ");
- Serial.print(x.value);
- Serial.print(" ");
- 
- //uint32_t tmp = x; // >> 4;
- 
- // if (tmp <= 4) {
- //  tmp = min(tmp, 224);
- // }
- // else if (tmp <= 8) {
- //  tmp = min(tmp, 240);
- // }
- // else if (tmp <= 12) {
- //  tmp = min(tmp, 248);
- // }
-
- // Serial.print(tmp);
-  Serial.println();
+ // Serial.print("Q: ");
+ // Serial.print(x.value);
+ // Serial.print(" ");
+ // Serial.println();
  
  _lpf.res(x);
 }
