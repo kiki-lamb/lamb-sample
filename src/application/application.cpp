@@ -27,37 +27,31 @@ application::draw_buffer     application::_draw_buffer;
 bool application::graph() {
  if (! _draw_buffer.readable()) return false;
   
+ voices::sample        tmp = _draw_buffer.dequeue() >> 8;
+
  static       uint16_t col = 0;
  static const uint16_t col_max = 200; // real max 320
  uint16_t              tmp_col = col+120;
   
  _tft.drawFastVLine(tmp_col, 0, 240, ILI9341_BLACK);
 
- uint16_t              tmp_volume = 119 - map(
-  voices::volume(),
-  0, 4091, 0, 119
- );
+ uint16_t              tmp_volume = 119 - (voices::volume() >> 4);
 
- _tft.drawPixel(tmp_col, tmp_volume, ILI9341_GREEN);
+ _tft.drawPixel(tmp_col, tmp_volume,     ILI9341_GREEN);
  _tft.drawPixel(tmp_col, 239-tmp_volume, ILI9341_GREEN);
-
- voices::sample        tmp = _draw_buffer.dequeue();
-
- voices::sample        tmp_sample = map(tmp, -32768, 32767, -120, 119);
   
- if (tmp_sample > 0)
+ if (tmp > 0)
   _tft.drawFastVLine(
    tmp_col,
    120,
-   tmp_sample,
+   tmp,
    ILI9341_YELLOW
   );
- else 
-  if (tmp_sample < 0) {
+ else if (tmp < 0) {
    _tft.drawFastVLine(
     tmp_col,
-    120 + tmp_sample,
-    abs(tmp_sample),
+    120 + tmp,
+    abs(tmp),
     ILI9341_YELLOW);
   }
   
