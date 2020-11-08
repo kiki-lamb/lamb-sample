@@ -165,25 +165,24 @@ uint32_t voices::filter_q() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void voices::filter_f(u0q16 const & x) {
- // Serial.print("F: ");
- // Serial.print(x);
- // Serial.print(" ");
-
+  Serial.print("F: ");
+  Serial.print(x.value);
+  Serial.print(" ");
  // uint32_t tmp = x >> 4;
  
  // Serial.print(tmp);
- // Serial.println();
-
+  Serial.println();
+ 
  _lpf.freq(x);
 }
   
 ////////////////////////////////////////////////////////////////////////////////
 
 void voices::filter_q(u0q16 const & x) {
- // Serial.print("Q: ");
- // Serial.print(x);
- // Serial.print(" ");
-
+ Serial.print("Q: ");
+ Serial.print(x.value);
+ Serial.print(" ");
+ 
  //uint32_t tmp = x; // >> 4;
  
  // if (tmp <= 4) {
@@ -197,7 +196,7 @@ void voices::filter_q(u0q16 const & x) {
  // }
 
  // Serial.print(tmp);
- // Serial.println();
+  Serial.println();
  
  _lpf.res(x);
 }
