@@ -8,12 +8,12 @@ controls::signal          controls::_signal_device2    ( PA2,  8, 2             
 controls::signal_source   controls::_signal_source0    ( &_signal_device0          );
 controls::signal_source   controls::_signal_source1    ( &_signal_device1          );
 controls::signal_source   controls::_signal_source2    ( &_signal_device2          );
-controls::button          controls::_button_device0    ( PB9,  5                   );
-controls::button          controls::_button_device1    ( PB8,  4                   );
-controls::button          controls::_button_device2    ( PB7,  3                   );
-controls::button          controls::_button_device3    ( PC14, 2                   );
-controls::button          controls::_button_device4    ( PC14, 1                   );
-controls::button          controls::_button_device5    ( PC15, 0                   );
+controls::button          controls::_button_device0    ( PB9,  0                   );
+controls::button          controls::_button_device1    ( PB8,  1                   );
+controls::button          controls::_button_device2    ( PB7,  2                   );
+controls::button          controls::_button_device3    ( PB6,  3                   );
+controls::button          controls::_button_device4    ( PA10, 4                   );
+controls::button          controls::_button_device5    ( PA9,  5                   );
 controls::button_source   controls::_button_source0    ( &_button_device0          );
 controls::button_source   controls::_button_source1    ( &_button_device1          );
 controls::button_source   controls::_button_source2    ( &_button_device2          );
