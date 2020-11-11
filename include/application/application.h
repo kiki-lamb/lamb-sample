@@ -13,7 +13,7 @@ class application {
 public:
   typedef lamb::device::Adafruit_ILI9341_STM_SPI2            tft;
   typedef lamb::device::pt8211                               dac;
-  typedef lamb::ring_buffer<voices::sample, 32>              draw_buffer;
+  typedef lamb::ring_buffer<voices::sample, 256>             draw_buffer;
   typedef controls::application_event                        application_event;
   typedef controls::application_event_type                   application_event_type;
   

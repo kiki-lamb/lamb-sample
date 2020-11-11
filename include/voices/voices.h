@@ -38,9 +38,9 @@ private:
  static            voice *              _items[COUNT];
   
  static            void                 generate_phincrs();  
- static            voice &              item(size_t const & ix);  
   
 public:
+ static            voice &              item(size_t const & ix);  
  static            void                 trigger(uint8_t const & ix);
  static            lamb::u0q16::value_type        volume();
  static            void                 filter_f(lamb::u0q16 const & f_);

@@ -2,9 +2,9 @@
 
 //////////////////////////////////////////////////////////////////////////////
 
-controls::signal          controls::_signal_device0    ( PA3,  8, 2                );
-controls::signal          controls::_signal_device1    ( PA4,  8, 2                );
-controls::signal          controls::_signal_device2    ( PA6,  8, 2                );
+controls::signal          controls::_signal_device0    ( PA3,  3                   );
+controls::signal          controls::_signal_device1    ( PA4,  4                   );
+controls::signal          controls::_signal_device2    ( PA6,  6                   );
 controls::signal_source   controls::_signal_source0    ( &_signal_device0          );
 controls::signal_source   controls::_signal_source1    ( &_signal_device1          );
 controls::signal_source   controls::_signal_source2    ( &_signal_device2          );

@@ -9,7 +9,7 @@ using namespace lamb::tables;
 
 //////////////////////////////////////////////////////////////////////////////
 
-const uint32_t               application::CAPTURE_RATIO      { 4                         };
+//const uint32_t               application::CAPTURE_RATIO      { 2                         };
 const uint32_t               application::V_SPACING          { 48                        };
 const uint32_t               application::K_RATE             { 80                        };
 int32_t                      application::_avg_sample        { 0                         };
@@ -25,17 +25,38 @@ application::draw_buffer     application::_draw_buffer;
 ////////////////////////////////////////////////////////////////////////////////
 
 bool application::graph() {
- if (! _draw_buffer.readable()) return false;
-  
- voices::sample        tmp = _draw_buffer.dequeue() >> 8;
+ if (_draw_buffer.count() < 16)
+  return false;
 
- static       uint16_t col = 0;
-// static const uint16_t col_max = 200; // real max 320
+ int32_t tmp = 0;
+ 
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+
+ tmp >>= 12;
+ 
+// voices::sample        tmp = _draw_buffer.dequeue() >> 8;
+
+ static uint16_t       col = 0;
  uint16_t              tmp_col = col & 0xff;
+// uint16_t            tmp_volume = 119 - (voices::volume() >> 4);
   
  _tft.drawFastVLine(tmp_col, 0, 240, ILI9341_BLACK);
-
- uint16_t              tmp_volume = 119 - (voices::volume() >> 4);
 
  // _tft.drawPixel(tmp_col, tmp_volume,     ILI9341_GREEN);
  // _tft.drawPixel(tmp_col, 239-tmp_volume, ILI9341_GREEN);
@@ -66,6 +87,8 @@ bool application::graph() {
 void application::k_rate() {
  ::controls::poll();
 
+ digitalWrite(LED_BUILTIN, voices::item(0).state);
+ 
  while(application_event ae = ::controls::dequeue_event())
  {
   switch (ae.type) {
@@ -131,20 +154,18 @@ void application::k_rate() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::s_rate() {
- if (_sample_ix0 == (1 << CAPTURE_RATIO)) {
-  _avg_sample >>= CAPTURE_RATIO;
+ // if (_sample_ix0 == (1 << CAPTURE_RATIO)) {
+ //  _avg_sample >>= CAPTURE_RATIO;
 
-  if (_draw_buffer.writable()) {
-   _draw_buffer.enqueue(_avg_sample);
-  }
-
-  _sample_ix0 = 0;
-  _avg_sample = 0;
- }
+ //  _sample_ix0 = 0;
+ //  _avg_sample = 0;
+ // }
 
  voices::mix s = voices::read();
 
- _avg_sample  += s;
+ if (_draw_buffer.writable()) {
+  _draw_buffer.enqueue(s);
+ }
 
  _dac.write_mono(s);
 
@@ -182,7 +203,9 @@ void application::setup_timers() {
 
 void application::setup() {
  delay(3000);
-  
+
+ pinMode(LED_BUILTIN, OUTPUT);
+ 
  Serial.begin(64000000);
   
  voices::setup();
@@ -210,7 +233,7 @@ void application::loop() {
   draw_operations ++;
   
 #ifdef LOG_DRAW_RATES
- if (_sample_ix1 >= (voices::S_RATE / 10)) {
+ if (_sample_ix1 >= (voices::S_RATE)) {
   static const uint8_t avging                    = 10;      
   static uint32_t      avg_draw_operations       = 0;
   static uint32_t      tenth_seconds             = 0;

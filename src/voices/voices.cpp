@@ -6,7 +6,7 @@ using namespace lamb;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const uint32_t       voices::S_RATE            { 48000L                                      };
+const uint32_t       voices::S_RATE            { 32768                                    };
 voices::voice *      voices::_items            [ voices::COUNT                               ];
 u0q32::value_type    voices::_phincrs[120]   = { 0                                           };
 u0q16::value_type    voices::_volume           { 1000                                        };
@@ -34,21 +34,21 @@ void voices::setup() {
   Serial.print(F(" => 0x"));
   Serial.print(((uint32_t)Samples::data+BLOCK_SIZE*MAP[ix]), HEX);
   Serial.println();
-    
+   
   item(ix).phincr    = u0q32(_phincrs[ROOT_NOTE]);
   item(ix).amplitude = u0q8(0x80);
  }
 
- item(0).amplitude = u0q8(0xb0); // 0xb8; // kick
- item(1).amplitude = u0q8(0x30); // 0xd8; // snare
- item(2).amplitude = u0q8(0x60); // 0xd8; // oh
- item(3).amplitude = u0q8(0xe0); // 0x78; // bass
- item(4).amplitude = u0q8(0xe0); // bass
- item(5).amplitude = u0q8(0xe0); // bass
+ item(0).amplitude = u0q8(0x90); // 0xb8; // kick
+ item(1).amplitude = u0q8(0x40); // 0xd8; // snare
+ item(2).amplitude = u0q8(0x50); // 0xd8; // oh
+ item(3).amplitude = u0q8(0xf0); // 0x78; // bass
+ item(4).amplitude = u0q8(0xf0); // bass
+ item(5).amplitude = u0q8(0xf0); // bass
 
- item(3).phincr = u0q32(_phincrs[BASS_ROOT_NOTE -  2   ]);
- item(4).phincr = u0q32(_phincrs[BASS_ROOT_NOTE +  1   ]);
- item(5).phincr = u0q32(_phincrs[BASS_ROOT_NOTE -  0   ]);
+ item(3).phincr = u0q32(_phincrs[BASS_ROOT_NOTE +  0  ]);
+ item(4).phincr = u0q32(_phincrs[BASS_ROOT_NOTE +  1  ]);
+ item(5).phincr = u0q32(_phincrs[BASS_ROOT_NOTE +  3   ]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -127,7 +127,7 @@ void voices::trigger(uint8_t const & ix) {
  Serial.print(ix);
  Serial.println();
 #endif
-    
+
  if (ix >= 3) {
   voices::item(3).stop();
   voices::item(4).stop();
