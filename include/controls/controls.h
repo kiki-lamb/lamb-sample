@@ -13,7 +13,6 @@ public:
  typedef events::control_event_type                          control_event_type;
  typedef events::application                                 application_event;
  typedef events::application_event_type                      application_event_type;
- typedef lamb::events::sources::buffer<control_event, 16>    control_source;
   
  typedef lamb::events::sources::analog<
   signal,
@@ -36,10 +35,16 @@ public:
   EVENT_SOURCES_COUNT>                                       combined_source;
 
 private:
+
+ struct signal_definition {
+  signal signal;
+  application_event_type application_event_type;
+ };
+
+ 
  static signal                         _signal_devices[SIGNALS_COUNT];
  static button                         _button_devices[BUTTONS_COUNT]; 
  static combined_source                _control_event_source;
-  
 
  static       application_event    process_control_event(
   control_event const & control_event
