@@ -40,15 +40,15 @@ void voices::setup() {
  }
 
  item(0).amplitude = u0q8(0x90); // 0xb8; // kick
- item(1).amplitude = u0q8(0x40); // 0xd8; // snare
- item(2).amplitude = u0q8(0x50); // 0xd8; // oh
+ item(1).amplitude = u0q8(0x30); // 0xd8; // snare
+ item(2).amplitude = u0q8(0x40); // 0xd8; // oh
  item(3).amplitude = u0q8(0xf0); // 0x78; // bass
  item(4).amplitude = u0q8(0xf0); // bass
  item(5).amplitude = u0q8(0xf0); // bass
 
  item(3).phincr = u0q32(_phincrs[BASS_ROOT_NOTE +  0  ]);
- item(4).phincr = u0q32(_phincrs[BASS_ROOT_NOTE +  1  ]);
- item(5).phincr = u0q32(_phincrs[BASS_ROOT_NOTE +  3   ]);
+ item(4).phincr = u0q32(_phincrs[BASS_ROOT_NOTE +  0  ]);
+ item(5).phincr = u0q32(_phincrs[BASS_ROOT_NOTE +  1  ]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

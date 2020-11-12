@@ -5,22 +5,12 @@
 controls::signal          controls::_signal_device0    ( PA3,  3                   );
 controls::signal          controls::_signal_device1    ( PA4,  4                   );
 controls::signal          controls::_signal_device2    ( PA6,  6                   );
-controls::signal_source   controls::_signal_source0    ( &_signal_device0          );
-controls::signal_source   controls::_signal_source1    ( &_signal_device1          );
-controls::signal_source   controls::_signal_source2    ( &_signal_device2          );
 controls::button          controls::_button_device0    ( PB9,  0                   );
 controls::button          controls::_button_device1    ( PB8,  1                   );
 controls::button          controls::_button_device2    ( PB7,  2                   );
 controls::button          controls::_button_device3    ( PB6,  3                   );
 controls::button          controls::_button_device4    ( PA10, 4                   );
 controls::button          controls::_button_device5    ( PA9,  5                   );
-controls::button_source   controls::_button_source0    ( &_button_device0          );
-controls::button_source   controls::_button_source1    ( &_button_device1          );
-controls::button_source   controls::_button_source2    ( &_button_device2          );
-controls::button_source   controls::_button_source3    ( &_button_device3          );
-controls::button_source   controls::_button_source4    ( &_button_device4          );
-controls::button_source   controls::_button_source5    ( &_button_device5          );
-controls::combined_source controls::_combined_source;
 controls::control_source  controls::_control_event_source;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -37,18 +27,17 @@ void controls::setup() {
   _button_device4      .setup();
   _button_device5      .setup();
 
-  _combined_source     .sources[0]  = &_signal_source0;
-  _combined_source     .sources[1]  = &_signal_source1;
-  _combined_source     .sources[2]  = &_signal_source2;
-
-  _combined_source     .sources[3]  = &_button_source0;
-  _combined_source     .sources[4]  = &_button_source1;
-  _combined_source     .sources[5]  = &_button_source2;
-  _combined_source     .sources[6]  = &_button_source3;
-  _combined_source     .sources[7]  = &_button_source4;
-  _combined_source     .sources[8]  = &_button_source5;
-
-  _control_event_source.source      = &_combined_source;
+  combined_source * cs         = new combined_source;
+  cs->sources[0]               = new signal_source(&_signal_device0);
+  cs->sources[1]               = new signal_source(&_signal_device1);
+  cs->sources[2]               = new signal_source(&_signal_device2);
+  cs->sources[3]               = new button_source(&_button_device0);
+  cs->sources[4]               = new button_source(&_button_device1);
+  cs->sources[5]               = new button_source(&_button_device2);
+  cs->sources[6]               = new button_source(&_button_device3);
+  cs->sources[7]               = new button_source(&_button_device4);
+  cs->sources[8]               = new button_source(&_button_device5);
+  _control_event_source.source = cs;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

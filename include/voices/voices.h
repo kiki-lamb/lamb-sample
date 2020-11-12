@@ -27,7 +27,7 @@ private:
  static constexpr  size_t               MAP[COUNT]         = { 0, 3, 5, 1, 1, 1 };
  static const      uint8_t              MIDDLE_OCTAVE      = 4;
  static const      uint8_t              ROOT_NOTE          = 44;
- static const      uint8_t              BASS_ROOT_NOTE     = ((uint8_t)(ROOT_NOTE - 6));
+ static const      uint8_t              BASS_ROOT_NOTE     = ((uint8_t)(ROOT_NOTE + 2));
  static const      size_t               BLOCK_SIZE         =
   Samples::NUM_ELEMENTS / COUNT;
 
