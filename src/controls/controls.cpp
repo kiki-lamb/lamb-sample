@@ -3,13 +3,13 @@
 //////////////////////////////////////////////////////////////////////////////
 
 controls::signal_configuration          controls::_signals[controls::SIGNALS_COUNT] = {
- { { PA0,  0 }, application_event_type::EVT_UNKNOWN },
- { { PA1,  1 }, application_event_type::EVT_UNKNOWN },
- { { PA2,  2 }, application_event_type::EVT_UNKNOWN },
- { { PA3,  3 }, application_event_type::EVT_FILTER_F_1 },
- { { PA4,  4 }, application_event_type::EVT_FILTER_Q_1 },
- { { PA5,  5 }, application_event_type::EVT_UNKNOWN },
- { { PA6,  6 }, application_event_type::EVT_PITCH_1 }
+ { { PA0 }, application_event_type::EVT_UNKNOWN    },
+ { { PA1 }, application_event_type::EVT_UNKNOWN    },
+ { { PA2 }, application_event_type::EVT_UNKNOWN    },
+ { { PA3 }, application_event_type::EVT_FILTER_F_1 },
+ { { PA4 }, application_event_type::EVT_FILTER_Q_1 },
+ { { PA5 }, application_event_type::EVT_UNKNOWN    },
+ { { PA6 }, application_event_type::EVT_PITCH_1    }
 };
 
 controls::button          controls::_button_devices[controls::BUTTONS_COUNT] = {
@@ -29,15 +29,17 @@ void controls::setup() {
  uint8_t ix = 0;
  
  for (size_t bix = 0; bix < BUTTONS_COUNT; ix++, bix++) {
+  _button_devices[bix].button_number = bix;
   _button_devices[bix].setup();
-
+  
   _control_event_source.sources[ix] =
    new button_source(&_button_devices[bix]);
  }
 
  for (size_t six = 0; six < SIGNALS_COUNT; ix++, six++) {
+  _signals[six].signal.signal_number = six;
   _signals[six].signal.setup();
-
+  
   _control_event_source.sources[ix] =
    new signal_source(&_signals[six].signal);
  }
