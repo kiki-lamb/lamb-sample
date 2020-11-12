@@ -36,13 +36,12 @@ public:
 
 private:
 
- struct signal_definition {
-  signal signal;
-  application_event_type application_event_type;
+ struct signal_configuration {
+  controls::signal               signal;
+  events::application_event_type application_event_type;
  };
-
  
- static signal                         _signal_devices[SIGNALS_COUNT];
+ static signal_configuration           _signals[SIGNALS_COUNT];
  static button                         _button_devices[BUTTONS_COUNT]; 
  static combined_source                _control_event_source;
 

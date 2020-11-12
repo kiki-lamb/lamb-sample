@@ -2,14 +2,14 @@
 
 //////////////////////////////////////////////////////////////////////////////
 
-controls::signal          controls::_signal_devices[controls::SIGNALS_COUNT] = {
- { PA0,  0 },
- { PA1,  1 },
- { PA2,  2 },
- { PA3,  3 },
- { PA4,  4 },
- { PA5,  5 },
- { PA6,  6 }
+controls::signal_configuration          controls::_signals[controls::SIGNALS_COUNT] = {
+ { { PA0,  0 }, application_event_type::EVT_UNKNOWN },
+ { { PA1,  1 }, application_event_type::EVT_UNKNOWN },
+ { { PA2,  2 }, application_event_type::EVT_UNKNOWN },
+ { { PA3,  3 }, application_event_type::EVT_FILTER_F_1 },
+ { { PA4,  4 }, application_event_type::EVT_FILTER_Q_1 },
+ { { PA5,  5 }, application_event_type::EVT_UNKNOWN },
+ { { PA6,  6 }, application_event_type::EVT_PITCH_1 }
 };
 
 controls::button          controls::_button_devices[controls::BUTTONS_COUNT] = {
@@ -36,10 +36,10 @@ void controls::setup() {
  }
 
  for (size_t six = 0; six < SIGNALS_COUNT; ix++, six++) {
-  _signal_devices[six].setup();
+  _signals[six].signal.setup();
 
   _control_event_source.sources[ix] =
-   new signal_source(&_signal_devices[six]);
+   new signal_source(&_signals[six].signal);
  }
 }
 
@@ -108,26 +108,14 @@ controls::application_event controls::process_control_event(
 controls::application_event controls::process_signal_event(
  controls::control_event const & control_event
 ) {
- uint16_t sig_val = control_event.parameter & 0x0fff;
- uint8_t  sig_num = (control_event.parameter& 0xf000) >> 12;
+ uint16_t          sig_val = control_event.parameter & 0x0fff;
+ uint8_t           sig_num = (control_event.parameter& 0xf000) >> 12;
+ application_event application_event(application_event_type::EVT_UNKNOWN, sig_val);
 
- application_event application_event;
-
- if (sig_num == 6) {
-  application_event.type           = application_event_type::EVT_PITCH_1;
-  application_event.parameter      = sig_val;
- }
- else if (sig_num == 3) {
-  application_event.type           = application_event_type::EVT_FILTER_F_1;
-  application_event.parameter      = sig_val;
- }
- else if (sig_num == 4) {
-  application_event.type           = application_event_type::EVT_FILTER_Q_1;
-  application_event.parameter      = sig_val;
- }
- else {
-  application_event.type           = application_event_type::EVT_UNKNOWN;
- }
+ if (sig_num < SIGNALS_COUNT) {
+  application_event.type      = _signals[sig_num].application_event_type;
+  application_event.parameter = sig_val;
+ } 
 
 #ifdef LOG_SIGNALS
  Serial.print(F("Signal "));
