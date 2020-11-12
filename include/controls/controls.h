@@ -40,9 +40,14 @@ private:
   controls::signal               signal;
   events::application_event_type application_event_type;
  };
+
+ struct button_configuration {
+  controls::button               button;
+  events::application_event_type application_event_type;
+ };
  
  static signal_configuration           _signals[SIGNALS_COUNT];
- static button                         _button_devices[BUTTONS_COUNT]; 
+ static button_configuration           _buttons[BUTTONS_COUNT];
  static combined_source                _control_event_source;
 
  static       application_event    process_control_event(

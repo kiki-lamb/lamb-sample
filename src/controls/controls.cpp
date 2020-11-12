@@ -12,13 +12,13 @@ controls::signal_configuration          controls::_signals[controls::SIGNALS_COU
  { { PA6 }, application_event_type::EVT_PITCH_1    }
 };
 
-controls::button          controls::_button_devices[controls::BUTTONS_COUNT] = {
- { PB9,  0 },
- { PB8,  1 },
- { PB7,  2 },
- { PB6,  3 },
- { PA10, 4 },
- { PA9,  5 },
+controls::button_configuration          controls::_buttons[controls::BUTTONS_COUNT] = {
+ { { PB9  }, application_event_type::EVT_TRIGGER },
+ { { PB8  }, application_event_type::EVT_TRIGGER },
+ { { PB7  }, application_event_type::EVT_TRIGGER },
+ { { PB6  }, application_event_type::EVT_TRIGGER },
+ { { PA10 }, application_event_type::EVT_TRIGGER },
+ { { PA9  }, application_event_type::EVT_TRIGGER },
 };
 
 controls::combined_source controls::_control_event_source;
@@ -29,11 +29,11 @@ void controls::setup() {
  uint8_t ix = 0;
  
  for (size_t bix = 0; bix < BUTTONS_COUNT; ix++, bix++) {
-  _button_devices[bix].button_number = bix;
-  _button_devices[bix].setup();
+  _buttons[bix].button.button_number = bix;
+  _buttons[bix].button.setup();
   
   _control_event_source.sources[ix] =
-   new button_source(&_button_devices[bix]);
+   new button_source(&_buttons[bix].button);
  }
 
  for (size_t six = 0; six < SIGNALS_COUNT; ix++, six++) {
