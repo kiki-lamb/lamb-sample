@@ -7,25 +7,25 @@
 
 class controls {
 public:
- typedef lamb::controls::button                           button;
- typedef lamb::controls::analog                           signal;
- typedef events::control                                  control_event;
- typedef events::control_event_type                       control_event_type;
- typedef events::application                              application_event;
- typedef events::application_event_type                   application_event_type;
- typedef lamb::events::sources::buffer<control_event, 16> control_source;
+ typedef lamb::controls::button                              button;
+ typedef lamb::controls::analog                              signal;
+ typedef events::control                                     control_event;
+ typedef events::control_event_type                          control_event_type;
+ typedef events::application                                 application_event;
+ typedef events::application_event_type                      application_event_type;
+ typedef lamb::events::sources::buffer<control_event, 16>    control_source;
   
  typedef lamb::events::sources::analog<
   signal,
   control_event,
   control_event_type::EVT_SIGNAL
-  >                                                      signal_source;
+  >                                                          signal_source;
 
  typedef lamb::events::sources::buttons<
   button,
   control_event,
   control_event_type::EVT_BUTTON
-  >                                                      button_source;
+  >                                                          button_source;
 
  static constexpr uint8_t              SIGNALS_COUNT       = 7;
  static constexpr uint8_t              BUTTONS_COUNT       = 6;
@@ -33,13 +33,12 @@ public:
 
  typedef lamb::events::sources::combine<
   control_event,
-  EVENT_SOURCES_COUNT>                                   combined_source;
+  EVENT_SOURCES_COUNT>                                       combined_source;
 
 private:
- static signal _signal_devices[SIGNALS_COUNT];
- static button _button_devices[BUTTONS_COUNT];
- 
- static       combined_source      _control_event_source;
+ static signal                         _signal_devices[SIGNALS_COUNT];
+ static button                         _button_devices[BUTTONS_COUNT]; 
+ static combined_source                _control_event_source;
   
 
  static       application_event    process_control_event(
