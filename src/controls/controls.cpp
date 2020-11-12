@@ -2,9 +2,13 @@
 
 //////////////////////////////////////////////////////////////////////////////
 
-controls::signal          controls::_signal_device0    ( PA3,  3                   );
-controls::signal          controls::_signal_device1    ( PA4,  4                   );
-controls::signal          controls::_signal_device2    ( PA6,  6                   );
+controls::signal          controls::_signal_device0    ( PA0,  0                   );
+controls::signal          controls::_signal_device1    ( PA1,  1                   );
+controls::signal          controls::_signal_device2    ( PA2,  2                   );
+controls::signal          controls::_signal_device3    ( PA3,  3                   );
+controls::signal          controls::_signal_device4    ( PA4,  4                   );
+controls::signal          controls::_signal_device5    ( PA5,  5                   );
+controls::signal          controls::_signal_device6    ( PA6,  6                   );
 controls::button          controls::_button_device0    ( PB9,  0                   );
 controls::button          controls::_button_device1    ( PB8,  1                   );
 controls::button          controls::_button_device2    ( PB7,  2                   );
@@ -28,22 +32,47 @@ void controls::setup() {
   _button_device5      .setup();
 
   combined_source * cs         = new combined_source;
-  cs->sources[0]               = new signal_source(&_signal_device0);
-  cs->sources[1]               = new signal_source(&_signal_device1);
-  cs->sources[2]               = new signal_source(&_signal_device2);
-  cs->sources[3]               = new button_source(&_button_device0);
-  cs->sources[4]               = new button_source(&_button_device1);
-  cs->sources[5]               = new button_source(&_button_device2);
-  cs->sources[6]               = new button_source(&_button_device3);
-  cs->sources[7]               = new button_source(&_button_device4);
-  cs->sources[8]               = new button_source(&_button_device5);
+  cs->sources[0]               = new button_source(&_button_device0);
+  cs->sources[1]               = new button_source(&_button_device1);
+  cs->sources[2]               = new button_source(&_button_device2);
+  cs->sources[3]               = new button_source(&_button_device3);
+  cs->sources[4]               = new button_source(&_button_device4);
+  cs->sources[5]               = new button_source(&_button_device5);
+  cs->sources[6]               = new signal_source(&_signal_device0);
+  cs->sources[7]               = new signal_source(&_signal_device1);
+  cs->sources[8]               = new signal_source(&_signal_device2);
+  cs->sources[9]               = new signal_source(&_signal_device3);
+  cs->sources[10]              = new signal_source(&_signal_device4);
+  cs->sources[11]              = new signal_source(&_signal_device5);
+  cs->sources[12]              = new signal_source(&_signal_device6);
+  
   _control_event_source.source = cs;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
+size_t controls::queue_count() {
+ return _control_event_source.queue_count();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 void controls::poll() {
+#ifdef LOG_EVENT_TIMES
+ uint32_t start = millis();
+#endif
   _control_event_source.poll();
+  
+#ifdef LOG_EVENT_TIMES
+  uint32_t delta = millis() - start;
+
+  Serial.print("Poll took ");
+  Serial.print(delta);
+  Serial.print(" ms, have ");
+  Serial.print(_control_event_source.queue_count());
+  Serial.print(" events.");
+  Serial.println();
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -76,7 +105,7 @@ controls::application_event controls::process_control_event(
   case control_event_type::EVT_ENCODER:
     return process_encoder_event(control_event);  
   }
-  
+
   return application_event;
 }
 
@@ -103,7 +132,7 @@ controls::application_event controls::process_signal_event(
     application_event.parameter      = sig_val;
   }
   else {
-    application_event.type           = application_event_type::APP_EVT_NOT_AVAILABLE;
+   application_event.type           = application_event_type::EVT_UNKNOWN;
   }
 
 #ifdef LOG_SIGNALS

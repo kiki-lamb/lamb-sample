@@ -26,8 +26,8 @@ public:
     control_event,
     control_event_type::EVT_BUTTON
     >                                                      button_source;
-  
-  static const uint8_t              EVENT_SOURCES_COUNT = 9;
+
+  static const uint8_t              EVENT_SOURCES_COUNT = 13;
 
   typedef lamb::events::sources::combine<
     control_event,
@@ -37,7 +37,11 @@ private:
   static       signal               _signal_device0;
   static       signal               _signal_device1;
   static       signal               _signal_device2;
-  
+  static       signal               _signal_device3;
+  static       signal               _signal_device4;
+  static       signal               _signal_device5;
+  static       signal               _signal_device6;
+ 
   static       button               _button_device0;
   static       button               _button_device1;
   static       button               _button_device2;
@@ -70,6 +74,7 @@ public:
   static       void                 loop();
   static       void                 poll();
   static       application_event    dequeue_event();
+  static       size_t               queue_count();
 };
 
 #endif

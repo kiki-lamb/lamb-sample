@@ -89,8 +89,18 @@ void application::k_rate() {
 
  digitalWrite(LED_BUILTIN, voices::item(0).state);
  
- while(application_event ae = ::controls::dequeue_event())
+ while(::controls::queue_count() > 0)
  {
+  application_event ae = ::controls::dequeue_event();
+  
+  // Serial.print("Dequeue evt ");
+  // Serial.print(ae.type);
+  // Serial.print(", ");
+  // Serial.print(::controls::queue_count());
+  // Serial.print(" remain.");
+  // Serial.println();
+
+  
   switch (ae.type) {
   case application_event_type::EVT_VOLUME:
   {
@@ -143,9 +153,11 @@ void application::k_rate() {
   }
   default:
   {
+#ifdef LOG_UNRECOGNIZED_EVENTS
    Serial.print(F("Unrecognized event: "));
    Serial.print(ae.type);
    Serial.println();
+#endif
   }
   }
  }
