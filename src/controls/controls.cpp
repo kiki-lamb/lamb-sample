@@ -26,22 +26,20 @@ controls::combined_source controls::_control_event_source;
 //////////////////////////////////////////////////////////////////////////////
 
 void controls::setup() {
- for (size_t ix = 0; ix < SIGNALS_COUNT; ix++) {
-  _signal_devices[ix].setup();
- }
-      
- for (size_t ix = 0; ix < BUTTONS_COUNT; ix++) {
-  _button_devices[ix].setup();
- }
-
  uint8_t ix = 0;
+ 
+ for (size_t bix = 0; bix < BUTTONS_COUNT; ix++, bix++) {
+  _button_devices[bix].setup();
 
- for (uint8_t iix = 0; iix < BUTTONS_COUNT; ix++, iix++) {
-  _control_event_source.sources[ix] = new button_source(&_button_devices[iix]);
+  _control_event_source.sources[ix] =
+   new button_source(&_button_devices[bix]);
  }
 
- for (uint8_t iix = 0; iix < SIGNALS_COUNT; ix++, iix++) {
-  _control_event_source.sources[ix] = new signal_source(&_signal_devices[iix]);
+ for (size_t six = 0; six < SIGNALS_COUNT; ix++, six++) {
+  _signal_devices[six].setup();
+
+  _control_event_source.sources[ix] =
+   new signal_source(&_signal_devices[six]);
  }
 }
 
