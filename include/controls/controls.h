@@ -51,7 +51,7 @@ private:
   
 //  static       combined_source      _combined_source;
   
-  static       control_source       _control_event_source;
+  static       combined_source      _control_event_source;
   
   static       application_event    process_control_event(
     control_event const & control_event

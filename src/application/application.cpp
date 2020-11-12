@@ -92,14 +92,15 @@ void application::k_rate() {
  while(::controls::queue_count() > 0)
  {
   application_event ae = ::controls::dequeue_event();
-  
-  // Serial.print("Dequeue evt ");
-  // Serial.print(ae.type);
-  // Serial.print(", ");
-  // Serial.print(::controls::queue_count());
-  // Serial.print(" remain.");
-  // Serial.println();
 
+#ifdef LOG_EVENT_TIMES
+  Serial.print("Dequeue evt ");
+  Serial.print(ae.type);
+  Serial.print(", ");
+  Serial.print(::controls::queue_count());
+  Serial.print(" remain.");
+  Serial.println();
+#endif
   
   switch (ae.type) {
   case application_event_type::EVT_VOLUME:
