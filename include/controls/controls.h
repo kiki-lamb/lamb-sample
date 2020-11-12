@@ -42,31 +42,33 @@ private:
  static       combined_source      _control_event_source;
   
 
-   static       application_event    process_control_event(
-    control_event const & control_event
-  );
+ static       application_event    process_control_event(
+  control_event const & control_event
+ );
 
-  static       application_event    process_button_event(
-    control_event const & control_event
-  );
+ static       application_event    process_button_event(
+  control_event const & control_event
+ );
 
-  static       application_event    process_encoder_event(
-    control_event const & control_event
-  );
+ static       application_event    process_encoder_event(
+  control_event const & control_event
+ );
 
-  static       application_event    process_signal_event(
-    control_event const & control_event
-  );
+ static       application_event    process_signal_event(
+  control_event const & control_event
+ );
   
 public:
-  static       void                 setup();
-  static       void                 loop();
-  static       void                 poll();
-  static       application_event    dequeue_event();
-  static       size_t               queue_count();
+ static       void                 setup();
+ static       void                 loop();
+ static       void                 poll();
+ static       application_event    dequeue_event();
+ static       size_t               queue_count();
 };
 
 #endif
+
+////////////////////////////////////////////////////////////////////////////////
 
 /* Local Variables:  */
 /* fill-column: 100  */

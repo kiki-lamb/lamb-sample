@@ -69,12 +69,12 @@ bool application::graph() {
    ILI9341_YELLOW
   );
  else if (tmp < 0) {
-   _tft.drawFastVLine(
-    tmp_col,
-    120 + tmp,
-    abs(tmp),
-    ILI9341_YELLOW);
-  }
+  _tft.drawFastVLine(
+   tmp_col,
+   120 + tmp,
+   abs(tmp),
+   ILI9341_YELLOW);
+ }
   
  col ++;
 // col %= col_max;
