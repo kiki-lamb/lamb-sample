@@ -102,6 +102,7 @@ controls::application_event controls::process<controls::control_event_type::EVT_
 
  return application_event;
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 
 template <>
@@ -142,14 +143,10 @@ controls::application_event controls::process<controls::control_event_type::EVT_
 controls::application_event controls::process_control_event(
  controls::control_event const & control_event
 ) {
- application_event application_event;
- application_event.type = application_event_type::EVT_UNKNOWN;
-
  switch (control_event.type) {
  case control_event_type::CTL_EVT_NOT_AVAILABLE:
-  application_event.type = application_event_type::APP_EVT_NOT_AVAILABLE;    
-  return application_event;
-    
+  return application_event(application_event_type::APP_EVT_NOT_AVAILABLE);
+  
  case control_event_type::EVT_SIGNAL:
   return process<control_event_type::EVT_SIGNAL>(control_event);
 
@@ -158,11 +155,12 @@ controls::application_event controls::process_control_event(
 
  case control_event_type::EVT_ENCODER:
   return process<control_event_type::EVT_ENCODER>(control_event);  
+ 
+ default: 
+  return application_event(application_event_type::EVT_UNKNOWN);
  }
-
- return application_event;
 }
-
+ 
 ////////////////////////////////////////////////////////////////////////////////
 
 /* Local Variables:  */

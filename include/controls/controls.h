@@ -1,12 +1,22 @@
 #ifndef BP_DRUM_CONTROLS_H
 #define BP_DRUM_CONTROLS_H
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
 #include "lamb.h"
 #include "events/control.h"
 #include "events/application.h"
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
 class controls {
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
 public:
+
+ /////////////////////////////////////////////////////////////////////////////////////////
+
  typedef lamb::controls::button                              button;
  typedef lamb::controls::analog                              signal;
  typedef events::control                                     control_event;
@@ -26,16 +36,24 @@ public:
   control_event_type::EVT_BUTTON
   >                                                          button_source;
 
+ /////////////////////////////////////////////////////////////////////////////////////////
+ 
  static constexpr uint8_t              SIGNALS_COUNT       = 7;
  static constexpr uint8_t              BUTTONS_COUNT       = 6;
  static constexpr uint8_t              EVENT_SOURCES_COUNT = SIGNALS_COUNT + BUTTONS_COUNT;
 
+ /////////////////////////////////////////////////////////////////////////////////////////
+ 
  typedef lamb::events::sources::combine<
   control_event,
   EVENT_SOURCES_COUNT>                                       combined_source;
+ 
+//////////////////////////////////////////////////////////////////////////////////////////
 
 private:
 
+ /////////////////////////////////////////////////////////////////////////////////////////
+ 
  struct signal_configuration {
   controls::signal               device;
   events::application_event_type application_event_type;
@@ -46,9 +64,13 @@ private:
   events::application_event_type application_event_type;
  };
  
+ /////////////////////////////////////////////////////////////////////////////////////////
+ 
  static  signal_configuration    _signals[SIGNALS_COUNT];
  static  button_configuration    _buttons[BUTTONS_COUNT];
  static  combined_source         _control_event_source;
+
+ /////////////////////////////////////////////////////////////////////////////////////////
 
  static       application_event    process_control_event(
   control_event const & control_event
@@ -61,21 +83,29 @@ private:
  );
 
  template <control_event_type cet>
- static  application_event process_control_event_type(
+ static  application_event process(
   control_event const & control_event
  );
+
+//////////////////////////////////////////////////////////////////////////////////////////
  
 public:
+
+ /////////////////////////////////////////////////////////////////////////////////////////
+
  static       void                 setup();
  static       void                 loop();
  static       void                 poll();
  static       application_event    dequeue_event();
  static       size_t               queue_count();
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
 };
 
 #endif
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
 
 /* Local Variables:  */
 /* fill-column: 100  */
