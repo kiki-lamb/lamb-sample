@@ -9,7 +9,7 @@ using namespace lamb;
 const uint32_t       voices::S_RATE            { 32768                         };
 voices::voice *      voices::_items            [ voices::COUNT                 ];
 u0q32                voices::_phincrs[120]   = { u0q32(0)                      };
-u0q16                voices::_volume           { 1000                          };
+voices::volume_type  voices::_volume           { 1000                          };
 voices::filter       voices::_lpf;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -142,7 +142,7 @@ voices::voice & voices::item(size_t const & ix) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-u0q16 voices::volume() {
+voices::volume_type voices::volume() {
  return _volume;
 }
 
@@ -182,7 +182,7 @@ void voices::filter_q(voices::filter::unsigned_internal_t const & x) {
   
 //////////////////////////////////////////////////////////////////////////////
 
-bool voices::volume(u0q16 const & volume) {
+bool voices::volume(voices::volume_type const & volume) {
  if (volume == _volume) return false;
   
  _volume    = volume;
@@ -227,6 +227,13 @@ voices::sample voices::read() {
 
  if (mixed >= s15q16::ONE) {
   Serial.println("WARNING, RED LINE!");
+
+  mixed = s15q16::MAX;
+ }
+ else if (mixed <= -s15q16::ONE) {
+  Serial.println("WARNING, RED LINE!");
+
+  mixed = s15q16::MIN;
  };
  
  return mixed;

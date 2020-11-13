@@ -9,9 +9,6 @@ using namespace lamb::tables;
 
 //////////////////////////////////////////////////////////////////////////////
 
-//const uint32_t               application::CAPTURE_RATIO      { 2                         };
-const uint32_t               application::V_SPACING          { 48                        };
-const uint32_t               application::K_RATE             { 80                        };
 int32_t                      application::_avg_sample        { 0                         };
 size_t                       application::_sample_ix0        { 0                         };
 size_t                       application::_sample_ix1        { 0                         };
@@ -37,32 +34,41 @@ bool application::graph() {
  if (_draw_buffer.count() < 16)
   return false;
 
- int32_t tmp = 0;
+ voices::mix tmp { 0 };
  
- tmp  += _draw_buffer.dequeue().value;
- tmp  += _draw_buffer.dequeue().value;
- tmp  += _draw_buffer.dequeue().value;
- tmp  += _draw_buffer.dequeue().value;
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
 
- tmp  += _draw_buffer.dequeue().value;
- tmp  += _draw_buffer.dequeue().value;
- tmp  += _draw_buffer.dequeue().value;
- tmp  += _draw_buffer.dequeue().value;
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
 
- tmp  += _draw_buffer.dequeue().value;
- tmp  += _draw_buffer.dequeue().value;
- tmp  += _draw_buffer.dequeue().value;
- tmp  += _draw_buffer.dequeue().value;
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
 
- tmp  += _draw_buffer.dequeue().value;
- tmp  += _draw_buffer.dequeue().value;
- tmp  += _draw_buffer.dequeue().value;
- tmp  += _draw_buffer.dequeue().value;
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue();
 
  tmp >>= 13; // to 7 bit
- 
-// voices::sample        tmp = _draw_buffer.dequeue() >> 8;
 
+ uint16_t wave_color = ILI9341_YELLOW;
+ 
+ if (tmp > 62) {
+  tmp.value = 62;
+  // wave_color = ILI9341_RED;
+ }
+ else if (tmp < -63) {
+  tmp.value = -63;
+  // wave_color = ILI9341_RED;
+ }
+ 
  static const uint16_t width = 172;
  static uint16_t       col = 0;
  uint16_t              tmp_col = col % width;
@@ -73,15 +79,16 @@ bool application::graph() {
   _tft.drawFastVLine(
    tmp_col,
    64,
-   tmp,
-   ILI9341_YELLOW
+   tmp.value,
+   wave_color
   );
  else if (tmp < 0) {
   _tft.drawFastVLine(
    tmp_col,
-   64 + tmp,
-   abs(tmp),
-   ILI9341_YELLOW);
+   64 + tmp.value,
+   abs(tmp.value),
+   wave_color
+  );
  }
 
  _tft.drawFastHLine(0,     64,  width, ILI9341_WHITE);
@@ -125,8 +132,10 @@ void application::k_rate() {
   case application_event_type::EVT_VOLUME:
   {
    
-   voices::volume(u0q16(ae.parameter << 4));
+   voices::volume(voices::volume_type(ae.parameter << 4));
 
+   // Serial.print("Vol: ");
+   // Serial.print(float(voices::volume()));   
  // Serial.print("Read ");
  // Serial.print(analogRead(PA3));
  // Serial.print(" ");
@@ -136,8 +145,7 @@ void application::k_rate() {
  // Serial.print(" ");
  // Serial.print(analogRead(PA6));
  // Serial.print(" ");
- // Serial.println();
-
+//   Serial.println();
    break;
   }
   case application_event_type::EVT_TRIGGER:
@@ -239,8 +247,8 @@ void application::setup_dac() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::setup_timers() {
- device::maple_timer::setup(_timer_1, voices::S_RATE, s_rate);
- device::maple_timer::setup(_timer_2, K_RATE, k_rate);
+ device::maple_timer::setup(_timer_1, voices::S_RATE,     s_rate);
+ device::maple_timer::setup(_timer_2, ::controls::K_RATE, k_rate);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

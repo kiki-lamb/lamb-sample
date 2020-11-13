@@ -19,16 +19,9 @@ public:
  typedef controls::application_event                        application_event;
  typedef controls::application_event_type                   application_event_type;
   
- static const      uint32_t             TFT_DC              = PA8;
- static const      uint32_t             TFT_CS              = PB12;
-
- static const      uint32_t             I2S_WS              = PA15;
- static const      uint32_t             I2S_BCK             = PA5;
- static const      uint32_t             I2S_DATA            = PA7;
-
- static const      uint32_t             K_RATE;
- static const      uint32_t             CAPTURE_RATIO;
- static const      uint32_t             V_SPACING;
+ static constexpr  uint32_t             TFT_DC              = PA8;
+ static constexpr  uint32_t             TFT_CS              = PB12;
+ static constexpr  uint32_t             I2S_WS              = PA15;
 
 private:
  
@@ -103,22 +96,27 @@ private:
    uint16_t x_pos = _x_pos + 11 * _name_len;
    
    application::_tft.setCursor(x_pos, _y_pos);
-
-   uint16_t text_red   = (64 - _value) >> 1;
-   uint16_t text_green = (64 - _value) >> 0;
-   uint16_t text_blue  = (64 - _value) >> 1;
-   uint16_t text_color = (text_red << 11) | (text_green << 5) | text_blue;
-   
-   application::_tft.setTextColor( text_color );
+   application::_tft.setTextColor(ILI9341_YELLOW);
    application::_tft.setTextSize(2);
 
-   uint8_t red_value  = _value > 32 ? _value - 32 : 0;
-   uint8_t blue_value = 32 - (_value >> 1);
+   uint16_t color;
+
+   if (_value < 32) {
+    color = ILI9341_GREEN;
+   }
+   else {
+    uint16_t tmp = _value - 32;
+
+    uint8_t red_value   = tmp;
+    uint8_t green_value = 64 - (tmp << 1);
+    
+    color = (red_value << 11) | (green_value << 5);
+   }
    
    application::_tft.fillRect (
     x_pos, _y_pos - 2,
     _value, 18,
-    (red_value << 11) | blue_value
+    color
    );
    
    application::_tft.fillRect (x_pos + _value, _y_pos - 2, _width - _value, 18, ILI9341_BLACK);
