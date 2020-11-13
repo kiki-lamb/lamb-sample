@@ -10,16 +10,13 @@
 
 class voices {
 public:
- typedef lamb::s0q15                                          sample_q;
- typedef sample_q::value_type                                 sample;
- typedef lamb::oneshot<sample, sample_q>                      voice;
- typedef typename lamb::sample_type_traits<sample>::mix_type  mix;
+ typedef lamb::s0q15                                          sample;
+ typedef lamb::oneshot<sample::value_type, sample>            voice;
+ typedef lamb::s15q16                                         mix;
  typedef lamb::filters::basic<>                               filter;
   
  static const      uint32_t             S_RATE;
  static const      uint8_t              COUNT              = 6;
- static const      mix                  SILENCE            =
-  lamb::sample_type_traits<mix>::silence;
   
 private:
  voices() = default;

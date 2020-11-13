@@ -213,7 +213,6 @@ voices::sample voices::read() {
  auto bass_items  = _items;
  bass_items      += 3;
 
-// MIX_Q(bass , bass_items, 3);
  MIX_Q(mixed , bass_items, 3);
 
  if (mixed >= s15q16::ONE) {
@@ -221,15 +220,17 @@ voices::sample voices::read() {
  };
 
  mixed -= mixed >> 2;
- mixed = _lpf.process(s0q15(mixed)); 
+ mixed  =_lpf.process(s0q15(mixed)); 
  
  MIX_Q(mixed, _items,     3);
+
+ mixed *= _volume;
 
  if (mixed >= s15q16::ONE) {
   Serial.println("WARNING, RED LINE!");
  };
-
- return (mixed * _volume).value; //  >> 1;
+ 
+ return mixed;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

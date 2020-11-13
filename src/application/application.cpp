@@ -39,25 +39,25 @@ bool application::graph() {
 
  int32_t tmp = 0;
  
- tmp  += _draw_buffer.dequeue();
- tmp  += _draw_buffer.dequeue();
- tmp  += _draw_buffer.dequeue();
- tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue().value;
+ tmp  += _draw_buffer.dequeue().value;
+ tmp  += _draw_buffer.dequeue().value;
+ tmp  += _draw_buffer.dequeue().value;
 
- tmp  += _draw_buffer.dequeue();
- tmp  += _draw_buffer.dequeue();
- tmp  += _draw_buffer.dequeue();
- tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue().value;
+ tmp  += _draw_buffer.dequeue().value;
+ tmp  += _draw_buffer.dequeue().value;
+ tmp  += _draw_buffer.dequeue().value;
 
- tmp  += _draw_buffer.dequeue();
- tmp  += _draw_buffer.dequeue();
- tmp  += _draw_buffer.dequeue();
- tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue().value;
+ tmp  += _draw_buffer.dequeue().value;
+ tmp  += _draw_buffer.dequeue().value;
+ tmp  += _draw_buffer.dequeue().value;
 
- tmp  += _draw_buffer.dequeue();
- tmp  += _draw_buffer.dequeue();
- tmp  += _draw_buffer.dequeue();
- tmp  += _draw_buffer.dequeue();
+ tmp  += _draw_buffer.dequeue().value;
+ tmp  += _draw_buffer.dequeue().value;
+ tmp  += _draw_buffer.dequeue().value;
+ tmp  += _draw_buffer.dequeue().value;
 
  tmp >>= 13; // to 7 bit
  
