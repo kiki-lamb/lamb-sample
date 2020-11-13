@@ -22,8 +22,8 @@ application::dac             application::_dac               ( application::I2S_
 application::tft             application::_tft(application::TFT_CS, application::TFT_DC  );
 application::draw_buffer     application::_draw_buffer;         
 
-application::displayed_value<uint16_t>
-application::_displayed_filter_freq("FREQ", 160, 20);
+application::displayed_value<voices::filter::unsigned_internal_t::value_type>
+application::_displayed_filter_freq("Freq", 190, 20, 8);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -56,7 +56,7 @@ bool application::graph() {
 // voices::sample        tmp = _draw_buffer.dequeue() >> 8;
 
  static uint16_t       col = 0;
- uint16_t              tmp_col = col & 0xff;
+ uint16_t              tmp_col = col % 180; // & 0x7f;
 // uint16_t            tmp_volume = 119 - (voices::volume() >> 4);
   
  _tft.drawFastVLine(tmp_col, 0, 240, ILI9341_BLACK);
@@ -140,7 +140,7 @@ void application::k_rate() {
   {
    lamb::u0q16 parameter(ae.parameter << 4); // 12 sig bits to 16
 
-//   _displayed_filter_freq.update(ae.parameter >> 4);
+   _displayed_filter_freq.update(parameter.value);
    
    // Serial.print("F: ");
    // Serial.println(parameter.value);

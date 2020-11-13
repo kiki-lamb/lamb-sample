@@ -55,6 +55,7 @@ private:
   uint8_t       _name_len;
   uint16_t      _x_pos;
   uint16_t      _y_pos;
+  uint8_t       _downshift;
   uint16_t      _width;
   uint32_t      _color;
   
@@ -63,24 +64,27 @@ private:
    char     const * name,
    uint16_t const & x_pos,
    uint16_t const & y_pos,
+   uint8_t  const & downshift,
    uint16_t const & width = 60,
    uint32_t const & color = ILI9341_GREEN) :
-//   _flagged(true),
    _name(name),
    _name_len(strlen(name)),
    _x_pos(x_pos),
    _y_pos(y_pos),
+   _downshift(downshift),
    _width(width),
    _color(color) {}
   
-  void update(value_t const & newval) {
+  void update(value_t newval) {
+   newval >>= _downshift;
+   
    if (_value == newval) {
-    Serial.println("Abort.");
+    // Serial.println("Abort.");
 
     return;
    }
 
-   Serial.println("Draw.");
+   // Serial.println("Draw.");
    
    _value   = newval;
    
@@ -94,7 +98,8 @@ private:
   }
  };
 
- static            displayed_value<uint16_t> _displayed_filter_freq;
+ static            displayed_value<voices::filter::unsigned_internal_t::value_type>
+ _displayed_filter_freq;
   
  static            void                 k_rate();
  static            void                 s_rate();
