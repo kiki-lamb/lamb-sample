@@ -66,7 +66,10 @@ private:
   control_event const & control_event
  );
 
- template <typename s_t, typename d_t> static void configure(d_t* arr, size_t count, size_t & ix);
+ template <typename s_t, uint8_t count, typename c_t> static void setup(
+  c_t arr[count],
+  uint8_t & ix
+ );
   
 public:
  static       void                 setup();

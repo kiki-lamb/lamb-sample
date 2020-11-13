@@ -25,9 +25,9 @@ controls::combined_source controls::_control_event_source;
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename s_t, typename d_t>
-void controls::configure(d_t * arr, size_t count, size_t & ix) {
- for (size_t bix = 0; bix < count; ix++, bix++) {
+template <typename s_t, uint8_t count, typename c_t>
+void controls::setup(c_t arr[count], uint8_t & ix) {
+ for (uint8_t bix = 0; bix < count; ix++, bix++) {
   arr[bix].device.number = bix;
   arr[bix].device.setup();
 
@@ -38,22 +38,9 @@ void controls::configure(d_t * arr, size_t count, size_t & ix) {
 
 void controls::setup() {
  uint8_t ix = 0;
- 
-  for (size_t bix = 0; bix < BUTTONS_COUNT; ix++, bix++) {
-  _buttons[bix].device.number = bix;
-  _buttons[bix].device.setup();
-  
-  _control_event_source.sources[ix] =
-   new button_source(&_buttons[bix].device);
- }
 
- for (size_t six = 0; six < SIGNALS_COUNT; ix++, six++) {
-  _signals[six].device.number = six;
-  _signals[six].device.setup();
-  
-  _control_event_source.sources[ix] =
-   new signal_source(&_signals[six].device);
- }
+ setup<button_source, BUTTONS_COUNT>(_buttons, ix);
+ setup<signal_source, SIGNALS_COUNT>(_signals, ix);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
