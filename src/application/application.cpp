@@ -127,9 +127,7 @@ void application::k_rate() {
    
    voices::volume(u0q16(ae.parameter << 4));
 
-   // Serial.print("Vol: ");
-   // Serial.println(u0q16(ae.parameter << 4).value);
-   //  Serial.print("Read ");
+ // Serial.print("Read ");
  // Serial.print(analogRead(PA3));
  // Serial.print(" ");
  // Serial.print(analogRead(PA4));
@@ -138,19 +136,7 @@ void application::k_rate() {
  // Serial.print(" ");
  // Serial.print(analogRead(PA6));
  // Serial.print(" ");
- Serial.println();
-   // Serial.print("Vol: ");
-   // Serial.println(u0q16(ae.parameter << 4).value);
- Serial.print("Read ");
- Serial.print(analogRead(PA3));
- Serial.print(" ");
- Serial.print(analogRead(PA4));
- Serial.print(" ");
- Serial.print(analogRead(PA5));
- Serial.print(" ");
- Serial.print(analogRead(PA6));
- Serial.print(" ");
- Serial.println();
+ // Serial.println();
 
    break;
   }
