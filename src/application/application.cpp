@@ -22,7 +22,8 @@ application::dac             application::_dac               ( application::I2S_
 application::tft             application::_tft(application::TFT_CS, application::TFT_DC  );
 application::draw_buffer     application::_draw_buffer;         
 
-application::displayed_value<u0q16> _displaye_filter_freq("FREQ");
+application::displayed_value<uint16_t>
+application::_displayed_filter_freq("FREQ", 160, 20);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -139,6 +140,8 @@ void application::k_rate() {
   {
    lamb::u0q16 parameter(ae.parameter << 4); // 12 sig bits to 16
 
+   _displayed_filter_freq.update(ae.parameter >> 4);
+   
    // Serial.print("F: ");
    // Serial.println(parameter.value);
    
@@ -148,7 +151,7 @@ void application::k_rate() {
   }
   case application_event_type::EVT_FILTER_Q_1:
   {
-   lamb::u0q16 parameter(ae.parameter << 4); // 12 sig bits to 16
+   lamb::u0q16 parameter(ae.parameter >> 4); // 12 sig bits to 16
      
    voices::filter_q(parameter);
      

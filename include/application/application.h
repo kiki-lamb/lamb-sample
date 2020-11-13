@@ -10,25 +10,38 @@
 #include "events/application.h"
 
 class application {
+
 public:
-  typedef lamb::device::Adafruit_ILI9341_STM_SPI2            tft;
-  typedef lamb::device::pt8211                               dac;
-  typedef lamb::ring_buffer<voices::sample, 256>             draw_buffer;
-  typedef controls::application_event                        application_event;
-  typedef controls::application_event_type                   application_event_type;
+ 
+ typedef lamb::device::Adafruit_ILI9341_STM_SPI2            tft;
+ typedef lamb::device::pt8211                               dac;
+ typedef lamb::ring_buffer<voices::sample, 256>             draw_buffer;
+ typedef controls::application_event                        application_event;
+ typedef controls::application_event_type                   application_event_type;
   
-  static const      uint32_t             TFT_DC              = PA8;
-  static const      uint32_t             TFT_CS              = PB12;
+ static const      uint32_t             TFT_DC              = PA8;
+ static const      uint32_t             TFT_CS              = PB12;
 
-  static const      uint32_t             I2S_WS              = PA15;
-  static const      uint32_t             I2S_BCK             = PA5;
-  static const      uint32_t             I2S_DATA            = PA7;
+ static const      uint32_t             I2S_WS              = PA15;
+ static const      uint32_t             I2S_BCK             = PA5;
+ static const      uint32_t             I2S_DATA            = PA7;
 
-  static const      uint32_t             K_RATE;
-  static const      uint32_t             CAPTURE_RATIO;
-  static const      uint32_t             V_SPACING;
+ static const      uint32_t             K_RATE;
+ static const      uint32_t             CAPTURE_RATIO;
+ static const      uint32_t             V_SPACING;
 
 private:
+ 
+ static            int32_t              _avg_sample;
+ static            size_t               _sample_ix0;
+ static            size_t               _sample_ix1;
+ static            HardwareTimer        _timer_1; 
+ static            HardwareTimer        _timer_2;
+ static            HardwareTimer        _timer_3;
+ static            dac                  _dac;
+ static            tft                  _tft;
+ static            draw_buffer          _draw_buffer;
+
  template <typename value_t_>
  class displayed_value {
 
@@ -36,46 +49,63 @@ private:
   typedef value_t_ value_t;
  
  private:
-  value_t  _value;
-  bool     _flagged;
-  uint32_t _color;
+  value_t       _value;
+//  bool          _flagged;
+  char const *  _name;
+  uint8_t       _name_len;
+  uint16_t      _x_pos;
+  uint16_t      _y_pos;
+  uint16_t      _width;
+  uint32_t      _color;
+  
  public:
   displayed_value(
-   const char * name,
-   uint32_t color = ILI9341_GREEN) :
-   _flagged(true), _color(color) {}
+   char     const * name,
+   uint16_t const & x_pos,
+   uint16_t const & y_pos,
+   uint16_t const & width = 60,
+   uint32_t const & color = ILI9341_GREEN) :
+//   _flagged(true),
+   _name(name),
+   _name_len(strlen(name)),
+   _x_pos(x_pos),
+   _y_pos(y_pos),
+   _width(width),
+   _color(color) {}
   
   void update(value_t const & newval) {
-   if (_value != newval) {
-    _value = newval;
-    _flagged = true;
+   if (_value == newval) {
+    Serial.println("Abort.");
+
+    return;
    }
+
+   Serial.println("Draw.");
+   
+   _value   = newval;
+   
+   application::_tft.setCursor(_x_pos, _y_pos);
+   application::_tft.setTextColor(_color);
+   application::_tft.setTextSize(2);
+   application::_tft.fillRect(_x_pos + 15 * _name_len, _y_pos, _width, 16, ILI9341_BLACK);
+   application::_tft.print(_name);
+   application::_tft.print(": ");    
+   application::_tft.print(_value);
   }
  };
 
- displayed_value<lamb::u0q16> _displayed_filter_freq;
- 
-  static            int32_t              _avg_sample;
-  static            size_t               _sample_ix0;
-  static            size_t               _sample_ix1;
-  static            HardwareTimer        _timer_1; 
-  static            HardwareTimer        _timer_2;
-  static            HardwareTimer        _timer_3;
-  static            dac                  _dac;
-  static            tft                  _tft;
-  static            draw_buffer          _draw_buffer;
-
+ static            displayed_value<uint16_t> _displayed_filter_freq;
   
-  static            void                 k_rate();
-  static            void                 s_rate();
-  static            bool                 graph();  
-  static            void                 setup_tft();
-  static            void                 setup_dac();
-  static            void                 setup_timers();
+ static            void                 k_rate();
+ static            void                 s_rate();
+ static            bool                 graph();  
+ static            void                 setup_tft();
+ static            void                 setup_dac();
+ static            void                 setup_timers();
   
 public:
-  static            void                 setup();
-  static            void                 loop();
+ static            void                 setup();
+ static            void                 loop();
 };
 
 #endif
