@@ -149,22 +149,22 @@ u0q16::value_type voices::volume() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-uint32_t voices::filter_f() {
+voices::filter::unsigned_internal_t voices::filter_f() {
 // return 0;
  
- return _lpf.freq().value;
+ return _lpf.freq();
 }
   
 ////////////////////////////////////////////////////////////////////////////////
 
-uint32_t voices::filter_q() {
+voices::filter::unsigned_internal_t voices::filter_q() {
  
- return _lpf.res().value; // .value;
+ return _lpf.res(); // .value;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void voices::filter_f(u0q16 const & x) {
+void voices::filter_f(voices::filter::unsigned_internal_t const & x) {
   // Serial.print("F: ");
   // Serial.print(x.value);
   // Serial.print(" ");
@@ -175,7 +175,7 @@ void voices::filter_f(u0q16 const & x) {
   
 ////////////////////////////////////////////////////////////////////////////////
 
-void voices::filter_q(u0q16 const & x) {
+void voices::filter_q(voices::filter::unsigned_internal_t const & x) {
  // Serial.print("Q: ");
  // Serial.print(x.value);
  // Serial.print(" ");

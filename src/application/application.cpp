@@ -140,7 +140,7 @@ void application::k_rate() {
   {
    lamb::u0q16 parameter(ae.parameter << 4); // 12 sig bits to 16
 
-   _displayed_filter_freq.update(ae.parameter >> 4);
+//   _displayed_filter_freq.update(ae.parameter >> 4);
    
    // Serial.print("F: ");
    // Serial.println(parameter.value);

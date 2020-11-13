@@ -43,10 +43,10 @@ public:
  static            voice &              item(size_t const & ix);  
  static            void                 trigger(uint8_t const & ix);
  static            lamb::u0q16::value_type        volume();
- static            void                 filter_f(lamb::u0q16 const & f_);
- static            void                 filter_q(lamb::u0q16 const & q_);
- static            uint32_t             filter_f();
- static            uint32_t             filter_q();  
+ static            void                 filter_f(filter::unsigned_internal_t const & f_);
+ static            void                 filter_q(filter::unsigned_internal_t const & q_);
+ static            filter::unsigned_internal_t filter_f();
+ static            filter::unsigned_internal_t filter_q();  
  static            sample               read();
  static            void                 setup();
  static            bool                 volume(uint12_t const & volume);
