@@ -23,10 +23,13 @@ application::tft             application::_tft(application::TFT_CS, application:
 application::draw_buffer     application::_draw_buffer;         
 
 application::displayed_value<voices::filter::unsigned_internal_t::value_type>
-application::_displayed_filter_freq("Freq: ", 184, 4,  10, 64);
+application::_displayed_filter_freq("Freq: ", 184, 5,  10, 64);
 
 application::displayed_value<voices::filter::unsigned_internal_t::value_type>
-application::_displayed_filter_res ("Res:  ", 184, 29, 10, 64);
+application::_displayed_filter_res ("Res:  ", 184, 30, 10, 64);
+
+application::displayed_value<u0q16::value_type>
+application::_displayed_vol ("Vol:  ", 184, 55, 10, 64);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -121,8 +124,12 @@ void application::k_rate() {
   switch (ae.type) {
   case application_event_type::EVT_VOLUME:
   {
-   voices::volume(ae.parameter);
+   
+   voices::volume(u0q16(ae.parameter << 4));
 
+   // Serial.print("Vol: ");
+   // Serial.println(u0q16(ae.parameter << 4).value);
+   
    break;
   }
   case application_event_type::EVT_TRIGGER:
@@ -267,6 +274,7 @@ void application::loop() {
 
   _displayed_filter_freq.update(voices::filter_f().value);
   _displayed_filter_res .update(voices::filter_q().value);
+  _displayed_vol        .update(voices::volume().value);
  } 
  
  if (graph())

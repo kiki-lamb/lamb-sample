@@ -8,7 +8,7 @@ controls::signal_configuration controls::_signals[controls::SIGNALS_COUNT] = {
  { { PA2    }, application_event_type::EVT_UNKNOWN    },
  { { PA3, 3 }, application_event_type::EVT_FILTER_F_1 },
  { { PA4, 3 }, application_event_type::EVT_FILTER_Q_1 },
- { { PA5    }, application_event_type::EVT_UNKNOWN    },
+ { { PA5, 3 }, application_event_type::EVT_VOLUME     },
  { { PA6, 3 }, application_event_type::EVT_PITCH_1    },
 };
 

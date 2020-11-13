@@ -133,6 +133,9 @@ private:
  static            displayed_value<voices::filter::unsigned_internal_t::value_type>
  _displayed_filter_res;
   
+ static            displayed_value<lamb::u0q16::value_type>
+ _displayed_vol;
+  
  static            void                 k_rate();
  static            void                 s_rate();
  static            bool                 graph();  

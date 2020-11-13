@@ -33,7 +33,7 @@ private:
 
  static            filter               _lpf;  
  static            lamb::u0q32::value_type        _phincrs[120];
- static            lamb::u0q16::value_type        _volume;
+ static            lamb::u0q16          _volume;
  static            voice *              _items[COUNT];
   
  static            void                 generate_phincrs();  
@@ -41,14 +41,14 @@ private:
 public:
  static            voice &              item(size_t const & ix);  
  static            void                 trigger(uint8_t const & ix);
- static            lamb::u0q16::value_type        volume();
+ static            lamb::u0q16          volume();
  static            void                 filter_f(filter::unsigned_internal_t const & f_);
  static            void                 filter_q(filter::unsigned_internal_t const & q_);
  static            filter::unsigned_internal_t filter_f();
  static            filter::unsigned_internal_t filter_q();  
  static            sample               read();
  static            void                 setup();
- static            bool                 volume(uint12_t const & volume);
+ static            bool                 volume(lamb::u0q16 const & volume);
  static            bool                 pitch(
   uint8_t  const & voice_ix,
   uint12_t const & parameter
