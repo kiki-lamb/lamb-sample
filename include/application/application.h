@@ -91,15 +91,17 @@ private:
    application::_tft.setCursor(_x_pos, _y_pos);
    application::_tft.setTextColor(_color);
    application::_tft.setTextSize(2);
-   application::_tft.fillRect(_x_pos + 15 * _name_len, _y_pos, _width, 16, ILI9341_BLACK);
+   application::_tft.fillRect(_x_pos + 15 * _name_len, _y_pos, _width, 16, ILI9341_RED);
    application::_tft.print(_name);
-   application::_tft.print(": ");    
    application::_tft.print(_value);
   }
  };
 
  static            displayed_value<voices::filter::unsigned_internal_t::value_type>
  _displayed_filter_freq;
+
+ static            displayed_value<voices::filter::unsigned_internal_t::value_type>
+ _displayed_filter_res;
   
  static            void                 k_rate();
  static            void                 s_rate();
