@@ -23,10 +23,10 @@ application::tft             application::_tft(application::TFT_CS, application:
 application::draw_buffer     application::_draw_buffer;         
 
 application::displayed_value<voices::filter::unsigned_internal_t::value_type>
-application::_displayed_filter_freq("Freq: ", 160, 20, 10, 64);
+application::_displayed_filter_freq("Freq: ", 168, 20, 10, 64);
 
 application::displayed_value<voices::filter::unsigned_internal_t::value_type>
-application::_displayed_filter_res ("Res:  ", 160, 40, 10, 64);
+application::_displayed_filter_res ("Res:  ", 168, 40, 10, 64);
 
 ////////////////////////////////////////////////////////////////////////////////
 
