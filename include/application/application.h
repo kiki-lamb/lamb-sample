@@ -65,7 +65,7 @@ private:
    uint16_t const & x_pos,
    uint16_t const & y_pos,
    uint8_t  const & downshift,
-   uint16_t const & width = 60,
+   uint16_t const & width = 50,
    uint32_t const & color = ILI9341_GREEN) :
    _name(name),
    _name_len(strlen(name)),
@@ -91,7 +91,7 @@ private:
    application::_tft.setCursor(_x_pos, _y_pos);
    application::_tft.setTextColor(_color);
    application::_tft.setTextSize(2);
-   application::_tft.fillRect(_x_pos + 15 * _name_len, _y_pos, _width, 16, ILI9341_RED);
+   application::_tft.fillRect(_x_pos + 10 * _name_len, _y_pos, _width, 16, ILI9341_BLACK);
    application::_tft.print(_name);
    application::_tft.print(_value);
   }
