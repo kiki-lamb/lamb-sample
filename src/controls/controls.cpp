@@ -79,33 +79,8 @@ controls::application_event controls::dequeue_event() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-controls::application_event controls::process_control_event(
- controls::control_event const & control_event
-) {
- application_event application_event;
- application_event.type = application_event_type::EVT_UNKNOWN;
-
- switch (control_event.type) {
- case control_event_type::CTL_EVT_NOT_AVAILABLE:
-  application_event.type = application_event_type::APP_EVT_NOT_AVAILABLE;    
-  return application_event;
-    
- case control_event_type::EVT_SIGNAL:
-  return process_signal_event(control_event);
-
- case control_event_type::EVT_BUTTON:
-  return process_button_event(control_event);  
-
- case control_event_type::EVT_ENCODER:
-  return process_encoder_event(control_event);  
- }
-
- return application_event;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-controls::application_event controls::process_signal_event(
+template <>
+controls::application_event controls::process<controls::control_event_type::EVT_SIGNAL>(
  controls::control_event const & control_event
 ) {
  uint16_t          sig_val = control_event.parameter & 0x0fff;
@@ -129,7 +104,8 @@ controls::application_event controls::process_signal_event(
 }
 ////////////////////////////////////////////////////////////////////////////////
 
-controls::application_event controls::process_button_event(
+template <>
+controls::application_event controls::process<controls::control_event_type::EVT_BUTTON>(
  controls::control_event const & control_event
 ) {
  uint8_t           button_number  = control_event.parameter_hi();
@@ -150,12 +126,39 @@ controls::application_event controls::process_button_event(
 
 ////////////////////////////////////////////////////////////////////////////////
 
-controls::application_event controls::process_encoder_event(
+template <>
+controls::application_event controls::process<controls::control_event_type::EVT_ENCODER>(
  controls::control_event const & control_event
 ) {
  application_event application_event(application_event_type::EVT_UNKNOWN, 0);
 
  Serial.println("Don't know how to process encoders yet!");
+
+ return application_event;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+controls::application_event controls::process_control_event(
+ controls::control_event const & control_event
+) {
+ application_event application_event;
+ application_event.type = application_event_type::EVT_UNKNOWN;
+
+ switch (control_event.type) {
+ case control_event_type::CTL_EVT_NOT_AVAILABLE:
+  application_event.type = application_event_type::APP_EVT_NOT_AVAILABLE;    
+  return application_event;
+    
+ case control_event_type::EVT_SIGNAL:
+  return process<control_event_type::EVT_SIGNAL>(control_event);
+
+ case control_event_type::EVT_BUTTON:
+  return process<control_event_type::EVT_BUTTON>(control_event);  
+
+ case control_event_type::EVT_ENCODER:
+  return process<control_event_type::EVT_ENCODER>(control_event);  
+ }
 
  return application_event;
 }

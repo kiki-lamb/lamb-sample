@@ -53,24 +53,18 @@ private:
  static       application_event    process_control_event(
   control_event const & control_event
  );
-
- static       application_event    process_button_event(
-  control_event const & control_event
- );
-
- static       application_event    process_encoder_event(
-  control_event const & control_event
- );
-
- static       application_event    process_signal_event(
-  control_event const & control_event
- );
-
- template <typename s_t, uint8_t count, typename c_t> static void setup(
+ 
+ template <typename s_t, uint8_t count, typename c_t>
+ static void setup(
   c_t arr[count],
   uint8_t & ix
  );
-  
+
+ template <control_event_type cet>
+ static  application_event process_control_event_type(
+  control_event const & control_event
+ );
+ 
 public:
  static       void                 setup();
  static       void                 loop();
