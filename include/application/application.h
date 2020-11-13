@@ -103,10 +103,11 @@ private:
    uint16_t x_pos = _x_pos + 12 * _name_len;
    
    application::_tft.setCursor(x_pos, _y_pos);
-   application::_tft.setTextColor(_color);
+   application::_tft.setTextColor(ILI9341_BLACK);
    application::_tft.setTextSize(2);
 
-   application::_tft.fillRect (x_pos, _y_pos, _width, 16, ILI9341_BLACK);
+   application::_tft.fillRect (x_pos, _y_pos - 1, _value, 17, ILI9341_GREEN);
+   application::_tft.fillRect (x_pos + _value, _y_pos - 1, _width - _value, 17, ILI9341_BLACK);
 
    application::_tft.print(_value);
   }
