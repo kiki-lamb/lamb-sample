@@ -29,8 +29,32 @@ public:
   static const      uint32_t             V_SPACING;
 
 private:
-  application() = default;
+ template <typename value_t_>
+ class displayed_value {
+
+ public:
+  typedef value_t_ value_t;
+ 
+ private:
+  value_t  _value;
+  bool     _flagged;
+  uint32_t _color;
+ public:
+  displayed_value(
+   const char * name,
+   uint32_t color = ILI9341_GREEN) :
+   _flagged(true), _color(color) {}
   
+  void update(value_t const & newval) {
+   if (_value != newval) {
+    _value = newval;
+    _flagged = true;
+   }
+  }
+ };
+
+ displayed_value<lamb::u0q16> _displayed_filter_freq;
+ 
   static            int32_t              _avg_sample;
   static            size_t               _sample_ix0;
   static            size_t               _sample_ix1;

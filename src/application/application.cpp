@@ -22,6 +22,8 @@ application::dac             application::_dac               ( application::I2S_
 application::tft             application::_tft(application::TFT_CS, application::TFT_DC  );
 application::draw_buffer     application::_draw_buffer;         
 
+application::displayed_value<u0q16> _displaye_filter_freq("FREQ");
+
 ////////////////////////////////////////////////////////////////////////////////
 
 bool application::graph() {
