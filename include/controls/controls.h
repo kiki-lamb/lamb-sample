@@ -65,6 +65,8 @@ private:
  static       application_event    process_signal_event(
   control_event const & control_event
  );
+
+ template <typename s_t, typename d_t> static void configure(d_t* arr, size_t count, size_t & ix);
   
 public:
  static       void                 setup();
@@ -72,7 +74,6 @@ public:
  static       void                 poll();
  static       application_event    dequeue_event();
  static       size_t               queue_count();
- template <typename s_t, typename d_t> static void configure(d_t* arr, size_t count);
 };
 
 #endif

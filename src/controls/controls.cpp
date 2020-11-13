@@ -26,10 +26,13 @@ controls::combined_source controls::_control_event_source;
 //////////////////////////////////////////////////////////////////////////////
 
 template <typename s_t, typename d_t>
-void configure(d_t * arr, size_t count) {
- for (size_t bix = 0; bix < count; bix++) {
+void controls::configure(d_t * arr, size_t count, size_t & ix) {
+ for (size_t bix = 0; bix < count; ix++, bix++) {
   arr[bix].device.number = bix;
   arr[bix].device.setup();
+
+  _control_event_source.sources[ix] =
+   new s_t(&arr[bix].device);   
  } 
 }
 
