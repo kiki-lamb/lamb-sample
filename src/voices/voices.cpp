@@ -6,10 +6,10 @@ using namespace lamb;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const uint32_t       voices::S_RATE            { 32768                                    };
-voices::voice *      voices::_items            [ voices::COUNT                               ];
-u0q32::value_type    voices::_phincrs[120]   = { 0                                           };
-u0q16                voices::_volume           { 1000                                        };
+const uint32_t       voices::S_RATE            { 32768                         };
+voices::voice *      voices::_items            [ voices::COUNT                 ];
+u0q32                voices::_phincrs[120]   = { u0q32(0)                      };
+u0q16                voices::_volume           { 1000                          };
 voices::filter       voices::_lpf;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -45,9 +45,9 @@ void voices::setup() {
  item(4).amplitude = u0q8(0xd0); // bass
  item(5).amplitude = u0q8(0xd0); // bass
 
- item(3).phincr = u0q32(_phincrs[BASS_ROOT_NOTE +  0  ]);
- item(4).phincr = u0q32(_phincrs[BASS_ROOT_NOTE +  0  ]);
- item(5).phincr = u0q32(_phincrs[BASS_ROOT_NOTE +  1  ]);
+ item(3).phincr = _phincrs[BASS_ROOT_NOTE +  0  ];
+ item(4).phincr = _phincrs[BASS_ROOT_NOTE +  0  ];
+ item(5).phincr = _phincrs[BASS_ROOT_NOTE +  1  ];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -102,7 +102,7 @@ void voices::generate_phincrs() {
 
    Serial.println();
 
-   voices::_phincrs[write_ix] = tmp_phincr;
+   voices::_phincrs[write_ix] = u0q32(tmp_phincr);
   }
  }
  
@@ -200,8 +200,7 @@ bool voices::pitch(uint8_t const & voice_ix, u0q16::value_type const & parameter
   0, 2, 3, 5, 7, 8, 10, 12
  };
 
- item(voice_ix).next_phincr =
-  u0q32(_phincrs[notes[notes_ix] + BASS_ROOT_NOTE]);
+ item(voice_ix).next_phincr = _phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
 
   return true;
 }
