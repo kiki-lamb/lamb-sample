@@ -209,24 +209,22 @@ bool voices::pitch(uint8_t const & voice_ix, u0q16::value_type const & parameter
 //////////////////////////////////////////////////////////////////////////////
 
 voices::sample voices::read() {
- s15q16 mixed  { 0 };
- s15q16 bass   { 0 };
- // mix mixed        = SILENCE;
- // mix bass         = SILENCE;
+ s15q16 mixed     { 0 };
+ s15q16 bass      { 0 };
  auto bass_items  = _items;
  bass_items      += 3;
 
- MIX_Q(mixed, _items,       3);
- MIX_Q(bass , bass_items,   3);
+ MIX_Q(mixed, _items,     3);
+ MIX_Q(bass , bass_items, 3);
 
  if (bass > s15q16::ONE) {
   Serial.println("WARNING, attenuate before processing!");
  };
  
- bass      = _lpf.process(s0q15(bass) * s0q15(0x7800));
+ bass      = _lpf.process(s0q15(bass) * u0q16(0xc000));
  mixed   >>= 1;  
  mixed    += bass;
-  
+
 // AMPLIFY(mixed, _scaled_volume, 9);
 
  return mixed.value;
