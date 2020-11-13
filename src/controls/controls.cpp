@@ -2,46 +2,54 @@
 
 //////////////////////////////////////////////////////////////////////////////
 
-controls::signal_configuration          controls::_signals[controls::SIGNALS_COUNT] = {
+controls::signal_configuration controls::_signals[controls::SIGNALS_COUNT] = {
  { { PA0 }, application_event_type::EVT_UNKNOWN    },
  { { PA1 }, application_event_type::EVT_UNKNOWN    },
  { { PA2 }, application_event_type::EVT_UNKNOWN    },
  { { PA3 }, application_event_type::EVT_FILTER_F_1 },
  { { PA4 }, application_event_type::EVT_FILTER_Q_1 },
  { { PA5 }, application_event_type::EVT_UNKNOWN    },
- { { PA6 }, application_event_type::EVT_PITCH_1    }
+ { { PA6 }, application_event_type::EVT_PITCH_1    },
 };
 
-controls::button_configuration          controls::_buttons[controls::BUTTONS_COUNT] = {
- { { PB9  }, application_event_type::EVT_TRIGGER },
- { { PB8  }, application_event_type::EVT_TRIGGER },
- { { PB7  }, application_event_type::EVT_TRIGGER },
- { { PB6  }, application_event_type::EVT_TRIGGER },
- { { PA10 }, application_event_type::EVT_TRIGGER },
- { { PA9  }, application_event_type::EVT_TRIGGER },
+controls::button_configuration  controls::_buttons[controls::BUTTONS_COUNT] = {
+ { { PB9  }, application_event_type::EVT_TRIGGER   },
+ { { PB8  }, application_event_type::EVT_TRIGGER   },
+ { { PB7  }, application_event_type::EVT_TRIGGER   },
+ { { PB6  }, application_event_type::EVT_TRIGGER   },
+ { { PA10 }, application_event_type::EVT_TRIGGER   },
+ { { PA9  }, application_event_type::EVT_TRIGGER   },
 };
 
 controls::combined_source controls::_control_event_source;
 
 //////////////////////////////////////////////////////////////////////////////
 
+template <typename s_t, typename d_t>
+void configure(d_t * arr, size_t count) {
+ for (size_t bix = 0; bix < count; bix++) {
+  arr[bix].device.number = bix;
+  arr[bix].device.setup();
+ } 
+}
+
 void controls::setup() {
  uint8_t ix = 0;
  
- for (size_t bix = 0; bix < BUTTONS_COUNT; ix++, bix++) {
-  _buttons[bix].button.button_number = bix;
-  _buttons[bix].button.setup();
+  for (size_t bix = 0; bix < BUTTONS_COUNT; ix++, bix++) {
+  _buttons[bix].device.number = bix;
+  _buttons[bix].device.setup();
   
   _control_event_source.sources[ix] =
-   new button_source(&_buttons[bix].button);
+   new button_source(&_buttons[bix].device);
  }
 
  for (size_t six = 0; six < SIGNALS_COUNT; ix++, six++) {
-  _signals[six].signal.signal_number = six;
-  _signals[six].signal.setup();
+  _signals[six].device.number = six;
+  _signals[six].device.setup();
   
   _control_event_source.sources[ix] =
-   new signal_source(&_signals[six].signal);
+   new signal_source(&_signals[six].device);
  }
 }
 

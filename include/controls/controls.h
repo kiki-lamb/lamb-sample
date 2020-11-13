@@ -37,18 +37,18 @@ public:
 private:
 
  struct signal_configuration {
-  controls::signal               signal;
+  controls::signal               device;
   events::application_event_type application_event_type;
  };
 
  struct button_configuration {
-  controls::button               button;
+  controls::button               device;
   events::application_event_type application_event_type;
  };
  
- static signal_configuration           _signals[SIGNALS_COUNT];
- static button_configuration           _buttons[BUTTONS_COUNT];
- static combined_source                _control_event_source;
+ static  signal_configuration    _signals[SIGNALS_COUNT];
+ static  button_configuration    _buttons[BUTTONS_COUNT];
+ static  combined_source         _control_event_source;
 
  static       application_event    process_control_event(
   control_event const & control_event
@@ -72,6 +72,7 @@ public:
  static       void                 poll();
  static       application_event    dequeue_event();
  static       size_t               queue_count();
+ template <typename s_t, typename d_t> static void configure(d_t* arr, size_t count);
 };
 
 #endif
