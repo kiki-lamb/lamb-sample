@@ -129,7 +129,29 @@ void application::k_rate() {
 
    // Serial.print("Vol: ");
    // Serial.println(u0q16(ae.parameter << 4).value);
-   
+    Serial.print("Read ");
+ Serial.print(analogRead(PA3));
+ Serial.print(" ");
+ Serial.print(analogRead(PA4));
+ Serial.print(" ");
+ Serial.print(analogRead(PA5));
+ Serial.print(" ");
+ Serial.print(analogRead(PA6));
+ Serial.print(" ");
+ Serial.println();
+   // Serial.print("Vol: ");
+   // Serial.println(u0q16(ae.parameter << 4).value);
+   Serial.print("Read ");
+   Serial.print(analogRead(PA3));
+   Serial.print(" ");
+   Serial.print(analogRead(PA4));
+   Serial.print(" ");
+   Serial.print(analogRead(PA5));
+   Serial.print(" ");
+   Serial.print(analogRead(PA6));
+   Serial.print(" ");
+   Serial.println();
+
    break;
   }
   case application_event_type::EVT_TRIGGER:
