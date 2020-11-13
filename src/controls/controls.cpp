@@ -36,6 +36,8 @@ void controls::setup(c_t arr[count], uint8_t & ix) {
  } 
 }
 
+//////////////////////////////////////////////////////////////////////////////
+
 void controls::setup() {
  uint8_t ix = 0;
 
@@ -55,6 +57,7 @@ void controls::poll() {
 #ifdef LOG_EVENT_TIMES
  uint32_t start = millis();
 #endif
+
  _control_event_source.poll();
   
 #ifdef LOG_EVENT_TIMES
