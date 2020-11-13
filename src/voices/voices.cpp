@@ -210,7 +210,6 @@ bool voices::pitch(uint8_t const & voice_ix, u0q16::value_type const & parameter
 
 voices::sample voices::read() {
  s15q16 mixed     { 0 };
-// s15q16 bass      { 0 };
  auto bass_items  = _items;
  bass_items      += 3;
 
@@ -223,15 +222,12 @@ voices::sample voices::read() {
 
  mixed -= mixed >> 2;
  mixed = _lpf.process(s0q15(mixed)); 
- mixed <<= 1;
  
  MIX_Q(mixed, _items,     3);
 
-
- // mixed   >>= 1;  
- // mixed    += bass;
-
-// AMPLIFY(mixed, _scaled_volume, 9);
+ if (mixed >= s15q16::ONE) {
+  Serial.println("WARNING, RED LINE!");
+ };
 
  return mixed.value; //  >> 1;
 }
