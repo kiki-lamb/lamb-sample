@@ -67,7 +67,7 @@ private:
    uint16_t const & y_pos,
    uint8_t  const & downshift,
    uint16_t const & width = 50,
-   uint32_t const & color = ILI9341_WHITE) :
+   uint32_t const & color = ILI9341_GREEN) :
    _name(name),
    _name_len(strlen(name)),
    _x_pos(x_pos),
@@ -100,7 +100,7 @@ private:
     _drawn = true;
    }
 
-   uint16_t x_pos = _x_pos + 12 * _name_len;
+   uint16_t x_pos = _x_pos + 11 * _name_len;
    
    application::_tft.setCursor(x_pos, _y_pos);
 

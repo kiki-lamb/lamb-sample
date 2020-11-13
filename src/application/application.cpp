@@ -23,10 +23,10 @@ application::tft             application::_tft(application::TFT_CS, application:
 application::draw_buffer     application::_draw_buffer;         
 
 application::displayed_value<voices::filter::unsigned_internal_t::value_type>
-application::_displayed_filter_freq("Freq: ", 176, 20, 10, 64);
+application::_displayed_filter_freq("Freq: ", 184, 4,  10, 64);
 
 application::displayed_value<voices::filter::unsigned_internal_t::value_type>
-application::_displayed_filter_res ("Res:  ", 176, 45, 10, 64);
+application::_displayed_filter_res ("Res:  ", 184, 29, 10, 64);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -40,6 +40,7 @@ bool application::graph() {
  tmp  += _draw_buffer.dequeue();
  tmp  += _draw_buffer.dequeue();
  tmp  += _draw_buffer.dequeue();
+
  tmp  += _draw_buffer.dequeue();
  tmp  += _draw_buffer.dequeue();
  tmp  += _draw_buffer.dequeue();
@@ -49,39 +50,48 @@ bool application::graph() {
  tmp  += _draw_buffer.dequeue();
  tmp  += _draw_buffer.dequeue();
  tmp  += _draw_buffer.dequeue();
+
  tmp  += _draw_buffer.dequeue();
  tmp  += _draw_buffer.dequeue();
  tmp  += _draw_buffer.dequeue();
  tmp  += _draw_buffer.dequeue();
 
- tmp >>= 12;
+ tmp >>= 13; // to 7 bit
  
 // voices::sample        tmp = _draw_buffer.dequeue() >> 8;
 
+ static const uint16_t width = 172;
  static uint16_t       col = 0;
- uint16_t              tmp_col = col % 172;
-// uint16_t            tmp_volume = 119 - (voices::volume() >> 4);
+ uint16_t              tmp_col = col % width;
   
- _tft.drawFastVLine(tmp_col, 0, 240, ILI9341_BLACK);
-
- // _tft.drawPixel(tmp_col, tmp_volume,     ILI9341_GREEN);
- // _tft.drawPixel(tmp_col, 239-tmp_volume, ILI9341_GREEN);
+ _tft.drawFastVLine(tmp_col, 1, 128 - 2, ILI9341_BLACK);
   
  if (tmp > 0)
   _tft.drawFastVLine(
    tmp_col,
-   120,
+   64,
    tmp,
    ILI9341_YELLOW
   );
  else if (tmp < 0) {
   _tft.drawFastVLine(
    tmp_col,
-   120 + tmp,
+   64 + tmp,
    abs(tmp),
    ILI9341_YELLOW);
  }
-  
+
+ _tft.drawFastHLine(0,     64,  width, ILI9341_WHITE);
+
+ static bool box = false;
+
+ if (! box) {
+  _tft.drawFastHLine(0,     128, width, ILI9341_GREEN);
+  _tft.drawFastVLine(width, 0,   128,   ILI9341_GREEN);
+
+  box = true;
+ }
+ 
  col ++;
 // col %= col_max;
   
