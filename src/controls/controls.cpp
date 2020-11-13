@@ -129,42 +129,36 @@ controls::application_event controls::process_signal_event(
 
  return application_event;
 }
+////////////////////////////////////////////////////////////////////////////////
+
+controls::application_event controls::process_button_event(
+ controls::control_event const & control_event
+) {
+ uint8_t           button_number  = control_event.parameter_hi();
+ application_event application_event(application_event_type::EVT_UNKNOWN, button_number);
+
+ if (button_number < SIGNALS_COUNT) {
+  application_event.type      = _buttons[button_number].application_event_type;
+ } 
+
+#ifdef LOG_BUTTONS
+ Serial.print(F("Button event, number: "));
+ Serial.print(button_number);
+ Serial.println();
+#endif
+  
+ return application_event;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
 controls::application_event controls::process_encoder_event(
  controls::control_event const & control_event
 ) {
- application_event application_event;
- application_event.type           = application_event_type::EVT_UNKNOWN;
+ application_event application_event(application_event_type::EVT_UNKNOWN, 0);
 
  Serial.println("Don't know how to process encoders yet!");
 
- return application_event;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-controls::application_event controls::process_button_event(
- controls::control_event const & control_event
-) {
- application_event application_event;
- application_event.type           = application_event_type::EVT_UNKNOWN;
- uint8_t           button_number  = control_event.parameter_hi();
-
-#ifdef LOG_BUTTONS
- int8_t            button_state   = (int8_t)control_event.parameter_lo(); 
-
- Serial.print(F("Button event, number: "));
- Serial.print(button_number);
- Serial.print(F(", state: "));
- Serial.print(button_state);
- Serial.println();
-#endif
-
- application_event.type      = application_event_type::EVT_TRIGGER;
- application_event.parameter = button_number;
-  
  return application_event;
 }
 
