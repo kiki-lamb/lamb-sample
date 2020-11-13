@@ -38,12 +38,12 @@ void voices::setup() {
   item(ix).amplitude = u0q8(0x80);
  }
 
- item(0).amplitude = u0q8(0x90); // 0xb8; // kick
- item(1).amplitude = u0q8(0x30); // 0xd8; // snare
- item(2).amplitude = u0q8(0x40); // 0xd8; // oh
- item(3).amplitude = u0q8(0xf0); // 0x78; // bass
- item(4).amplitude = u0q8(0xf0); // bass
- item(5).amplitude = u0q8(0xf0); // bass
+ item(0).amplitude = u0q8(0xd0); // 0xb8; // kick
+ item(1).amplitude = u0q8(0x50); // 0xd8; // snare
+ item(2).amplitude = u0q8(0x60); // 0xd8; // oh
+ item(3).amplitude = u0q8(0xd0); // 0x78; // bass
+ item(4).amplitude = u0q8(0xd0); // bass
+ item(5).amplitude = u0q8(0xd0); // bass
 
  item(3).phincr = u0q32(_phincrs[BASS_ROOT_NOTE +  0  ]);
  item(4).phincr = u0q32(_phincrs[BASS_ROOT_NOTE +  0  ]);
@@ -209,24 +209,27 @@ bool voices::pitch(uint8_t const & voice_ix, u0q16::value_type const & parameter
 //////////////////////////////////////////////////////////////////////////////
 
 voices::sample voices::read() {
- mix mixed = SILENCE;
- mix bass  = SILENCE;
- auto v    = _items;
- v        += 3;
+ s15q16 mixed  { 0 };
+ s15q16 bass   { 0 };
+ // mix mixed        = SILENCE;
+ // mix bass         = SILENCE;
+ auto bass_items  = _items;
+ bass_items      += 3;
 
- MIX_Q(mixed, _items, 3);
- MIX_Q(bass , v,      3);
+ MIX_Q(mixed, _items,       3);
+ MIX_Q(bass , bass_items,   3);
 
-// bass      = _lpf.process(s0q15(bass)).value;
-// return bass;
-
- bass      = _lpf.process(s0q15(bass) * s0q15(49152)).value;
+ if (bass > s15q16::ONE) {
+  Serial.println("WARNING, attenuate before processing!");
+ };
+ 
+ bass      = _lpf.process(s0q15(bass) * s0q15(0x7800));
  mixed   >>= 1;  
  mixed    += bass;
   
 // AMPLIFY(mixed, _scaled_volume, 9);
 
- return mixed;
+ return mixed.value;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
