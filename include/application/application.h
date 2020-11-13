@@ -103,7 +103,13 @@ private:
    uint16_t x_pos = _x_pos + 12 * _name_len;
    
    application::_tft.setCursor(x_pos, _y_pos);
-   application::_tft.setTextColor( 0xff - (_value << 2) );
+
+   uint16_t text_red   = (64 - _value) >> 1;
+   uint16_t text_green = (64 - _value) >> 0;
+   uint16_t text_blue  = (64 - _value) >> 1;
+   uint16_t text_color = (text_red << 11) | (text_green << 5) | text_blue;
+   
+   application::_tft.setTextColor( text_color );
    application::_tft.setTextSize(2);
 
    uint8_t red_value  = _value > 32 ? _value - 32 : 0;
