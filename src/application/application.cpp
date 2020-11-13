@@ -23,10 +23,10 @@ application::tft             application::_tft(application::TFT_CS, application:
 application::draw_buffer     application::_draw_buffer;         
 
 application::displayed_value<voices::filter::unsigned_internal_t::value_type>
-application::_displayed_filter_freq("Freq: ", 200, 20, 8);
+application::_displayed_filter_freq("Freq: ", 195, 30, 9);
 
 application::displayed_value<voices::filter::unsigned_internal_t::value_type>
-application::_displayed_filter_res ("Res:  ", 200, 40, 0);
+application::_displayed_filter_res ("Res:  ", 195, 60, 9);
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -152,7 +152,7 @@ void application::k_rate() {
   }
   case application_event_type::EVT_FILTER_Q_1:
   {
-   lamb::u0q16 parameter(ae.parameter >> 4); // 12 sig bits to 16
+   lamb::u0q16 parameter(ae.parameter << 4); // 12 sig bits to 16
      
    voices::filter_q(parameter);
      
@@ -252,7 +252,7 @@ void application::loop() {
 
  uint32_t now = millis();
 
- if ((now - last_params_draw) > 50) {
+ if ((now - last_params_draw) > 100) {
   last_params_draw = now;
 
   _displayed_filter_freq.update(voices::filter_f().value);

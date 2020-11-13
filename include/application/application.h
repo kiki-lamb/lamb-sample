@@ -58,6 +58,7 @@ private:
   uint8_t       _downshift;
   uint16_t      _width;
   uint32_t      _color;
+  bool          _drawn;
   
  public:
   displayed_value(
@@ -73,7 +74,8 @@ private:
    _y_pos(y_pos),
    _downshift(downshift),
    _width(width),
-   _color(color) {}
+   _color(color),
+   _drawn(false) {}
   
   void update(value_t newval) {
    newval >>= _downshift;
@@ -87,12 +89,25 @@ private:
    // Serial.println("Draw.");
    
    _value   = newval;
+
+   if (! _drawn) {
+    application::_tft.setCursor(_x_pos, _y_pos);
+    application::_tft.setTextColor(_color);
+    application::_tft.setTextSize(2);
+    
+    application::_tft.print(_name);
+
+    _drawn = true;
+   }
+
+   uint16_t x_pos = _x_pos + 12 * _name_len;
    
-   application::_tft.setCursor(_x_pos, _y_pos);
+   application::_tft.setCursor(x_pos, _y_pos);
    application::_tft.setTextColor(_color);
    application::_tft.setTextSize(2);
-   application::_tft.fillRect(_x_pos + 10 * _name_len, _y_pos, _width, 16, ILI9341_BLACK);
-   application::_tft.print(_name);
+
+   application::_tft.fillRect (x_pos, _y_pos, _width, 16, ILI9341_BLACK);
+
    application::_tft.print(_value);
   }
  };
