@@ -91,7 +91,7 @@ bool application::graph() {
   );
  }
 
- _tft.drawFastHLine(0,     64,  width, ILI9341_WHITE);
+ _tft.drawFastHLine(0,     64,  width, ILI9341_RED);
 
  static bool box = false;
 
