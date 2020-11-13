@@ -10,7 +10,6 @@ const uint32_t       voices::S_RATE            { 32768                          
 voices::voice *      voices::_items            [ voices::COUNT                               ];
 u0q32::value_type    voices::_phincrs[120]   = { 0                                           };
 u0q16::value_type    voices::_volume           { 1000                                        };
-u0q16::value_type    voices::_scaled_volume    { u0q16::value_type(voices::_volume * 3 / 4)  };
 voices::filter       voices::_lpf;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -225,7 +224,7 @@ voices::sample voices::read() {
  mixed   >>= 1;  
  mixed    += bass;
   
- AMPLIFY(mixed, _scaled_volume, 9);
+// AMPLIFY(mixed, _scaled_volume, 9);
 
  return mixed;
 }

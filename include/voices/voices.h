@@ -34,7 +34,6 @@ private:
  static            filter               _lpf;  
  static            lamb::u0q32::value_type        _phincrs[120];
  static            lamb::u0q16::value_type        _volume;
- static            lamb::u0q16::value_type        _scaled_volume;
  static            voice *              _items[COUNT];
   
  static            void                 generate_phincrs();  
