@@ -96,22 +96,32 @@ private:
    uint16_t x_pos = _x_pos + 11 * _name_len;
    
    application::_tft.setCursor(x_pos, _y_pos);
-   application::_tft.setTextColor(ILI9341_YELLOW);
+
+   
+   // uint16_t font_red   = _value < 24 ? 0 : min(31, _value - 24);
+   // uint16_t font_green = _value < 24 ? 0 : min(63, (_value - 24) << 1);
+   uint16_t font_red = 0, font_green = 0;
+   if (_value >= 56) {
+    font_red   = (_value - 56) << 2;
+    font_green = (_value - 56) << 3;
+   }
+//    else if (_value >= 32) {
+// //    font_red   = (_value - 48) << 1;
+//     font_green = (_value - 32) << 1;
+//    }
+   else if (_value <= 8) {
+    font_red   = (8 - _value) << 2;
+    font_green = (8 - _value) << 3;
+   }
+   
+   uint16_t font_color = (font_red << 11) | (font_green << 5);
+   
+   application::_tft.setTextColor(font_color);
    application::_tft.setTextSize(2);
 
-   uint16_t color;
-
-   if (_value < 32) {
-    color = ILI9341_GREEN;
-   }
-   else {
-    uint16_t tmp = _value - 32;
-
-    uint8_t red_value   = tmp;
-    uint8_t green_value = 64 - (tmp << 1);
-    
-    color = (red_value << 11) | (green_value << 5);
-   }
+   uint16_t red_value   = _value >> 1;
+   uint16_t green_value = 63 - _value;
+   uint16_t color = (red_value << 11) | (green_value << 5);
    
    application::_tft.fillRect (
     x_pos, _y_pos - 2,
