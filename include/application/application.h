@@ -8,6 +8,7 @@
 #include "voices/voices.h"
 #include "events/control.h"
 #include "events/application.h"
+#include <SPI.h>
 
 class application {
 
@@ -22,6 +23,7 @@ public:
  static constexpr  uint32_t             TFT_DC              = PA8;
  static constexpr  uint32_t             TFT_CS              = PB12;
  static constexpr  uint32_t             I2S_WS              = PA15;
+ static constexpr  uint32_t             SD_CS               = PB1;
 
 private:
  

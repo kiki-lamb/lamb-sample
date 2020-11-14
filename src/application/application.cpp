@@ -2,6 +2,7 @@
 #include <inttypes.h>
 #include <Arduino.h>
 #include <math.h>
+#include "SD.h"
 
 using namespace lamb;
 
@@ -253,30 +254,62 @@ void application::setup_timers() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void application::setup() {
- delay(3000);
+void printDirectory(File dir, int numTabs) {
+  while (true) {
+ 
+    File entry =  dir.openNextFile();
+    if (! entry) {
+      // no more files
+      break;
+    }
+    for (uint8_t i = 0; i < numTabs; i++) {
+      Serial.print('\t');
+    }
+    Serial.print(entry.name());
+    if (entry.isDirectory()) {
+      Serial.println("/");
+      printDirectory(entry, numTabs + 1);
+    } else {
+      // files have sizes, directories do not
+      Serial.print("\t\t");
+      Serial.println(entry.size(), DEC);
+    }
+    entry.close();
+  }
+}
 
- pinMode(LED_BUILTIN, OUTPUT);
+void application::setup() {
+  delay(5000);
+
+ // pinMode(LED_BUILTIN, OUTPUT);
  
  Serial.begin(64000000);
   
- voices::setup();
- ::controls::setup();
+ // voices::setup();
+ // ::controls::setup();
 
- afio_remap(AFIO_REMAP_USART1);
- afio_cfg_debug_ports (AFIO_DEBUG_SW_ONLY);
- afio_remap (AFIO_REMAP_SPI1);
- gpio_set_mode (GPIOA, 15, GPIO_AF_OUTPUT_PP);
- gpio_set_mode (GPIOB,  3, GPIO_AF_OUTPUT_PP);
- gpio_set_mode (GPIOB,  4, GPIO_INPUT_FLOATING);
- gpio_set_mode (GPIOB,  5, GPIO_AF_OUTPUT_PP);
+ // afio_remap(AFIO_REMAP_USART1);
+ // afio_cfg_debug_ports (AFIO_DEBUG_SW_ONLY);
+ // afio_remap (AFIO_REMAP_SPI1);
+ // gpio_set_mode (GPIOA, 15, GPIO_AF_OUTPUT_PP);
+ // gpio_set_mode (GPIOB,  3, GPIO_AF_OUTPUT_PP);
+ // gpio_set_mode (GPIOB,  4, GPIO_INPUT_FLOATING);
+ // gpio_set_mode (GPIOB,  5, GPIO_AF_OUTPUT_PP);
  
- setup_tft();
- setup_dac();
- setup_timers();
+ // setup_tft();
+ // setup_dac();
+ // setup_timers();
 
- pinMode(PA5, INPUT);
+ if (SD.begin(SD_CS)) {
+  Serial.println("Started SD.");
+ }
+ else {
+  Serial.println("ERROR: Couldn't start SD.");
+ }
+
+ printDirectory(SD.open("/"), 0);
  
+ // pinMode(PA5, INPUT);
 }
   
 ////////////////////////////////////////////////////////////////////////////////
