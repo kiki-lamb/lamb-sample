@@ -282,7 +282,7 @@ void application::setup() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::loop() {
- static uint32_t draw_operations                  = 0;
+ static u16q16   draw_operations                  { 0 };
 
  static uint32_t last_params_draw                 = 0;
 
@@ -297,36 +297,32 @@ void application::loop() {
  } 
  
  if (graph())
-  draw_operations ++;
+  draw_operations += u16q16(1, 0);
   
 #ifdef LOG_DRAW_RATES
- if (_sample_ix1 >= (voices::S_RATE)) {
-  static const uint8_t avging                    = 10;      
-  static uint32_t      avg_draw_operations       = 0;
+ if (_sample_ix1 >= voices::S_RATE) {
+//  static const uint8_t avging                    = 10;      
+  static u16q16        avg_draw_operations       { 0 };
   static uint32_t      tenth_seconds             = 0;
   tenth_seconds                                 += 1;
   _sample_ix1                                    = 0;
-  uint32_t             tmp_avg_draw_operations   = avg_draw_operations;
-  avg_draw_operations                           *= avging;
-  avg_draw_operations                           -= tmp_avg_draw_operations;
-  avg_draw_operations                           += draw_operations;
-  avg_draw_operations                           /= avging;    
+  avg_draw_operations                           *= u16q16(0xe000);
+  avg_draw_operations                           += draw_operations * u16q16(0x1fff);
     
   Serial.print(tenth_seconds);
   Serial.print(F(", "));
-  Serial.print(draw_operations);
+  Serial.print(float(draw_operations));
   Serial.print(F(", "));
-  Serial.print(avg_draw_operations);
+  Serial.print(float(avg_draw_operations));
   Serial.print(F(" avg, "));
-  Serial.print(
-   (int32_t)avg_draw_operations -
-   (int32_t)tmp_avg_draw_operations
-  );
+  // Serial.print(
+  //  (avg_draw_operations - tmp_avg_draw_operations).value
+  // );
   Serial.print(F(", "));
   Serial.print(_draw_buffer.count());
   Serial.println();
     
-  draw_operations                                = 0;
+  draw_operations.value                          = 0;
  }
 #endif
 }
