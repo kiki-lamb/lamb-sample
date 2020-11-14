@@ -2,7 +2,6 @@
 #include <inttypes.h>
 #include <Arduino.h>
 #include <math.h>
-#include "SD.h"
 
 using namespace lamb;
 

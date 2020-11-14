@@ -9,6 +9,7 @@
 #include "events/control.h"
 #include "events/application.h"
 #include <SPI.h>
+#include "SD.h"
 
 class application {
 
