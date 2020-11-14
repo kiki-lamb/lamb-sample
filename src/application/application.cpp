@@ -253,7 +253,7 @@ void application::setup_timers() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void printDirectory(File dir, int numTabs) {
+void print_directory(File dir, int numTabs) {
   while (true) {
  
     File entry =  dir.openNextFile();
@@ -267,7 +267,7 @@ void printDirectory(File dir, int numTabs) {
     Serial.print(entry.name());
     if (entry.isDirectory()) {
       Serial.println("/");
-      printDirectory(entry, numTabs + 1);
+      // print_directory(entry, numTabs + 1);
     } else {
       // files have sizes, directories do not
       Serial.print("\t\t");
@@ -277,27 +277,27 @@ void printDirectory(File dir, int numTabs) {
   }
 }
 
-void application::setup() {
-  delay(5000);
+////////////////////////////////////////////////////////////////////////////////
 
- // pinMode(LED_BUILTIN, OUTPUT);
+void application::setup() {
+ delay(5000);
+
+ pinMode(LED_BUILTIN, OUTPUT);
  
  Serial.begin(64000000);
   
- // voices::setup();
- // ::controls::setup();
+ voices::setup();
+ ::controls::setup();
 
- // afio_remap(AFIO_REMAP_USART1);
- // afio_cfg_debug_ports (AFIO_DEBUG_SW_ONLY);
- // afio_remap (AFIO_REMAP_SPI1);
- // gpio_set_mode (GPIOA, 15, GPIO_AF_OUTPUT_PP);
- // gpio_set_mode (GPIOB,  3, GPIO_AF_OUTPUT_PP);
- // gpio_set_mode (GPIOB,  4, GPIO_INPUT_FLOATING);
- // gpio_set_mode (GPIOB,  5, GPIO_AF_OUTPUT_PP);
- 
- // setup_tft();
- // setup_dac();
- // setup_timers();
+ afio_remap(AFIO_REMAP_USART1);
+ afio_cfg_debug_ports (AFIO_DEBUG_SW_ONLY);
+ afio_remap (AFIO_REMAP_SPI1);
+ gpio_set_mode (GPIOA, 15, GPIO_AF_OUTPUT_PP);
+ gpio_set_mode (GPIOB,  3, GPIO_AF_OUTPUT_PP);
+ gpio_set_mode (GPIOB,  4, GPIO_INPUT_FLOATING);
+ gpio_set_mode (GPIOB,  5, GPIO_AF_OUTPUT_PP);
+
+ Serial.println("Setup SD card...\n");
 
  if (SD.begin(SD_CS)) {
   Serial.println("Started SD.");
@@ -306,12 +306,25 @@ void application::setup() {
   Serial.println("ERROR: Couldn't start SD.");
  }
 
- printDirectory(SD.open("/"), 0);
+ print_directory(SD.open("/"), 0);
+
+ Serial.println("Setup TFT...\n");
+ setup_tft();
  
- // pinMode(PA5, INPUT);
+ Serial.println("Setup DAC...\n");
+ setup_dac();
+ 
+ Serial.println("Setup timers...\n");
+ setup_timers();
+
+ Serial.print("Correct PA5 pinmode...\n");
+ pinMode(PA5, INPUT);
+
+ Serial.print("Setup complete.\n");
 }
   
 ////////////////////////////////////////////////////////////////////////////////
+extern SPIClass SPITWO;
 
 void application::loop() {
  static u16q16   draw_operations                  { 0 };
@@ -319,6 +332,10 @@ void application::loop() {
  static uint32_t last_params_draw                 = 0;
 
  uint32_t now = millis();
+
+ 
+ SPITWO.setClockDivider(0);
+// SPITWO.beginTransaction(SPISettings(36000000, MSBFIRST, SPI_MODE0));
 
  if ((now - last_params_draw) > 100) {
   last_params_draw = now;
@@ -330,10 +347,13 @@ void application::loop() {
  
  if (graph())
   draw_operations += u16q16(1, 0);
-  
+ 
+ SPITWO.endTransaction();
+ 
 #ifdef LOG_DRAW_RATES
- if (_sample_ix1 >= voices::S_RATE) {
-//  static const uint8_t avging                    = 10;      
+ if (_sample_ix1 >= voices::S_RATE / 10) {
+  print_directory(SD.open("/"), 0);
+  
   static u16q16        avg_draw_operations       { 0 };
   static uint32_t      tenth_seconds             = 0;
   tenth_seconds                                 += 1;
@@ -347,10 +367,6 @@ void application::loop() {
   Serial.print(F(", "));
   Serial.print(float(avg_draw_operations));
   Serial.print(F(" avg, "));
-  // Serial.print(
-  //  (avg_draw_operations - tmp_avg_draw_operations).value
-  // );
-  Serial.print(F(", "));
   Serial.print(_draw_buffer.count());
   Serial.println();
     
