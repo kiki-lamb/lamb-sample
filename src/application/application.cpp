@@ -240,7 +240,7 @@ void application::s_rate() {
   _draw_buffer.enqueue(s);
  }
 
- _dac.write_mono(s);
+// _dac.write_mono(s);
 
  _sample_ix0  ++;
  _sample_ix1  ++;
@@ -384,7 +384,7 @@ void application::setup() {
 
  setup_tft();
 
- setup_dac();
+// setup_dac();
  
  Serial.println("[Setup] Correct PA5 pin mode...");
  pinMode(PA5, INPUT);
