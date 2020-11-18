@@ -16,7 +16,10 @@ size_t                       application::_sample_ix1        { 0                
 HardwareTimer                application::_timer_1           ( 1                         );
 HardwareTimer                application::_timer_2           ( 2                         );
 HardwareTimer                application::_timer_3           ( 3                         );
+
+#ifdef ENABLE_DAC
 application::dac             application::_dac               ( application::I2S_WS, &SPI );
+#endif
 
 #ifdef ENABLE_TFT
 application::tft             application::_tft(application::TFT_CS, application::TFT_DC  );
@@ -99,14 +102,14 @@ bool application::graph() {
 
  _tft.drawFastHLine(0,     64,  width, ILI9341_RED);
 
- static bool box = false;
+ // static bool box = false;
 
- if (! box) {
+ // if (! box) {
   _tft.drawFastHLine(0,     128, width, ILI9341_GREEN);
   _tft.drawFastVLine(width, 0,   128,   ILI9341_GREEN);
 
-  box = true;
- }
+  // box = true;
+ // }
  
  col ++;
 // col %= col_max;
@@ -246,8 +249,10 @@ void application::s_rate() {
   _draw_buffer.enqueue(s);
  }
 
+#ifdef ENABLE_DAC
  _dac.write_mono(s);
-
+#endif
+ 
  _sample_ix0  ++;
  _sample_ix1  ++;
 }
@@ -270,20 +275,26 @@ void application::setup_tft() {
 
 
 void application::setup_dac() {
+#ifdef ENABLE_DAC
  Serial.println("[Setup] Setup DAC...");
-
+#endif
+ 
  SPI.begin();
-  
+ 
+#ifdef ENABLE_DAC 
  _dac.setup();
+#endif         
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::setup_timers() {
+#ifdef ENABLE_TIMERS
  Serial.println("[Setup] Setup timers...");
 
  device::maple_timer::setup(_timer_1, voices::S_RATE,     s_rate);
  device::maple_timer::setup(_timer_2, ::controls::K_RATE, k_rate);
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -388,15 +399,13 @@ void application::setup() {
 #ifdef ENABLE_TFT
  setup_tft();
 #endif
-
+ 
  setup_dac();
  
  Serial.println("[Setup] Correct PA5 pin mode...");
  pinMode(PA5, INPUT);
 
-#ifndef DISABLE_TIMERS
  setup_timers();
-#endif
 
  Serial.println("[Setup] Complete.");
 }

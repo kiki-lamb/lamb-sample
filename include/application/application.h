@@ -14,7 +14,11 @@ class application {
 public:
  
  typedef lamb::device::Adafruit_ILI9341_STM_SPI2            tft;
+
+#ifdef ENABLE_DAC
  typedef lamb::device::pt8211                               dac;
+#endif
+
  typedef lamb::ring_buffer<voices::sample, 256>             draw_buffer;
  typedef controls::application_event                        application_event;
  typedef controls::application_event_type                   application_event_type;
@@ -24,8 +28,10 @@ public:
  static constexpr  uint32_t             TFT_CS              = PB12;
 #endif
  
+#ifdef ENABLE_DAC
  static constexpr  uint32_t             I2S_WS              = PA15;
-
+#endif
+ 
  static constexpr  uint32_t             SD_CS               = PB1;
 
 private:
@@ -36,7 +42,10 @@ private:
  static            HardwareTimer        _timer_1; 
  static            HardwareTimer        _timer_2;
  static            HardwareTimer        _timer_3;
+
+#ifdef ENABLE_DAC
  static            dac                  _dac;
+#endif
 
 #ifdef ENABLE_TFT
  static            tft                  _tft;
