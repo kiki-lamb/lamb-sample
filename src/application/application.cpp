@@ -342,12 +342,6 @@ void application::setup_sd() {
 
  if (SD.begin(SD_CS)) {
   Serial.println("[Setup] Successfully setup SD card.");
-
-  // File root = SD.open("/");
-
-  // print_directory(root);
-
-  // root.close();
  }
  else {
   Serial.println("[Setup] Failed to setup SD card.");
@@ -425,7 +419,11 @@ void application::loop() {
  } 
  
 #ifdef ENABLE_SD
-  print_directory(SD.open("/"));
+ File root = SD.open("/");
+
+ print_directory(root);
+
+ root.close();
 #endif
 
   if (graph())
