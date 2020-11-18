@@ -106,8 +106,8 @@ bool application::graph() {
  col ++;
 // col %= col_max;
 
- static auto last_time = 0;
- auto new_time = millis();
+ static uint32_t last_time = 0;
+ uint32_t new_time = millis();
  
  if ((new_time - last_time) > 500) {
   _tft.setCursor(10, 210);
@@ -120,11 +120,11 @@ bool application::graph() {
   Serial.println(new_time);
 
   last_time = new_time;
- }
+ } /*
  else {
   Serial.print("No: ");
   Serial.println(new_time);
- }
+  } */
  
  return true;
 }
@@ -325,7 +325,8 @@ void application::remap_spi1() {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void application::setup_sd() {
-  Serial.println("[Setup] Setup SD card...");
+#ifdef ENABLE_SD
+ Serial.println("[Setup] Setup SD card...");
 
  if (SD.begin(SD_CS)) {
   Serial.println("[Setup] Successfully setup SD card.");
@@ -335,6 +336,7 @@ void application::setup_sd() {
  else {
   Serial.println("[Setup] Failed to setup SD card.");
  }
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -353,7 +355,7 @@ void application::setup() {
 
  remap_spi1();
 
-// setup_sd();
+ setup_sd();
 
  setup_tft();
 
@@ -383,10 +385,16 @@ void application::loop() {
   _displayed_filter_res .update(voices::filter_q().value);
   _displayed_vol        .update(voices::volume().value);
  } 
- 
-  print_directory(SD.open("/"));
 
-  if (graph())
+#ifdef ENABLE_SD
+ File root = SD.open("/");
+ 
+ print_directory(root);
+
+ root.close();
+#endif
+ 
+ if (graph())
   draw_operations += u16q16(1, 0);
   
 #ifdef LOG_DRAW_RATES
