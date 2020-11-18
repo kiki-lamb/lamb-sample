@@ -106,6 +106,7 @@ bool application::graph() {
  col ++;
 // col %= col_max;
 
+#ifdef TIME_ON_TFT
  static uint32_t last_time = 0;
  uint32_t new_time = millis();
  
@@ -120,11 +121,8 @@ bool application::graph() {
   Serial.println(new_time);
 
   last_time = new_time;
- } /*
- else {
-  Serial.print("No: ");
-  Serial.println(new_time);
-  } */
+ } 
+#endif
  
  return true;
 }
