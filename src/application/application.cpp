@@ -120,11 +120,11 @@ bool application::graph() {
   Serial.println(new_time);
 
   last_time = new_time;
- }
+ } /*
  else {
   Serial.print("No: ");
   Serial.println(new_time);
- }
+  } */
  
  return true;
 }
