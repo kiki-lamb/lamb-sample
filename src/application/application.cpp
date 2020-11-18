@@ -226,9 +226,11 @@ void application::s_rate() {
 }
  
 ////////////////////////////////////////////////////////////////////////////////
-      
+
+SPIClass my_spi(2);
+
 void application::setup_tft() {
- _tft.begin();
+ _tft.begin(my_spi);
  _tft.setRotation(3);
  _tft.setTextColor(ILI9341_WHITE);  
  _tft.setTextSize(2);

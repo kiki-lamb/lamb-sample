@@ -8,12 +8,13 @@
 #include "voices/voices.h"
 #include "events/control.h"
 #include "events/application.h"
+#include "Adafruit_ILI9341_STM.h"
 
 class application {
 
 public:
  
- typedef lamb::device::Adafruit_ILI9341_STM_SPI2            tft;
+ typedef Adafruit_ILI9341_STM                               tft;
  typedef lamb::device::pt8211                               dac;
  typedef lamb::ring_buffer<voices::sample, 256>             draw_buffer;
  typedef controls::application_event                        application_event;
