@@ -15,6 +15,8 @@ voices::filter       voices::_lpf;
 ////////////////////////////////////////////////////////////////////////////////
 
 void voices::setup() {
+  Serial.println("[Setup] Setup voices...");
+
  _lpf.freq(u17q15(1000));
  _lpf.res(u16q16(0));
   

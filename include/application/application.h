@@ -151,7 +151,9 @@ private:
  static            void                 setup_tft();
  static            void                 setup_dac();
  static            void                 setup_timers();
-  
+ static            void                 setup_sd();
+ static            void                 remap_spi1();
+ 
 public:
  static            void                 setup();
  static            void                 loop();
