@@ -106,8 +106,8 @@ bool application::graph() {
  col ++;
 // col %= col_max;
 
- static auto last_time = 0;
- auto new_time = millis();
+ static uint32_t last_time = 0;
+ uint32_t new_time = millis();
  
  if ((new_time - last_time) > 500) {
   _tft.setCursor(10, 210);
