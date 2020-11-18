@@ -365,8 +365,10 @@ void application::setup() {
  
  Serial.println("[Setup] Correct PA5 pin mode...");
  pinMode(PA5, INPUT);
- 
+
+#ifndef DISABLE_TIMERS
  setup_timers();
+#endif
 
  Serial.println("[Setup] Complete.");
 }
@@ -388,7 +390,9 @@ void application::loop() {
   _displayed_vol        .update(voices::volume().value);
  } 
  
-//  print_directory(SD.open("/"));
+#ifdef ENABLE_SD
+  print_directory(SD.open("/"));
+#endif
 
   if (graph())
   draw_operations += u16q16(1, 0);
