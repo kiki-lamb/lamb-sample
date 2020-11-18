@@ -2,6 +2,7 @@
 #include <inttypes.h>
 #include <Arduino.h>
 #include <math.h>
+#include "SD.h"
 
 using namespace lamb;
 
@@ -254,15 +255,20 @@ void application::setup_timers() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::setup() {
- delay(3000);
+ delay(5000);
 
  pinMode(LED_BUILTIN, OUTPUT);
  
  Serial.begin(64000000);
-  
+ Serial.println("[Setup] Begin...");
+
+ Serial.println("[Setup] Setup voices...");
  voices::setup();
+
+ Serial.println("[Setup] Setup controls...");
  ::controls::setup();
 
+ Serial.println("[Setup] Remap SPI1...");  
  afio_remap(AFIO_REMAP_USART1);
  afio_cfg_debug_ports (AFIO_DEBUG_SW_ONLY);
  afio_remap (AFIO_REMAP_SPI1);
@@ -270,13 +276,29 @@ void application::setup() {
  gpio_set_mode (GPIOB,  3, GPIO_AF_OUTPUT_PP);
  gpio_set_mode (GPIOB,  4, GPIO_INPUT_FLOATING);
  gpio_set_mode (GPIOB,  5, GPIO_AF_OUTPUT_PP);
- 
- setup_tft();
- setup_dac();
- setup_timers();
 
+ Serial.println("[Setup] Setup SD card...");
+
+ if (SD.begin(SD_CS)) {
+  Serial.println("[Setup] Successfully setup SD card.");
+ }
+ else {
+  Serial.println("[Setup] Failed to setup SD card.");
+ }
+ 
+ Serial.println("[Setup] Setup TFT...");
+ setup_tft();
+
+ Serial.println("[Setup] Setup DAC...");
+ setup_dac();
+ 
+ Serial.println("[Setup] Correct PA5 pin mode...");
  pinMode(PA5, INPUT);
  
+ Serial.println("[Setup] Setup timers...");
+ setup_timers();
+
+ Serial.println("[Setup] Complete.");
 }
   
 ////////////////////////////////////////////////////////////////////////////////
