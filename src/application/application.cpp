@@ -132,7 +132,9 @@ bool application::graph() {
 //////////////////////////////////////////////////////////////////////////////
 
 void application::k_rate() {
- ::controls::poll();
+#ifdef DISABLE_CONTROLS
+ return;
+#endif
 
  digitalWrite(LED_BUILTIN, voices::item(0).state);
  
@@ -384,7 +386,7 @@ void application::loop() {
   _displayed_vol        .update(voices::volume().value);
  } 
  
-  print_directory(SD.open("/"));
+//  print_directory(SD.open("/"));
 
   if (graph())
   draw_operations += u16q16(1, 0);
