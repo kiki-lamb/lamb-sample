@@ -349,12 +349,16 @@ void application::setup() {
 
  voices::setup();
 
+#ifndef DISABLE_CONTROLS
  ::controls::setup();
+#endif
 
  remap_spi1();
 
-// setup_sd();
-
+#ifdef ENABLE_SD
+ setup_sd();
+#endif
+ 
  setup_tft();
 
  setup_dac();
