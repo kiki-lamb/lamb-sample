@@ -266,7 +266,7 @@ void application::setup_dac() {
 
  SPI.begin();
   
- _dac.setup();
+ _dac.setup(&SPI);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -280,12 +280,39 @@ void application::setup_timers() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void print_directory(File dir, int numTabs = 0, bool recurse = false) {
+File dir;
+bool reset = true;
+
+void print_directories() {
+ // Serial.println("\nCalled.");
+  
+ if (reset) {
+  // Serial.println("Do reset.");
+  
+  dir.close();
+  dir = SD.open("/");
+  reset = false;
+ }
+
+ File entry = dir.openNextFile();
+
+ if (! entry) {
+  // Serial.println("Flag reset.");
+  reset = true;
+  return;
+ }
+ 
+ Serial.print(entry.name());
+ Serial.println();
+
+ entry.close();
+}
+ 
+void print_directory(File & dir, int numTabs = 0, bool recurse = false) {
  while (true) {
   File entry =  dir.openNextFile();
 
   if (! entry) {
-   // no more files
    break;
   }
     
@@ -385,13 +412,13 @@ void application::loop() {
  } 
 
 #ifdef ENABLE_SD
- File root = SD.open("/");
+ static uint32_t last_sd_read = 0;
  
- print_directory(root);
-
- root.close();
+ if ((now - last_sd_read) > 100) { 
+  print_directories();
+  last_sd_read = now;
+ }
 #endif
- 
  if (graph())
   draw_operations += u16q16(1, 0);
   
