@@ -18,10 +18,14 @@ public:
  typedef lamb::ring_buffer<voices::sample, 256>             draw_buffer;
  typedef controls::application_event                        application_event;
  typedef controls::application_event_type                   application_event_type;
-  
+
+#ifdef ENABLE_TFT
  static constexpr  uint32_t             TFT_DC              = PA8;
  static constexpr  uint32_t             TFT_CS              = PB12;
+#endif
+ 
  static constexpr  uint32_t             I2S_WS              = PA15;
+
  static constexpr  uint32_t             SD_CS               = PB1;
 
 private:
@@ -33,7 +37,11 @@ private:
  static            HardwareTimer        _timer_2;
  static            HardwareTimer        _timer_3;
  static            dac                  _dac;
+
+#ifdef ENABLE_TFT
  static            tft                  _tft;
+#endif
+ 
  static            draw_buffer          _draw_buffer;
 
  template <typename value_t_>
@@ -83,18 +91,21 @@ private:
    _value   = newval;
 
    if (! _drawn) {
+#ifdef ENABLE_TFT
     application::_tft.setCursor(_x_pos, _y_pos);
     application::_tft.setTextColor(_color);
     application::_tft.setTextSize(2);
     
     application::_tft.print(_name);
-
+#endif
     _drawn = true;
    }
 
    uint16_t x_pos = _x_pos + 11 * _name_len;
    
+#ifdef ENABLE_TFT
    application::_tft.setCursor(x_pos, _y_pos);
+#endif
 
    uint16_t font_red = 0, font_green = 0;
    if (_value >= 56) {
@@ -108,13 +119,16 @@ private:
    
    uint16_t font_color = (font_red << 11) | (font_green << 5);
    
+#ifdef ENABLE_TFT
    application::_tft.setTextColor(font_color);
    application::_tft.setTextSize(2);
+#endif
 
    uint16_t red_value   = _value >> 1;
    uint16_t green_value = 63 - _value;
    uint16_t color = (red_value << 11) | (green_value << 5);
    
+#ifdef ENABLE_TFT
    application::_tft.fillRect (
     x_pos, _y_pos - 2,
     _value, 18,
@@ -124,6 +138,7 @@ private:
    application::_tft.fillRect (x_pos + _value, _y_pos - 2, _width - _value, 18, ILI9341_BLACK);
 
    application::_tft.print(_value);
+#endif
   }
  };
 
@@ -139,7 +154,11 @@ private:
  static            void                 k_rate();
  static            void                 s_rate();
  static            bool                 graph();  
+
+#ifdef ENABLE_TFT
  static            void                 setup_tft();
+#endif
+ 
  static            void                 setup_dac();
  static            void                 setup_timers();
  static            void                 setup_sd();

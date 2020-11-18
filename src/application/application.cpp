@@ -17,7 +17,11 @@ HardwareTimer                application::_timer_1           ( 1                
 HardwareTimer                application::_timer_2           ( 2                         );
 HardwareTimer                application::_timer_3           ( 3                         );
 application::dac             application::_dac               ( application::I2S_WS, &SPI );
+
+#ifdef ENABLE_TFT
 application::tft             application::_tft(application::TFT_CS, application::TFT_DC  );
+#endif
+
 application::draw_buffer     application::_draw_buffer;         
 
 application::displayed_value<voices::filter::unsigned_internal_t::value_type>
@@ -74,6 +78,7 @@ bool application::graph() {
  static uint16_t       col = 0;
  uint16_t              tmp_col = col % width;
   
+#ifdef ENABLE_TFT
  _tft.drawFastVLine(tmp_col, 1, 128 - 2, ILI9341_BLACK);
   
  if (tmp > 0)
@@ -123,7 +128,8 @@ bool application::graph() {
   last_time = new_time;
  } 
 #endif
- 
+
+#endif
  return true;
 }
 
@@ -247,7 +253,8 @@ void application::s_rate() {
 }
  
 ////////////////////////////////////////////////////////////////////////////////
-      
+
+#ifdef ENABLE_TFT
 void application::setup_tft() {
   Serial.println("[Setup] Setup TFT...");
 
@@ -257,6 +264,7 @@ void application::setup_tft() {
  _tft.setTextSize(2);
  _tft.fillScreen(ILI9341_BLACK);
 }
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -280,10 +288,12 @@ void application::setup_timers() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void print_directory(File dir, int numTabs = 0, bool recurse = false) {
- while (true) {
+void print_directory(File dir, uint32 abort_after = 3, int numTabs = 0, bool recurse = false) {
+ Serial.println("Listing files...");
+ 
+ while (abort_after-- > 0) {
   File entry =  dir.openNextFile();
-
+  
   if (! entry) {
    // no more files
    break;
@@ -298,7 +308,7 @@ void print_directory(File dir, int numTabs = 0, bool recurse = false) {
   if (entry.isDirectory()) {
    Serial.println("/");
    if (recurse) {
-    print_directory(entry, numTabs + 1);
+    print_directory(entry, abort_after, numTabs + 1);
    }
   } else {
    Serial.print("\t\t");
@@ -359,7 +369,9 @@ void application::setup() {
  setup_sd();
 #endif
  
+#ifdef ENABLE_TFT
  setup_tft();
+#endif
 
  setup_dac();
  
@@ -395,7 +407,7 @@ void application::loop() {
 #endif
 
   if (graph())
-  draw_operations += u16q16(1, 0);
+   draw_operations += u16q16(1, 0);
   
 #ifdef LOG_DRAW_RATES
  if (_sample_ix1 >= voices::S_RATE) {
