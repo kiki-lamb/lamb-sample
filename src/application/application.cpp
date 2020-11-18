@@ -288,7 +288,7 @@ void application::setup_timers() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void print_directory(File dir, uint32 abort_after = 3, int numTabs = 0, bool recurse = false) {
+void print_directory(File dir, uint32 abort_after = 10, int numTabs = 0, bool recurse = false) {
  Serial.println("Listing files...");
  
  while (abort_after-- > 0) {
@@ -296,6 +296,8 @@ void print_directory(File dir, uint32 abort_after = 3, int numTabs = 0, bool rec
   
   if (! entry) {
    // no more files
+   entry.close();
+   
    break;
   }
     
@@ -307,6 +309,7 @@ void print_directory(File dir, uint32 abort_after = 3, int numTabs = 0, bool rec
 
   if (entry.isDirectory()) {
    Serial.println("/");
+
    if (recurse) {
     print_directory(entry, abort_after, numTabs + 1);
    }
@@ -340,7 +343,11 @@ void application::setup_sd() {
  if (SD.begin(SD_CS)) {
   Serial.println("[Setup] Successfully setup SD card.");
 
-  print_directory(SD.open("/"));
+  // File root = SD.open("/");
+
+  // print_directory(root);
+
+  // root.close();
  }
  else {
   Serial.println("[Setup] Failed to setup SD card.");
@@ -367,6 +374,21 @@ void application::setup() {
 
 #ifdef ENABLE_SD
  setup_sd();
+
+ #ifdef SD_TEST_LOOP
+ while (true) {
+  Serial.print("T: ");
+  Serial.println(millis());
+  
+  File root = SD.open("/");
+  
+  print_directory(root);
+
+  root.close();
+  
+  delay(250);
+ }
+ #endif
 #endif
  
 #ifdef ENABLE_TFT
