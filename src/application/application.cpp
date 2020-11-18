@@ -330,8 +330,6 @@ void application::setup_sd() {
 
  if (SD.begin(SD_CS)) {
   Serial.println("[Setup] Successfully setup SD card.");
-
-  print_directory(SD.open("/"));
  }
  else {
   Serial.println("[Setup] Failed to setup SD card.");
