@@ -39,7 +39,7 @@ public:
  /////////////////////////////////////////////////////////////////////////////////////////
 
  static constexpr uint32_t             K_RATE              = 80;
- static constexpr uint8_t              SIGNALS_COUNT       = 7;
+ static constexpr uint8_t              SIGNALS_COUNT       = 4;
  static constexpr uint8_t              BUTTONS_COUNT       = 6;
  static constexpr uint8_t              EVENT_SOURCES_COUNT = SIGNALS_COUNT + BUTTONS_COUNT;
 

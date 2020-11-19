@@ -3,9 +3,9 @@
 //////////////////////////////////////////////////////////////////////////////
 
 controls::signal_configuration controls::_signals[controls::SIGNALS_COUNT] = {
- { { PA0    }, application_event_type::EVT_UNKNOWN    },
- { { PA1    }, application_event_type::EVT_UNKNOWN    },
- { { PA2    }, application_event_type::EVT_UNKNOWN    },
+ // { { PA0    }, application_event_type::EVT_UNKNOWN    },
+ // { { PA1    }, application_event_type::EVT_UNKNOWN    },
+ // { { PA2    }, application_event_type::EVT_UNKNOWN    },
  { { PA3, 3 }, application_event_type::EVT_FILTER_F_1 },
  { { PA4, 3 }, application_event_type::EVT_FILTER_Q_1 },
  { { PA5, 3 }, application_event_type::EVT_VOLUME     },
@@ -115,7 +115,7 @@ controls::application_event controls::process<controls::control_event_type::EVT_
  uint8_t           button_number  = control_event.parameter_hi();
  application_event application_event(application_event_type::EVT_UNKNOWN, button_number);
 
- if (button_number < SIGNALS_COUNT) {
+ if (button_number < BUTTONS_COUNT) {
   application_event.type      = _buttons[button_number].application_event_type;
  } 
 
