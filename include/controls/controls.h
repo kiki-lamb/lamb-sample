@@ -53,41 +53,45 @@ public:
 
 private:
 
+ static  combined_source         _control_event_source;
+
  /////////////////////////////////////////////////////////////////////////////////////////
 
- template <typename device_t_, typename source_t_>
- struct configuration {
+ template <typename device_t_, typename source_t_, uint8_t count_>
+ struct configurations {
+
   typedef device_t_ device_t;
+
   typedef source_t_ source_t;
 
-  device_t device;
-  
-  events::application_event_type application_event_type;
- };
+  static constexpr uint8_t COUNT = count_;
 
-  //---------------------------------------------------------------------------------------
-
- template <uint8_t count, typename device_t_, typename source_t_>
- static void configure(configuration<device_t_, source_t_> arr[count], uint8_t & ix) {
-  for (uint8_t bix = 0; bix < count; ix++, bix++) {
-   arr[bix].device.number = bix;
-   arr[bix].device.setup();
+  struct {
+   device_t device;
    
-   _control_event_source.sources[ix] =
-    new source_t_(&arr[bix].device);   
-  }
- }
+   events::application_event_type application_event_type;
+  } items[COUNT];
 
+  void configure(uint8_t & ix) {
+   for (uint8_t bix = 0; bix < COUNT; ix++, bix++) {
+    items[bix].device.number = bix;
+    items[bix].device.setup();
+    
+    _control_event_source.sources[ix] =
+     new source_t_(&items[bix].device);   
+   }
+  }
+ };
+  
  //---------------------------------------------------------------------------------------
 
- typedef configuration<signal, signal_source>  signal_configurations[SIGNALS_COUNT];
- typedef configuration<button, button_source>  button_configurations[BUTTONS_COUNT];
+ typedef configurations<signal, signal_source, SIGNALS_COUNT> signal_configurations;
+ typedef configurations<button, button_source, BUTTONS_COUNT> button_configurations;
  
  /////////////////////////////////////////////////////////////////////////////////////////
  
  static  signal_configurations   _signals;
  static  button_configurations   _buttons;
- static  combined_source         _control_event_source;
 
  /////////////////////////////////////////////////////////////////////////////////////////
 

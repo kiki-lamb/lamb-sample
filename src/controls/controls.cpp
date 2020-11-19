@@ -3,22 +3,26 @@
 //////////////////////////////////////////////////////////////////////////////
 
 controls::signal_configurations controls::_signals = {
- // { { PA0    }, application_event_type::EVT_UNKNOWN    },
- // { { PA1    }, application_event_type::EVT_UNKNOWN    },
- // { { PA2    }, application_event_type::EVT_UNKNOWN    },
- { { PA3, 3 }, application_event_type::EVT_FILTER_F_1 },
- { { PA4, 3 }, application_event_type::EVT_FILTER_Q_1 },
- { { PA5, 3 }, application_event_type::EVT_VOLUME     },
- { { PA6, 3 }, application_event_type::EVT_PITCH_1    },
+ {
+  // { { PA0    }, application_event_type::EVT_UNKNOWN    },
+  // { { PA1    }, application_event_type::EVT_UNKNOWN    },
+  // { { PA2    }, application_event_type::EVT_UNKNOWN    },
+  { { PA3, 3 }, application_event_type::EVT_FILTER_F_1 },
+  { { PA4, 3 }, application_event_type::EVT_FILTER_Q_1 },
+  { { PA5, 3 }, application_event_type::EVT_VOLUME     },
+  { { PA6, 3 }, application_event_type::EVT_PITCH_1    },
+ }
 };
 
 controls::button_configurations  controls::_buttons = {
- { { PB9  }, application_event_type::EVT_TRIGGER   },
- { { PB8  }, application_event_type::EVT_TRIGGER   },
- { { PB7  }, application_event_type::EVT_TRIGGER   },
- { { PB6  }, application_event_type::EVT_TRIGGER   },
- { { PA10 }, application_event_type::EVT_TRIGGER   },
- { { PA9  }, application_event_type::EVT_TRIGGER   },
+ {
+  { { PB9  }, application_event_type::EVT_TRIGGER   },
+  { { PB8  }, application_event_type::EVT_TRIGGER   },
+  { { PB7  }, application_event_type::EVT_TRIGGER   },
+  { { PB6  }, application_event_type::EVT_TRIGGER   },
+  { { PA10 }, application_event_type::EVT_TRIGGER   },
+  { { PA9  }, application_event_type::EVT_TRIGGER   },
+ }
 };
 
 controls::combined_source controls::_control_event_source;
@@ -28,8 +32,8 @@ controls::combined_source controls::_control_event_source;
 void controls::setup() {
  uint8_t ix = 0;
 
- configure<BUTTONS_COUNT>(_buttons, ix);
- configure<SIGNALS_COUNT>(_signals, ix);
+ _buttons.configure(ix);
+ _signals.configure(ix);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -78,7 +82,7 @@ controls::application_event controls::process<controls::control_event_type::EVT_
  application_event application_event(application_event_type::EVT_UNKNOWN, sig_val);
 
  if (sig_num < SIGNALS_COUNT) {
-  application_event.type      = _signals[sig_num].application_event_type;
+  application_event.type      = _signals.items[sig_num].application_event_type;
   application_event.parameter = sig_val;
  } 
 
@@ -103,7 +107,7 @@ controls::application_event controls::process<controls::control_event_type::EVT_
  application_event application_event(application_event_type::EVT_UNKNOWN, button_number);
 
  if (button_number < BUTTONS_COUNT) {
-  application_event.type      = _buttons[button_number].application_event_type;
+  application_event.type      = _buttons.items[button_number].application_event_type;
  } 
 
 #ifdef LOG_BUTTONS
