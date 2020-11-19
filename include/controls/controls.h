@@ -54,16 +54,19 @@ public:
 private:
 
  /////////////////////////////////////////////////////////////////////////////////////////
- 
- struct signal_configuration {
-  controls::signal               device;
-  events::application_event_type application_event_type;
- };
 
- struct button_configuration {
-  controls::button               device;
-  events::application_event_type application_event_type;
+ template <typename device_t_, source_t_>
+ struct configuration {
+  typedef device_t_ device_t;
+  typedef source_t_ source_t;
+
+  device_t device;
+  events::application_event_type application_event_type;  
  };
+ 
+ typedef configuration<signal, signal_source>  signal_configuration
+ typedef configuration<button, signal_source>  button_configuration
+
  
  /////////////////////////////////////////////////////////////////////////////////////////
  
