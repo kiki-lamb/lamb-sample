@@ -39,9 +39,9 @@ public:
  /////////////////////////////////////////////////////////////////////////////////////////
 
  static constexpr uint32_t             K_RATE              = 80;
- static constexpr uint8_t              SIGNALS_COUNT       = 4;
- static constexpr uint8_t              BUTTONS_COUNT       = 6;
- static constexpr uint8_t              EVENT_SOURCES_COUNT = SIGNALS_COUNT + BUTTONS_COUNT;
+ static constexpr size_t               SIGNALS_COUNT       = 4;
+ static constexpr size_t               BUTTONS_COUNT       = 6;
+ static constexpr size_t               EVENT_SOURCES_COUNT = SIGNALS_COUNT + BUTTONS_COUNT;
 
  /////////////////////////////////////////////////////////////////////////////////////////
  
@@ -57,14 +57,14 @@ private:
 
  /////////////////////////////////////////////////////////////////////////////////////////
 
- template <typename device_t_, typename source_t_, uint8_t count_>
+ template <typename device_t_, typename source_t_, size_t count_>
  struct configurations {
 
   typedef device_t_ device_t;
 
   typedef source_t_ source_t;
 
-  static constexpr uint8_t COUNT = count_;
+  static constexpr size_t COUNT = count_;
 
   struct {
    device_t device;
@@ -72,8 +72,8 @@ private:
    events::application_event_type application_event_type;
   } items[COUNT];
 
-  void configure(uint8_t & ix) {
-   for (uint8_t bix = 0; bix < COUNT; ix++, bix++) {
+  void configure(size_t & ix) {
+   for (size_t bix = 0; bix < COUNT; ix++, bix++) {
     items[bix].device.number = bix;
     items[bix].device.setup();
     
@@ -83,7 +83,7 @@ private:
   }
  };
   
- //---------------------------------------------------------------------------------------
+ /////////////////////////////////////////////////////////////////////////////////////////
 
  typedef configurations<signal, signal_source, SIGNALS_COUNT> signal_configurations;
  typedef configurations<button, button_source, BUTTONS_COUNT> button_configurations;

@@ -30,7 +30,7 @@ controls::combined_source controls::_control_event_source;
 //////////////////////////////////////////////////////////////////////////////
 
 void controls::setup() {
- uint8_t ix = 0;
+ size_t ix = 0;
 
  _buttons.configure(ix);
  _signals.configure(ix);
