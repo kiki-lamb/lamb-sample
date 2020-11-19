@@ -55,23 +55,38 @@ private:
 
  /////////////////////////////////////////////////////////////////////////////////////////
 
- template <typename device_t_, source_t_>
+ template <typename device_t_, typename source_t_>
  struct configuration {
   typedef device_t_ device_t;
   typedef source_t_ source_t;
 
   device_t device;
-  events::application_event_type application_event_type;  
+  
+  events::application_event_type application_event_type;
  };
- 
- typedef configuration<signal, signal_source>  signal_configuration
- typedef configuration<button, signal_source>  button_configuration
 
+  //---------------------------------------------------------------------------------------
+
+ template <uint8_t count, typename device_t_, typename source_t_>
+ static void configure(configuration<device_t_, source_t_> arr[count], uint8_t & ix) {
+  for (uint8_t bix = 0; bix < count; ix++, bix++) {
+   arr[bix].device.number = bix;
+   arr[bix].device.setup();
+   
+   _control_event_source.sources[ix] =
+    new source_t_(&arr[bix].device);   
+  }
+ }
+
+ //---------------------------------------------------------------------------------------
+
+ typedef configuration<signal, signal_source>  signal_configurations[SIGNALS_COUNT];
+ typedef configuration<button, button_source>  button_configurations[BUTTONS_COUNT];
  
  /////////////////////////////////////////////////////////////////////////////////////////
  
- static  signal_configuration    _signals[SIGNALS_COUNT];
- static  button_configuration    _buttons[BUTTONS_COUNT];
+ static  signal_configurations   _signals;
+ static  button_configurations   _buttons;
  static  combined_source         _control_event_source;
 
  /////////////////////////////////////////////////////////////////////////////////////////
@@ -80,12 +95,6 @@ private:
   control_event const & control_event
  );
  
- template <typename s_t, uint8_t count, typename c_t>
- static void setup(
-  c_t arr[count],
-  uint8_t & ix
- );
-
  template <control_event_type cet>
  static  application_event process(
   control_event const & control_event

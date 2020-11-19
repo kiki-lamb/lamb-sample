@@ -2,7 +2,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 
-controls::signal_configuration controls::_signals[controls::SIGNALS_COUNT] = {
+controls::signal_configurations controls::_signals = {
  // { { PA0    }, application_event_type::EVT_UNKNOWN    },
  // { { PA1    }, application_event_type::EVT_UNKNOWN    },
  // { { PA2    }, application_event_type::EVT_UNKNOWN    },
@@ -12,7 +12,7 @@ controls::signal_configuration controls::_signals[controls::SIGNALS_COUNT] = {
  { { PA6, 3 }, application_event_type::EVT_PITCH_1    },
 };
 
-controls::button_configuration  controls::_buttons[controls::BUTTONS_COUNT] = {
+controls::button_configurations  controls::_buttons = {
  { { PB9  }, application_event_type::EVT_TRIGGER   },
  { { PB8  }, application_event_type::EVT_TRIGGER   },
  { { PB7  }, application_event_type::EVT_TRIGGER   },
@@ -25,24 +25,11 @@ controls::combined_source controls::_control_event_source;
 
 //////////////////////////////////////////////////////////////////////////////
 
-template <typename s_t, uint8_t count, typename c_t>
-void controls::setup(c_t arr[count], uint8_t & ix) {
- for (uint8_t bix = 0; bix < count; ix++, bix++) {
-  arr[bix].device.number = bix;
-  arr[bix].device.setup();
-
-  _control_event_source.sources[ix] =
-   new s_t(&arr[bix].device);   
- } 
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
 void controls::setup() {
  uint8_t ix = 0;
 
- setup<button_source, BUTTONS_COUNT>(_buttons, ix);
- setup<signal_source, SIGNALS_COUNT>(_signals, ix);
+ configure<BUTTONS_COUNT>(_buttons, ix);
+ configure<SIGNALS_COUNT>(_signals, ix);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
