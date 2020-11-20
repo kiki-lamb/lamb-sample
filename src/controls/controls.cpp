@@ -7,10 +7,10 @@ controls::signal_configurations controls::_signals = {
   // { { PA0    }, application_event_type::EVT_UNKNOWN    },
   // { { PA1    }, application_event_type::EVT_UNKNOWN    },
   // { { PA2    }, application_event_type::EVT_UNKNOWN    },
-  { { PA3, 3 }, application_event_type::EVT_FILTER_F_1 },
-  { { PA4, 3 }, application_event_type::EVT_FILTER_Q_1 },
+  { { PA3, 3 }, application_event_type::EVT_UNKNOWN }, // EVT_FILTER_F_1 },
+  { { PA4, 3 }, application_event_type::EVT_UNKNOWN }, // EVT_FILTER_Q_1 },
   { { PA5, 3 }, application_event_type::EVT_VOLUME     },
-  { { PA6, 3 }, application_event_type::EVT_PITCH_1    },
+  { { PA6, 3 }, application_event_type::EVT_UNKNOWN }, // EVT_PITCH_1    },
  }
 };
 
