@@ -373,6 +373,7 @@ void application::loop() {
  static u16q16   draw_operations                  { 0 };
 
  static uint32_t last_params_draw                 = 0;
+ static uint32_t last_auto_trigger                = 0;
 
  uint32_t now = millis();
 
@@ -392,9 +393,17 @@ void application::loop() {
  root.close();
 #endif
  
+ if ((now - last_auto_trigger) > 500) {
+  last_auto_trigger = now;
+
+#ifdef TEST_TRIGGER
+  voices::trigger(0);
+#endif
+ } 
+
  if (graph())
   draw_operations += u16q16(1, 0);
-  
+
 #ifdef LOG_DRAW_RATES
  if (_sample_ix1 >= voices::S_RATE) {
 //  static const uint8_t avging                    = 10;      

@@ -39,9 +39,9 @@ public:
  /////////////////////////////////////////////////////////////////////////////////////////
 
  static constexpr uint32_t             K_RATE              = 80;
- static constexpr uint8_t              SIGNALS_COUNT       = 7;
- static constexpr uint8_t              BUTTONS_COUNT       = 6;
- static constexpr uint8_t              EVENT_SOURCES_COUNT = SIGNALS_COUNT + BUTTONS_COUNT;
+ static constexpr size_t               SIGNALS_COUNT       = 4;
+ static constexpr size_t               BUTTONS_COUNT       = 6;
+ static constexpr size_t               EVENT_SOURCES_COUNT = SIGNALS_COUNT + BUTTONS_COUNT;
 
  /////////////////////////////////////////////////////////////////////////////////////////
  
@@ -53,23 +53,45 @@ public:
 
 private:
 
- /////////////////////////////////////////////////////////////////////////////////////////
- 
- struct signal_configuration {
-  controls::signal               device;
-  events::application_event_type application_event_type;
- };
-
- struct button_configuration {
-  controls::button               device;
-  events::application_event_type application_event_type;
- };
- 
- /////////////////////////////////////////////////////////////////////////////////////////
- 
- static  signal_configuration    _signals[SIGNALS_COUNT];
- static  button_configuration    _buttons[BUTTONS_COUNT];
  static  combined_source         _control_event_source;
+
+ /////////////////////////////////////////////////////////////////////////////////////////
+
+ template <typename device_t_, typename source_t_, size_t count_>
+ struct configurations {
+
+  typedef device_t_ device_t;
+
+  typedef source_t_ source_t;
+
+  static constexpr size_t COUNT = count_;
+
+  struct {
+   device_t device;
+   
+   events::application_event_type application_event_type;
+  } items[COUNT];
+
+  void configure(size_t & ix) {
+   for (size_t bix = 0; bix < COUNT; ix++, bix++) {
+    items[bix].device.number = bix;
+    items[bix].device.setup();
+    
+    _control_event_source.sources[ix] =
+     new source_t_(&items[bix].device);   
+   }
+  }
+ };
+  
+ /////////////////////////////////////////////////////////////////////////////////////////
+
+ typedef configurations<signal, signal_source, SIGNALS_COUNT> signal_configurations;
+ typedef configurations<button, button_source, BUTTONS_COUNT> button_configurations;
+ 
+ /////////////////////////////////////////////////////////////////////////////////////////
+ 
+ static  signal_configurations   _signals;
+ static  button_configurations   _buttons;
 
  /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -77,12 +99,6 @@ private:
   control_event const & control_event
  );
  
- template <typename s_t, uint8_t count, typename c_t>
- static void setup(
-  c_t arr[count],
-  uint8_t & ix
- );
-
  template <control_event_type cet>
  static  application_event process(
   control_event const & control_event
