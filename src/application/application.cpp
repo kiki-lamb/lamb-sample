@@ -362,8 +362,6 @@ void application::setup() {
 
  update_displayed_values();
  
- while(true);
- 
  setup_dac();
  
  Serial.println("[Setup] Correct PA5 pin mode...");
@@ -392,12 +390,14 @@ void application::loop() {
 
  uint32_t now = millis();
 
+ return;
+
  if ((now - last_params_draw) > 100) {
   last_params_draw = now;
 
   update_displayed_values();
  } 
-
+ 
 #ifdef ENABLE_SD
  File root = SD.open("/");
  
@@ -419,7 +419,6 @@ void application::loop() {
 
 #ifdef LOG_DRAW_RATES
  if (_sample_ix1 >= voices::S_RATE) {
-//  static const uint8_t avging                    = 10;      
   static u16q16        avg_draw_operations       { 0 };
   static uint32_t      tenth_seconds             = 0;
   tenth_seconds                                 += 1;
