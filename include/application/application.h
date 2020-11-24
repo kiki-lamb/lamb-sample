@@ -86,16 +86,23 @@ private:
     application::_tft.setTextColor(_color);
     application::_tft.setTextSize(2);
     
+    Serial.print("Print name ");
+    Serial.print(_name);
+    Serial.println();
+
     application::_tft.print(_name);
 
     _drawn = true;
    }
-   else if (_value == newval) {
+   else if (_drawn && (_value == newval)) {
+    Serial.print("Not printing ");
+    Serial.print(_name);
+    Serial.println();
+    
     return;
    }
-   else {
-    _value   = newval;
-   }
+
+   _value   = newval;
 
    uint16_t x_pos = _x_pos + 11 * _name_len;
    
@@ -118,7 +125,7 @@ private:
    }
    
    uint16_t font_color = (font_red << 11) | (font_green << 5);
-   
+
    application::_tft.setTextColor(font_color);
    application::_tft.setTextSize(2);
 
@@ -134,6 +141,14 @@ private:
    
    application::_tft.fillRect (x_pos + _value, _y_pos - 2, _width - _value, 18, ILI9341_BLACK);
 
+   Serial.print("Print ");
+   Serial.print(_name);
+   Serial.print(" value ");
+   Serial.print(_value);
+   Serial.print(" color ");
+   Serial.print(font_color);
+   Serial.println();
+   
    application::_tft.print(_value);
   }
  };
@@ -155,6 +170,7 @@ private:
  static            void                 setup_timers();
  static            void                 setup_sd();
  static            void                 remap_spi1();
+ static            void                 update_displayed_values();
  
 public:
  static            void                 setup();

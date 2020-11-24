@@ -360,6 +360,10 @@ void application::setup() {
 
  setup_tft();
 
+ update_displayed_values();
+ 
+ while(true);
+ 
  setup_dac();
  
  Serial.println("[Setup] Correct PA5 pin mode...");
@@ -370,6 +374,14 @@ void application::setup() {
  Serial.println("[Setup] Complete.");
 }
   
+////////////////////////////////////////////////////////////////////////////////
+
+void application::update_displayed_values() {
+ _displayed_filter_freq.update(voices::filter_f().value);
+ _displayed_filter_res .update(voices::filter_q().value);
+ _displayed_vol        .update(voices::volume().value);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::loop() {
@@ -383,9 +395,7 @@ void application::loop() {
  if ((now - last_params_draw) > 100) {
   last_params_draw = now;
 
-  _displayed_filter_freq.update(voices::filter_f().value);
-  _displayed_filter_res .update(voices::filter_q().value);
-  _displayed_vol        .update(voices::volume().value);
+  update_displayed_values();
  } 
 
 #ifdef ENABLE_SD
