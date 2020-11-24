@@ -74,16 +74,6 @@ private:
   void update(value_t newval) {
    newval >>= _downshift;
    
-   if (_value == newval) {
-    // Serial.println("Abort.");
-
-    return;
-   }
-
-   // Serial.println("Draw.");
-   
-   _value   = newval;
-
    if (! _drawn) {
     application::_tft.setCursor(_x_pos, _y_pos);
     application::_tft.setTextColor(_color);
@@ -93,11 +83,16 @@ private:
 
     _drawn = true;
    }
+   else if (_value == newval) {
+    return;
+   }
+   else {
+    _value   = newval;
+   }
 
    uint16_t x_pos = _x_pos + 11 * _name_len;
    
    application::_tft.setCursor(x_pos, _y_pos);
-
    
    // uint16_t font_red   = _value < 24 ? 0 : min(31, _value - 24);
    // uint16_t font_green = _value < 24 ? 0 : min(63, (_value - 24) << 1);
