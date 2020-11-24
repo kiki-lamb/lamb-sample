@@ -9,6 +9,7 @@ using namespace lamb;
 using namespace lamb::tables;
 
 //////////////////////////////////////////////////////////////////////////////
+SPIClass SPITWO(2);
 
 int32_t                      application::_avg_sample        { 0                         };
 size_t                       application::_sample_ix0        { 0                         };
@@ -17,7 +18,7 @@ HardwareTimer                application::_timer_1           ( 1                
 HardwareTimer                application::_timer_2           ( 2                         );
 HardwareTimer                application::_timer_3           ( 3                         );
 application::dac             application::_dac               ( application::I2S_WS, &SPI );
-application::tft             application::_tft(application::TFT_CS, application::TFT_DC  );
+application::tft             application::_tft(SPITWO, application::TFT_CS, application::TFT_DC  );
 application::draw_buffer     application::_draw_buffer;         
 
 application::displayed_value<voices::filter::unsigned_internal_t::value_type>
