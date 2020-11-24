@@ -39,6 +39,8 @@ void controls::setup(c_t arr[count], uint8_t & ix) {
 //////////////////////////////////////////////////////////////////////////////
 
 void controls::setup() {
+ Serial.println("[Setup] Setup controls...");
+
  uint8_t ix = 0;
 
  setup<button_source, BUTTONS_COUNT>(_buttons, ix);

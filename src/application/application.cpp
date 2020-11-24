@@ -2,6 +2,7 @@
 #include <inttypes.h>
 #include <Arduino.h>
 #include <math.h>
+#include "SD.h"
 
 using namespace lamb;
 
@@ -104,7 +105,27 @@ bool application::graph() {
  
  col ++;
 // col %= col_max;
-  
+
+ static uint32_t last_time = 0;
+ uint32_t new_time = millis();
+ 
+ if ((new_time - last_time) > 500) {
+  _tft.setCursor(10, 210);
+  _tft.fillRect(10, 210 - 2, 100, 20, ILI9341_BLACK);
+  _tft.setTextColor(ILI9341_GREEN);
+  _tft.setTextSize(2);
+  _tft.print(new_time);
+
+  Serial.print("Time: ");
+  Serial.println(new_time);
+
+  last_time = new_time;
+ } /*
+ else {
+  Serial.print("No: ");
+  Serial.println(new_time);
+  } */
+ 
  return true;
 }
 
@@ -136,15 +157,15 @@ void application::k_rate() {
 
    // Serial.print("Vol: ");
    // Serial.print(float(voices::volume()));   
- // Serial.print("Read ");
- // Serial.print(analogRead(PA3));
- // Serial.print(" ");
- // Serial.print(analogRead(PA4));
- // Serial.print(" ");
- // Serial.print(analogRead(PA5));
- // Serial.print(" ");
- // Serial.print(analogRead(PA6));
- // Serial.print(" ");
+   // Serial.print("Read ");
+   // Serial.print(analogRead(PA3));
+   // Serial.print(" ");
+   // Serial.print(analogRead(PA4));
+   // Serial.print(" ");
+   // Serial.print(analogRead(PA5));
+   // Serial.print(" ");
+   // Serial.print(analogRead(PA6));
+   // Serial.print(" ");
 //   Serial.println();
    break;
   }
@@ -228,6 +249,8 @@ void application::s_rate() {
 ////////////////////////////////////////////////////////////////////////////////
       
 void application::setup_tft() {
+  Serial.println("[Setup] Setup TFT...");
+
  _tft.begin();
  _tft.setRotation(3);
  _tft.setTextColor(ILI9341_WHITE);  
@@ -239,6 +262,8 @@ void application::setup_tft() {
 
 
 void application::setup_dac() {
+ Serial.println("[Setup] Setup DAC...");
+
  SPI.begin();
   
  _dac.setup();
@@ -247,22 +272,47 @@ void application::setup_dac() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::setup_timers() {
+ Serial.println("[Setup] Setup timers...");
+
  device::maple_timer::setup(_timer_1, voices::S_RATE,     s_rate);
  device::maple_timer::setup(_timer_2, ::controls::K_RATE, k_rate);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void application::setup() {
- delay(3000);
+void print_directory(File dir, int numTabs = 0, bool recurse = false) {
+ while (true) {
+  File entry =  dir.openNextFile();
 
- pinMode(LED_BUILTIN, OUTPUT);
- 
- Serial.begin(64000000);
-  
- voices::setup();
- ::controls::setup();
+  if (! entry) {
+   // no more files
+   break;
+  }
+    
+  for (uint8_t i = 0; i < numTabs; i++) {
+   Serial.print('\t');
+  }
+    
+  Serial.print(entry.name());
 
+  if (entry.isDirectory()) {
+   Serial.println("/");
+   if (recurse) {
+    print_directory(entry, numTabs + 1);
+   }
+  } else {
+   Serial.print("\t\t");
+   Serial.println(entry.size(), DEC);
+  }
+
+  entry.close();
+ }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void application::remap_spi1() {
+ Serial.println("[Setup] Remap SPI1...");  
  afio_remap(AFIO_REMAP_USART1);
  afio_cfg_debug_ports (AFIO_DEBUG_SW_ONLY);
  afio_remap (AFIO_REMAP_SPI1);
@@ -270,13 +320,51 @@ void application::setup() {
  gpio_set_mode (GPIOB,  3, GPIO_AF_OUTPUT_PP);
  gpio_set_mode (GPIOB,  4, GPIO_INPUT_FLOATING);
  gpio_set_mode (GPIOB,  5, GPIO_AF_OUTPUT_PP);
- 
- setup_tft();
- setup_dac();
- setup_timers();
+}
 
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void application::setup_sd() {
+#ifdef ENABLE_SD
+ Serial.println("[Setup] Setup SD card...");
+
+ if (SD.begin(SD_CS)) {
+  Serial.println("[Setup] Successfully setup SD card.");
+ }
+ else {
+  Serial.println("[Setup] Failed to setup SD card.");
+ }
+#endif
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void application::setup() {
+ delay(5000);
+
+ pinMode(LED_BUILTIN, OUTPUT);
+ 
+ Serial.begin(64000000);
+ Serial.println("[Setup] Begin...");
+
+ voices::setup();
+
+ ::controls::setup();
+
+ remap_spi1();
+
+ setup_sd();
+
+ setup_tft();
+
+ setup_dac();
+ 
+ Serial.println("[Setup] Correct PA5 pin mode...");
  pinMode(PA5, INPUT);
  
+ setup_timers();
+
+ Serial.println("[Setup] Complete.");
 }
   
 ////////////////////////////////////////////////////////////////////////////////
@@ -295,6 +383,14 @@ void application::loop() {
   _displayed_filter_res .update(voices::filter_q().value);
   _displayed_vol        .update(voices::volume().value);
  } 
+
+#ifdef ENABLE_SD
+ File root = SD.open("/");
+ 
+ print_directory(root);
+
+ root.close();
+#endif
  
  if (graph())
   draw_operations += u16q16(1, 0);
