@@ -119,6 +119,10 @@ private:
 // //    font_red   = (_value - 48) << 1;
 //     font_green = (_value - 32) << 1;
 //    }
+   else if (_value == 0) {
+    font_red   = 7 << 2;
+    font_green = 7 << 3;
+   }
    else if (_value <= 8) {
     font_red   = (8 - _value) << 2;
     font_green = (8 - _value) << 3;
