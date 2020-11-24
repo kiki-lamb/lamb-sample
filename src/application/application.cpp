@@ -360,6 +360,11 @@ void application::setup() {
 
  setup_tft();
 
+// col %= col_max;
+
+ _tft.drawFastHLine(0,     128, 172,  ILI9341_GREEN);
+ _tft.drawFastVLine(172,   0,   128,  ILI9341_GREEN);
+
  update_displayed_values();
  
  setup_dac();
