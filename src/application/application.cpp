@@ -9,7 +9,7 @@ using namespace lamb;
 using namespace lamb::tables;
 
 //////////////////////////////////////////////////////////////////////////////
-SPIClass                     application::_spi_2           { 2                         };
+SPIClass                     application::_spi_2             { 2                         };
 int32_t                      application::_avg_sample        { 0                         };
 size_t                       application::_sample_ix0        { 0                         };
 size_t                       application::_sample_ix1        { 0                         };
@@ -18,7 +18,6 @@ HardwareTimer                application::_timer_2           ( 2                
 HardwareTimer                application::_timer_3           ( 3                         );
 application::dac             application::_dac               ( application::I2S_WS, &SPI );
 application::tft             application::_tft(
- application::_spi_2,
  application::TFT_CS,
  application::TFT_DC
 );
@@ -255,7 +254,7 @@ void application::s_rate() {
 void application::setup_tft() {
   Serial.println("[Setup] Setup TFT...");
 
- _tft.begin();
+ _tft.begin(_spi_2);
  _tft.setRotation(3);
  _tft.setTextColor(ILI9341_WHITE);  
  _tft.setTextSize(2);

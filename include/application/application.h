@@ -9,11 +9,18 @@
 #include "events/control.h"
 #include "events/application.h"
 
+#ifdef USE_GENERIC_ILI9341
+#include "Adafruit_ILI9341_STM.h"
+#endif
+
 class application {
 
 public:
- 
+#ifdef USE_GENERIC_ILI9341
+ typedef Adafruit_ILI9341_STM                               tft;
+#else
  typedef lamb::device::Adafruit_ILI9341_STM32F1             tft;
+#endif
  typedef lamb::device::pt8211                               dac;
  typedef lamb::ring_buffer<voices::sample, 256>             draw_buffer;
  typedef controls::application_event                        application_event;
