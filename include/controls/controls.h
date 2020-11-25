@@ -38,9 +38,9 @@ public:
 
  /////////////////////////////////////////////////////////////////////////////////////////
 
- static constexpr uint32_t             K_RATE              { 80 };
- static constexpr size_t               SIGNALS_COUNT       { 4 };
- static constexpr size_t               BUTTONS_COUNT       { 6 };
+ static constexpr uint32_t             K_RATE              = 80;
+ static constexpr size_t               SIGNALS_COUNT       = 4;
+ static constexpr size_t               BUTTONS_COUNT       = 6;
  static constexpr size_t               EVENT_SOURCES_COUNT = SIGNALS_COUNT + BUTTONS_COUNT;
 
  /////////////////////////////////////////////////////////////////////////////////////////
@@ -64,7 +64,7 @@ private:
 
   typedef source_t_ source_t;
 
-  static constexpr size_t COUNT { count_ };
+  static constexpr size_t COUNT = count_;
 
   struct {
    device_t device;

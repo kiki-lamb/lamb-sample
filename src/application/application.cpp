@@ -11,13 +11,13 @@ using namespace lamb::tables;
 //////////////////////////////////////////////////////////////////////////////
 SPIClass                     application::_spi_1             { 1                         };
 SPIClass                     application::_spi_2             { 2                         };
-int32_t                      application::_avg_sample        { 0                         };
-size_t                       application::_sample_ix0        { 0                         };
-size_t                       application::_sample_ix1        { 0                         };
 HardwareTimer                application::_timer_1           { 1                         };
 HardwareTimer                application::_timer_2           { 2                         };
 HardwareTimer                application::_timer_3           { 3                         };
 application::dac             application::_dac               { application::I2S_WS       };
+int32_t                      application::_avg_sample        = 0;
+size_t                       application::_sample_ix0        = 0;
+size_t                       application::_sample_ix1        = 0;
 application::tft             application::_tft {
  application::TFT_CS,
   application::TFT_DC
@@ -65,7 +65,7 @@ bool application::graph() {
 
   tmp >>= 13; // to 7 bit
 
-  uint16_t wave_color { ILI9341_YELLOW };
+  uint16_t wave_color = ILI9341_YELLOW;
  
   if (tmp > 62) {
    tmp.value = 62;
@@ -76,9 +76,9 @@ bool application::graph() {
    // wave_color = ILI9341_RED;
   }
  
-  static const uint16_t width   { 172 };
-  static uint16_t       col     { 0 };
-  uint16_t              tmp_col (col % width);
+  static const uint16_t width   = 172;
+  static uint16_t       col     = 0;
+  uint16_t              tmp_col = col % width;
   
   _tft.drawFastVLine(tmp_col, 1, 128 - 2, ILI9341_BLACK);
   
@@ -100,7 +100,7 @@ bool application::graph() {
 
   _tft.drawFastHLine(0,      64,  width, ILI9341_RED);
 
-  static bool box { false };
+  static bool box = false;
 
   if (! box) {
    _tft.drawFastHLine(0,     128, width, ILI9341_GREEN);
@@ -112,8 +112,8 @@ bool application::graph() {
   col ++;
  }
 
- static uint32_t last_time { 0 };
- uint32_t         new_time { millis() };
+ static uint32_t last_time = 0;
+ uint32_t         new_time = millis();
  
  if ((new_time - last_time) > 500) {
   _tft.setCursor(10, 210);
@@ -144,7 +144,7 @@ void application::k_rate() {
  
  while(::controls::queue_count() > 0)
  {
-  application_event ae { ::controls::dequeue_event() };
+  application_event ae = ::controls::dequeue_event();
 
 #ifdef LOG_EVENT_TIMES
   Serial.print("Dequeue evt ");
@@ -157,8 +157,7 @@ void application::k_rate() {
   
   switch (ae.type) {
   case application_event_type::EVT_VOLUME:
-  {
-   
+  {   
    voices::volume(voices::volume_type(ae.parameter << 4));
 
    // Serial.print("Vol: ");
@@ -240,7 +239,7 @@ void application::s_rate() {
  //  _avg_sample = 0;
  // }
 
- voices::mix s { voices::read() };
+ voices::mix s = voices::read();
 
  if (_draw_buffer.writable()) {
   _draw_buffer.enqueue(s);
@@ -295,7 +294,7 @@ void print_directory(File dir, int numTabs = 0, bool recurse = false) {
    break;
   }
     
-  for (uint8_t i { 0 }; i < numTabs; i++) {
+  for (uint8_t i = 0; i < numTabs; i++) {
    Serial.print('\t');
   }
     
@@ -388,12 +387,10 @@ void application::update_displayed_values() {
 void application::loop() {
  static u16q16   draw_operations                  { 0 };
 
- static uint32_t last_params_draw                 { 0 };
- static uint32_t last_auto_trigger                { 0 };
+ static uint32_t last_params_draw                 = 0;
+ static uint32_t last_auto_trigger                = 0;
 
- uint32_t now { millis() };
-
-// return;
+ uint32_t now = millis();
 
  if ((now - last_params_draw) > 100) {
   last_params_draw = now;
@@ -423,7 +420,7 @@ void application::loop() {
 #ifdef LOG_DRAW_RATES
  if (_sample_ix1 >= voices::S_RATE) {
   static u16q16        avg_draw_operations       { 0 };
-  static uint32_t      tenth_seconds             { 0 };
+  static uint32_t      tenth_seconds             = 0;
   tenth_seconds                                 += 1;
   _sample_ix1                                    = 0;
   avg_draw_operations                           *= u16q16(0xe000);

@@ -32,7 +32,7 @@ controls::combined_source controls::_control_event_source;
 void controls::setup() {
  Serial.println("[Setup] Setup controls...");
 
- size_t ix { 0 };
+ size_t ix = 0;
 
  _buttons.configure(ix);
  _signals.configure(ix);
@@ -48,13 +48,13 @@ size_t controls::queue_count() {
 
 void controls::poll() {
 #ifdef LOG_EVENT_TIMES
- uint32_t start { millis() };
+ uint32_t start = millis();
 #endif
 
  _control_event_source.poll();
   
 #ifdef LOG_EVENT_TIMES
- uint32_t delta { millis() - start };
+ uint32_t delta = millis() - start;
 
  Serial.print("Poll took ");
  Serial.print(delta);
@@ -79,9 +79,9 @@ template <>
 controls::application_event controls::process<controls::control_event_type::EVT_SIGNAL>(
  controls::control_event const & control_event
 ) {
- uint16_t          sig_val(control_event.parameter & 0x0fff);
- uint8_t           sig_num ((control_event.parameter& 0xf000) >> 12);
- application_event application_event(application_event_type::EVT_UNKNOWN, sig_val);
+ uint16_t          sig_val = control_event.parameter & 0x0fff;
+ uint8_t           sig_num = (control_event.parameter& 0xf000) >> 12;
+ application_event application_event { application_event_type::EVT_UNKNOWN, sig_val };
 
  if (sig_num < SIGNALS_COUNT) {
   application_event.type      = _signals.items[sig_num].application_event_type;
@@ -105,7 +105,7 @@ template <>
 controls::application_event controls::process<controls::control_event_type::EVT_BUTTON>(
  controls::control_event const & control_event
 ) {
- uint8_t           button_number  (control_event.parameter_hi());
+ uint8_t           button_number  = control_event.parameter_hi();
  application_event application_event { application_event_type::EVT_UNKNOWN, button_number };
 
  if (button_number < BUTTONS_COUNT) {
