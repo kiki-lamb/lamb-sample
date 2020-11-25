@@ -120,8 +120,8 @@ bool application::graph() {
   _tft.setTextSize(2);
   _tft.print(new_time);
 
-  Serial.print("Time: ");
-  Serial.println(new_time);
+  // Serial.print("Time: ");
+  // Serial.println(new_time);
 
   last_time = new_time;
  } /*
@@ -360,9 +360,6 @@ void application::setup() {
  setup_sd();
 
  setup_tft();
-
- _tft.drawFastHLine(0,     128, 172,  ILI9341_GREEN);
- _tft.drawFastVLine(172,   0,   128,  ILI9341_GREEN);
 
  update_displayed_values();
  

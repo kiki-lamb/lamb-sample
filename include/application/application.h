@@ -96,9 +96,9 @@ private:
     _drawn = true;
    }
    else if (_drawn && (_value == newval)) {
-    Serial.print("Not printing ");
-    Serial.print(_name);
-    Serial.println();
+    // Serial.print("Not printing ");
+    // Serial.print(_name);
+    // Serial.println();
     
     return;
    }
