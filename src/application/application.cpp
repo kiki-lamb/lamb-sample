@@ -77,10 +77,17 @@ bool application::graph() {
    // wave_color = ILI9341_RED;
   }
  
-  static const uint16_t width   = 172;
-  static uint16_t       col     = 0;
-  uint16_t              tmp_col = col % width;
+  static const uint16_t    width   = 172;
+  static uint16_t          col     = 0;
+
+  uint16_t                 tmp_col = col % width;
+
+  static uint32_t          ctr     = 0;
+  static uint32_t          accum   = 0;
+  static constexpr uint8_t avging  = 11;
   
+  uint32_t                 start   = micros(); 
+
   _tft.drawFastVLine(tmp_col, 1, 128 - 2, ILI9341_BLACK);
   
   if (tmp > 0)
@@ -101,6 +108,20 @@ bool application::graph() {
 
   _tft.drawFastHLine(0,      64,  width, ILI9341_RED);
 
+  accum += micros() - start;
+  ctr   ++;
+
+  if (ctr == (1 << avging)) {
+   accum >>= avging;
+   
+   Serial.print("t = ");
+   Serial.print(accum);
+   Serial.println();
+
+   accum = 0;
+   ctr   = 0;
+  }
+  
   static bool box = false;
 
   if (! box) {
