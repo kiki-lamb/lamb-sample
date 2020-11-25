@@ -21,7 +21,6 @@ public:
 #else
  typedef lamb::device::Adafruit_ILI9341_STM32F1             tft;
 #endif
- typedef lamb::device::pt8211                               dac;
  typedef lamb::ring_buffer<voices::sample, 256>             draw_buffer;
  typedef controls::application_event                        application_event;
  typedef controls::application_event_type                   application_event_type;
@@ -40,7 +39,6 @@ private:
  static            HardwareTimer        _timer_1; 
  static            HardwareTimer        _timer_2;
  static            HardwareTimer        _timer_3;
- static            dac                  _dac;
  static            tft                  _tft;
  static            draw_buffer          _draw_buffer;
 
@@ -173,7 +171,6 @@ private:
  static            void                 s_rate();
  static            bool                 graph();  
  static            void                 setup_tft();
- static            void                 setup_dac();
  static            void                 setup_timers();
  static            void                 setup_sd();
  static            void                 remap_spi1();

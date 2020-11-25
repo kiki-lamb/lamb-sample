@@ -14,7 +14,6 @@ SPIClass                     application::_spi_2             { 2                
 HardwareTimer                application::_timer_1           { 1                         };
 HardwareTimer                application::_timer_2           { 2                         };
 HardwareTimer                application::_timer_3           { 3                         };
-application::dac             application::_dac               { application::I2S_WS       };
 int32_t                      application::_avg_sample        = 0;
 size_t                       application::_sample_ix0        = 0;
 size_t                       application::_sample_ix1        = 0;
@@ -136,8 +135,6 @@ void application::s_rate() {
   _draw_buffer.enqueue(s);
  }
 
- _dac.write_mono(s);
-
  _sample_ix0  ++;
  _sample_ix1  ++;
 }
@@ -152,17 +149,6 @@ void application::setup_tft() {
  _tft.setTextColor(ILI9341_WHITE);  
  _tft.setTextSize(2);
  _tft.fillScreen(ILI9341_BLACK);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-
-void application::setup_dac() {
- Serial.println("[Setup] Setup DAC...");
-
- _spi_2.begin();
-  
- _dac.setup(_spi_2);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -254,8 +240,6 @@ void application::setup() {
  setup_sd();
 
  setup_tft();
- 
- setup_dac();
  
  // Serial.println("[Setup] Correct PA5 pin mode...");
  // pinMode(PA5, INPUT);
