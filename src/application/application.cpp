@@ -9,6 +9,7 @@ using namespace lamb;
 using namespace lamb::tables;
 
 //////////////////////////////////////////////////////////////////////////////
+SPIClass                     application::_spi_1             { 1                         };
 SPIClass                     application::_spi_2             { 2                         };
 int32_t                      application::_avg_sample        { 0                         };
 size_t                       application::_sample_ix0        { 0                         };
@@ -16,7 +17,7 @@ size_t                       application::_sample_ix1        { 0                
 HardwareTimer                application::_timer_1           ( 1                         );
 HardwareTimer                application::_timer_2           ( 2                         );
 HardwareTimer                application::_timer_3           ( 3                         );
-application::dac             application::_dac               ( application::I2S_WS, &SPI );
+application::dac             application::_dac               { application::I2S_WS       };
 application::tft             application::_tft(
  application::TFT_CS,
  application::TFT_DC
@@ -267,9 +268,9 @@ void application::setup_tft() {
 void application::setup_dac() {
  Serial.println("[Setup] Setup DAC...");
 
- SPI.begin();
+ _spi_1.begin();
   
- _dac.setup();
+ _dac.setup(_spi_1);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -360,8 +361,6 @@ void application::setup() {
 
  setup_tft();
 
-// col %= col_max;
-
  _tft.drawFastHLine(0,     128, 172,  ILI9341_GREEN);
  _tft.drawFastVLine(172,   0,   128,  ILI9341_GREEN);
 
@@ -395,7 +394,7 @@ void application::loop() {
 
  uint32_t now = millis();
 
- return;
+// return;
 
  if ((now - last_params_draw) > 100) {
   last_params_draw = now;

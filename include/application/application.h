@@ -32,6 +32,7 @@ public:
  static constexpr  uint32_t             SD_CS               = PB1;
 
 private:
+ static            SPIClass             _spi_1;
  static            SPIClass             _spi_2;
  static            int32_t              _avg_sample;
  static            size_t               _sample_ix0;
