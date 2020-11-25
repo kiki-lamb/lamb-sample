@@ -9,6 +9,7 @@ using namespace lamb;
 using namespace lamb::tables;
 
 //////////////////////////////////////////////////////////////////////////////
+SPIClass                     application::_spi_1             { 1                         };
 SPIClass                     application::_spi_2             { 2                         };
 int32_t                      application::_avg_sample        { 0                         };
 size_t                       application::_sample_ix0        { 0                         };
@@ -16,7 +17,9 @@ size_t                       application::_sample_ix1        { 0                
 HardwareTimer                application::_timer_1           ( 1                         );
 HardwareTimer                application::_timer_2           ( 2                         );
 HardwareTimer                application::_timer_3           ( 3                         );
-application::dac             application::_dac               ( application::I2S_WS, &SPI );
+application::dac             application::_dac               (
+ application::I2S_WS
+);
 application::tft             application::_tft(
  application::TFT_CS,
  application::TFT_DC
@@ -119,8 +122,8 @@ bool application::graph() {
   _tft.setTextSize(2);
   _tft.print(new_time);
 
-  Serial.print("Time: ");
-  Serial.println(new_time);
+  // Serial.print("Time: ");
+  // Serial.println(new_time);
 
   last_time = new_time;
  } /*
@@ -269,7 +272,7 @@ void application::setup_dac() {
 
  SPI.begin();
   
- _dac.setup();
+ _dac.setup(application::_spi_1);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
