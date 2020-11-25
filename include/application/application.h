@@ -105,13 +105,15 @@ private:
 
    _value   = newval;
 
-   uint16_t x_pos = _x_pos + 11 * _name_len;
+   uint16_t x_pos(_x_pos + 11 * _name_len);
    
    application::_tft.setCursor(x_pos, _y_pos);
    
    // uint16_t font_red   = _value < 24 ? 0 : min(31, _value - 24);
    // uint16_t font_green = _value < 24 ? 0 : min(63, (_value - 24) << 1);
-   uint16_t font_red = 0, font_green = 0;
+
+   uint16_t font_red(0), font_green(0);
+   
    if (_value >= 56) {
     font_red   = (_value - 56) << 2;
     font_green = (_value - 56) << 3;
@@ -129,14 +131,14 @@ private:
     font_green = (8 - _value) << 3;
    }
    
-   uint16_t font_color = (font_red << 11) | (font_green << 5);
+   uint16_t font_color((font_red << 11) | (font_green << 5));
 
    application::_tft.setTextColor(font_color);
    application::_tft.setTextSize(2);
 
-   uint16_t red_value   = _value >> 1;
-   uint16_t green_value = 63 - _value;
-   uint16_t color = (red_value << 11) | (green_value << 5);
+   uint16_t red_value(_value >> 1);
+   uint16_t green_value(63 - _value);
+   uint16_t color((red_value << 11) | (green_value << 5));
    
    application::_tft.fillRect (
     x_pos, _y_pos - 2,

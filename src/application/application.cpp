@@ -435,8 +435,6 @@ void application::loop() {
   Serial.print(F(", "));
   Serial.print(float(avg_draw_operations));
   Serial.print(F(" avg, "));
-  Serial.print((avg_draw_operations - tmp_avg_draw_operations).value);
-  Serial.print(F(", "));
   Serial.print(_draw_buffer.count());
   Serial.println();
     
