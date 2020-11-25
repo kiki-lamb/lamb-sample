@@ -91,7 +91,7 @@ private:
     Serial.print(_name);
     Serial.println();
 
-    application::_tft.print(_name);
+//    application::_tft.print(_name);
 
     _drawn = true;
    }
@@ -156,7 +156,7 @@ private:
    Serial.print(font_color);
    Serial.println();
    
-   application::_tft.print(_value);
+//   application::_tft.print(_value);
   }
  };
 

@@ -30,10 +30,10 @@ application::displayed_value<voices::filter::unsigned_internal_t::value_type>
 application::_displayed_filter_freq { "Freq:", 184, 5,  10, 64 };
 
 application::displayed_value<voices::filter::unsigned_internal_t::value_type>
-application::_displayed_filter_res  { "Res:", 184, 30, 10, 64 };
+application::_displayed_filter_res  { "Res: ", 184, 30, 10, 64 };
 
 application::displayed_value<u0q16::value_type>
-application::_displayed_vol         { "Vol:", 184, 55, 10, 64 };
+application::_displayed_vol         { "Vol: ", 184, 55, 10, 64 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -120,20 +120,16 @@ bool application::graph() {
    _tft.fillRect(10, 210 - 2, 100, 20, ILI9341_BLACK);
    _tft.setTextColor(ILI9341_GREEN);
    _tft.setTextSize(2);
-   _tft.print(new_time);
+//   _tft.print(new_time);
    
    // Serial.print("Time: ");
    // Serial.println(new_time);
    
    last_time = new_time;
- } /*
-     else {
-     Serial.print("No: ");
-     Serial.println(new_time);
-     } */
-  
-  return true;
+  }
  }
+ 
+ return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////
