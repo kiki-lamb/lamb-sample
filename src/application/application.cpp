@@ -18,26 +18,27 @@ application::dac             application::_dac               { application::I2S_
 int32_t                      application::_avg_sample        = 0;
 size_t                       application::_sample_ix0        = 0;
 size_t                       application::_sample_ix1        = 0;
-application::tft             application::_tft {
+
+application::tft             application::_tft(
  application::TFT_CS,
-  application::TFT_DC
-  };
+ application::TFT_DC
+);
 
 application::draw_buffer     application::_draw_buffer;         
 
 application::displayed_value<voices::filter::unsigned_internal_t::value_type>
-application::_displayed_filter_freq { "Freq: ", 184, 5,  10, 64 };
+application::_displayed_filter_freq { "Freq:", 184, 5,  10, 64 };
 
 application::displayed_value<voices::filter::unsigned_internal_t::value_type>
-application::_displayed_filter_res  { "Res:  ", 184, 30, 10, 64 };
+application::_displayed_filter_res  { "Res:", 184, 30, 10, 64 };
 
 application::displayed_value<u0q16::value_type>
-application::_displayed_vol         { "Vol :  ", 184, 55, 10, 64 };
+application::_displayed_vol         { "Vol:", 184, 55, 10, 64 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 bool application::graph() {
- if (false) {
+ if (true) {
   if (_draw_buffer.count() < 16)
    return false;
 
@@ -110,29 +111,29 @@ bool application::graph() {
   }
  
   col ++;
- }
-
- static uint32_t last_time = 0;
- uint32_t         new_time = millis();
- 
- if ((new_time - last_time) > 500) {
-  _tft.setCursor(10, 210);
-  _tft.fillRect(10, 210 - 2, 100, 20, ILI9341_BLACK);
-  _tft.setTextColor(ILI9341_GREEN);
-  _tft.setTextSize(2);
-  _tft.print(new_time);
-
-  // Serial.print("Time: ");
-  // Serial.println(new_time);
-
-  last_time = new_time;
+ } else {
+  static uint32_t last_time = 0;
+  uint32_t         new_time = millis();
+  
+  if ((new_time - last_time) > 500) {
+   _tft.setCursor(10, 210);
+   _tft.fillRect(10, 210 - 2, 100, 20, ILI9341_BLACK);
+   _tft.setTextColor(ILI9341_GREEN);
+   _tft.setTextSize(2);
+   _tft.print(new_time);
+   
+   // Serial.print("Time: ");
+   // Serial.println(new_time);
+   
+   last_time = new_time;
  } /*
      else {
      Serial.print("No: ");
      Serial.println(new_time);
      } */
- 
- return true;
+  
+  return true;
+ }
 }
 
 //////////////////////////////////////////////////////////////////////////////
