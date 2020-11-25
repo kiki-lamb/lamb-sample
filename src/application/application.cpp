@@ -84,11 +84,27 @@ bool application::graph() {
 
   static uint32_t          ctr     = 0;
   static uint32_t          accum   = 0;
-  static constexpr uint8_t avging  = 11;
+  static constexpr uint8_t avging  = 12;
   
   uint32_t                 start   = micros(); 
 
   _tft.drawFastVLine(tmp_col, 1, 128 - 2, ILI9341_BLACK);
+  
+  {
+   accum += micros() - start;
+   ctr   ++;
+   
+   if (ctr == (1 << avging)) {
+    accum >>= avging;
+    
+    Serial.print("t = ");
+    Serial.print(accum);
+    Serial.println();
+    
+    accum = 0;
+    ctr   = 0;
+   }
+  }
   
   if (tmp > 0)
    _tft.drawFastVLine(
@@ -108,20 +124,6 @@ bool application::graph() {
 
   _tft.drawFastHLine(0,      64,  width, ILI9341_RED);
 
-  accum += micros() - start;
-  ctr   ++;
-
-  if (ctr == (1 << avging)) {
-   accum >>= avging;
-   
-   Serial.print("t = ");
-   Serial.print(accum);
-   Serial.println();
-
-   accum = 0;
-   ctr   = 0;
-  }
-  
   static bool box = false;
 
   if (! box) {
