@@ -7,7 +7,7 @@ using namespace lamb;
 ////////////////////////////////////////////////////////////////////////////////
 
 voices::voice *      voices::_items[voices::COUNT];
-voices::volume_type  voices::_volume                { 1000                     };
+voices::volume_type  voices::_volume                { 0x8000                   };
 u0q32                voices::_phincrs[120]          { u0q32(0)                 };
 voices::filter       voices::_lpf;
 
