@@ -18,7 +18,7 @@ HardwareTimer                application::_timer_1           ( 1                
 HardwareTimer                application::_timer_2           ( 2                         );
 HardwareTimer                application::_timer_3           ( 3                         );
 application::dac             application::_dac               (
- application::I2S_WS
+ application::DAC_WS
 );
 application::tft             application::_tft(
  application::TFT_CS,
@@ -257,7 +257,12 @@ void application::s_rate() {
 void application::setup_tft() {
   Serial.println("[Setup] Setup TFT...");
 
- _tft.begin(TFT_SPI);
+#if TFT_SPI == SPI_1
+  _tft.begin(_spi_1);
+#else
+  _tft.begin(_spi_2);
+#endif
+  
  _tft.setRotation(3);
  _tft.setTextColor(ILI9341_WHITE);  
  _tft.setTextSize(2);
@@ -270,7 +275,11 @@ void application::setup_tft() {
 void application::setup_dac() {
  Serial.println("[Setup] Setup DAC...");
 
- _dac.setup(DAC_SPI);
+#if DAC_SPI == SPI_1
+ _dac.setup(_spi_1);
+#else
+ _dac.setup(_spi_2);
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -324,7 +333,7 @@ void application::setup_spis() {
  // afio_remap(AFIO_REMAP_USART1);
  // afio_cfg_debug_ports (AFIO_DEBUG_SW_ONLY);
 
-#ifdef REMAP_SPI1
+#ifdef REMAP_SPI_1
  afio_remap (AFIO_REMAP_SPI1);
 
  // remapped

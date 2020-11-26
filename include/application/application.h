@@ -10,8 +10,16 @@
 #include "events/application.h"
 #include "Adafruit_ILI9341_STM.h"
 
-#define TFT_SPI _spi_1
-#define DAC_SPI _spi_2
+#define SPI_1   1
+#define SPI_2   2
+
+#ifndef TFT_SPI
+#define TFT_SPI SPI_1 
+#endif
+
+#ifndef DAC_SPI
+#define DAC_SPI SPI_2
+#endif
 
 class application {
 
@@ -21,10 +29,30 @@ public:
  typedef lamb::ring_buffer<voices::sample, 256>             draw_buffer;
  typedef controls::application_event                        application_event;
  typedef controls::application_event_type                   application_event_type;
-  
- static constexpr  uint32_t             TFT_DC              = PB0;
- static constexpr  uint32_t             TFT_CS              = PA4;
- static constexpr  uint32_t             I2S_WS              = PA15;
+
+#if TFT_SPI == SPI_1
+ #ifndef REMAP_SPI_1
+  static constexpr  uint32_t            TFT_DC              = PB0;
+  static constexpr  uint32_t            TFT_CS              = PA4;
+ #else // remapped
+  static constexpr  uint32_t            TFT_DC              = PA8;
+  static constexpr  uint32_t            TFT_CS              = PA15;
+ #endif
+#else // SPI_2
+ static constexpr  uint32_t             TFT_DC              = PA8;
+ static constexpr  uint32_t             TFT_CS              = PB12;
+#endif
+ 
+#if DAC_SPI == SPI_1
+ #ifndef REMAP_SPI_1
+  static constexpr  uint32_t             DAC_WS              = PA15;
+ #else // remapped
+  static constexpr  uint32_t             DAC_WS              = PA4;
+ #endif
+#else // SPI_2
+ static constexpr  uint32_t             DAC_WS              = PB12;
+#endif
+ 
  static constexpr  uint32_t             SD_CS               = PB1;
 
 private:
