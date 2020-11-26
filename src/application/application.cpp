@@ -195,34 +195,6 @@ void print_directory(File dir, int numTabs = 0, bool recurse = false) {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-void application::remap_spi1() {
- Serial.println("[Setup] Remap SPI1...");  
- afio_remap(AFIO_REMAP_USART1);
- afio_cfg_debug_ports (AFIO_DEBUG_SW_ONLY);
- afio_remap (AFIO_REMAP_SPI1);
- gpio_set_mode (GPIOA, 15, GPIO_AF_OUTPUT_PP);
- gpio_set_mode (GPIOB,  3, GPIO_AF_OUTPUT_PP);
- gpio_set_mode (GPIOB,  4, GPIO_INPUT_FLOATING);
- gpio_set_mode (GPIOB,  5, GPIO_AF_OUTPUT_PP);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-void application::setup_sd() {
-#ifdef ENABLE_SD
- Serial.println("[Setup] Setup SD card...");
-
- if (SD.begin(SD_CS)) {
-  Serial.println("[Setup] Successfully setup SD card.");
- }
- else {
-  Serial.println("[Setup] Failed to setup SD card.");
- }
-#endif
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
 void application::setup() {
  delay(5000);
 
@@ -233,16 +205,7 @@ void application::setup() {
 
  voices::setup();
 
-// ::controls::setup();
-
-// remap_spi1();
-
- setup_sd();
-
  setup_tft();
- 
- // Serial.println("[Setup] Correct PA5 pin mode...");
- // pinMode(PA5, INPUT);
  
  setup_timers();
 
