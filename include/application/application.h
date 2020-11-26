@@ -21,8 +21,10 @@
 #define DAC_SPI SPI_2
 #endif
 
+#ifdef  ENABLE_SD
 #ifndef SD_SPI
 #define SD_SPI SPI_1
+#endif
 #endif
 
 class application {
@@ -35,30 +37,40 @@ public:
  typedef controls::application_event_type                   application_event_type;
 
 #if TFT_SPI == SPI_1
- #ifndef REMAP_SPI_1
-  static constexpr  uint32_t            TFT_DC              = PB0;
-  static constexpr  uint32_t            TFT_CS              = BOARD_SPI1_NSS_PIN;
- #else // remapped
-  static constexpr  uint32_t            TFT_DC              = PA8;
-  static constexpr  uint32_t            TFT_CS              = BOARD_ALT_SPI1_NSS_PIN;
- #endif
+#ifndef REMAP_SPI_1
+ static constexpr  uint32_t            TFT_DC              = PB0; // next to SPI1 MOSI
+ static constexpr  uint32_t            TFT_CS              = BOARD_SPI1_NSS_PIN; 
+#else // remapped
+ static constexpr  uint32_t            TFT_DC              = PA8; // next to SPI2 NSS
+ static constexpr  uint32_t            TFT_CS              = BOARD_ALT_SPI1_NSS_PIN;
+#endif
 #else // SPI_2
- static constexpr  uint32_t             TFT_DC              = PA8;
- static constexpr  uint32_t             TFT_CS              = BOARD_ALT_SPI2_NSS_PIN;
+ static constexpr  uint32_t            TFT_DC              = PA8; // next to SPI2 NSS
+ static constexpr  uint32_t            TFT_CS              = BOARD_ALT_SPI2_NSS_PIN;
 #endif
  
 #if DAC_SPI == SPI_1
- #ifndef REMAP_SPI_1
-  static constexpr  uint32_t            DAC_WS              = BOARD_SPI1_NSS_PIN;
- #else // remapped
-  static constexpr  uint32_t            DAC_WS              = BOARD_SPI1_ALT_NSS_PIN;
- #endif
+#ifndef REMAP_SPI_1
+ static constexpr  uint32_t            DAC_WS              = BOARD_SPI1_NSS_PIN;
+#else // remapped
+ static constexpr  uint32_t            DAC_WS              = BOARD_SPI1_ALT_NSS_PIN;
+#endif
 #else // SPI_2
- static constexpr  uint32_t             DAC_WS              = BOARD_SPI2_NSS_PIN;
+ static constexpr  uint32_t            DAC_WS              = BOARD_SPI2_NSS_PIN;
+#endif
+
+#ifdef ENABLE_SD
+#if SD_SPI == SPI_1
+#ifndef REMAP_SPI_1
+ static constexpr  uint32_t            SD_CS               = BOARD_SPI1_NSS_PIN;
+#else // remapped
+ static constexpr  uint32_t            SD_CS               = BOARD_SPI1_ALT_NSS_PIN;
+#endif
+#else // SPI_2
+ static constexpr  uint32_t            SD_CS               = BOARD_SPI2_NSS_PIN;
+#endif
 #endif
  
- static constexpr  uint32_t             SD_CS               = PB1;
-
 private:
  static            SPIClass             _spi_1;
  static            SPIClass             _spi_2;
@@ -80,7 +92,6 @@ private:
  
  private:
   value_t       _value;
-//  bool          _flagged;
   char const *  _name;
   uint8_t       _name_len;
   uint16_t      _x_pos;

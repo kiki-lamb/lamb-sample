@@ -9,31 +9,27 @@ using namespace lamb;
 using namespace lamb::tables;
 
 //////////////////////////////////////////////////////////////////////////////
-SPIClass                     application::_spi_1             { 1                         };
-SPIClass                     application::_spi_2             { 2                         };
-int32_t                      application::_avg_sample        { 0                         };
-size_t                       application::_sample_ix0        { 0                         };
-size_t                       application::_sample_ix1        { 0                         };
-HardwareTimer                application::_timer_1           ( 1                         );
-HardwareTimer                application::_timer_2           ( 2                         );
-HardwareTimer                application::_timer_3           ( 3                         );
-application::dac             application::_dac               (
- application::DAC_WS
-);
-application::tft             application::_tft(
- application::TFT_CS,
- application::TFT_DC
-);
+SPIClass                     application::_spi_1     { 1 };
+SPIClass                     application::_spi_2     { 2 };
+int32_t                      application::_avg_sample{ 0 };
+size_t                       application::_sample_ix0{ 0 };
+size_t                       application::_sample_ix1{ 0 };
+HardwareTimer                application::_timer_1   { 1 };
+HardwareTimer                application::_timer_2   { 2 };
+HardwareTimer                application::_timer_3   { 3 };
+application::dac             application::_dac{ application::DAC_WS };
+application::tft             application::_tft{ application::TFT_CS, application::TFT_DC };
+
 application::draw_buffer     application::_draw_buffer;         
 
 application::displayed_value<voices::filter::unsigned_internal_t::value_type>
-application::_displayed_filter_freq("Freq: ", 184, 5,  10, 64);
+application::_displayed_filter_freq{ "Freq: ", 184, 5,  10, 64 };
 
 application::displayed_value<voices::filter::unsigned_internal_t::value_type>
-application::_displayed_filter_res ("Res:  ", 184, 30, 10, 64);
+application::_displayed_filter_res { "Res:  ", 184, 30, 10, 64 };
 
 application::displayed_value<u0q16::value_type>
-application::_displayed_vol ("Vol:  ", 184, 55, 10, 64);
+application::_displayed_vol        { "Vol:  ", 184, 55, 10, 64 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -233,13 +229,6 @@ void application::k_rate() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::s_rate() {
- // if (_sample_ix0 == (1 << CAPTURE_RATIO)) {
- //  _avg_sample >>= CAPTURE_RATIO;
-
- //  _sample_ix0 = 0;
- //  _avg_sample = 0;
- // }
-
  voices::mix s = voices::read();
 
  if (_draw_buffer.writable()) {
@@ -328,19 +317,19 @@ void application::setup_spis() {
 #if ((TFT_SPI == SPI_1) || (DAC_SPI == SPI_1) || (SD_SPI == SPI_1))
  {
  #ifndef REMAP_SPI_1 // not remapped
-  gpio_set_mode (GPIOA,  4, GPIO_AF_OUTPUT_PP);   // NSS
-  gpio_set_mode (GPIOA,  5, GPIO_AF_OUTPUT_PP);   // SCK
-  gpio_set_mode (GPIOA,  6, GPIO_INPUT_FLOATING); // MISO
-  gpio_set_mode (GPIOA,  7, GPIO_AF_OUTPUT_PP);   // MOSI
+  gpio_set_mode (GPIOA,  4, GPIO_AF_OUTPUT_PP);   // SPI1 NSS
+  gpio_set_mode (GPIOA,  5, GPIO_AF_OUTPUT_PP);   // SPI1 SCK
+  gpio_set_mode (GPIOA,  6, GPIO_INPUT_FLOATING); // SPI1 MISO
+  gpio_set_mode (GPIOA,  7, GPIO_AF_OUTPUT_PP);   // SPI1 MOSI
 #else // remapped
   Serial.println("[Setup] Remap SPI1...");  
 
   afio_remap (AFIO_REMAP_SPI1);
  
-  gpio_set_mode (GPIOA, 15, GPIO_AF_OUTPUT_PP);   // NSS
-  gpio_set_mode (GPIOB,  3, GPIO_AF_OUTPUT_PP);   // SCK
-  gpio_set_mode (GPIOB,  4, GPIO_INPUT_FLOATING); // MISO
-  gpio_set_mode (GPIOB,  5, GPIO_AF_OUTPUT_PP);   // MOSI
+  gpio_set_mode (GPIOA, 15, GPIO_AF_OUTPUT_PP);   // Alt SPI1 NSS
+  gpio_set_mode (GPIOB,  3, GPIO_AF_OUTPUT_PP);   // Alt SPI1 SCK
+  gpio_set_mode (GPIOB,  4, GPIO_INPUT_FLOATING); // Alt SPI1 MISO
+  gpio_set_mode (GPIOB,  5, GPIO_AF_OUTPUT_PP);   // Alt SPI1 MOSI
  #endif
 
   Serial.println("[Setup] Start SPI1...");
@@ -383,6 +372,7 @@ void application::setup_sd() {
 void application::setup() {
  delay(5000);
 
+ 
  pinMode(LED_BUILTIN, OUTPUT);
  
  Serial.begin(64000000);
