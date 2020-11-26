@@ -1,76 +1,35 @@
 #include "application/application.h"
-#include <inttypes.h>
 #include <Arduino.h>
-#include <math.h>
-#include "SD.h"
 
 using namespace lamb;
 
 using namespace lamb::tables;
 
 //////////////////////////////////////////////////////////////////////////////
-SPIClass                     application::_spi_1             { 1                         };
-SPIClass                     application::_spi_2             { 2                         };
-HardwareTimer                application::_timer_1           { 1                         };
-HardwareTimer                application::_timer_2           { 2                         };
-HardwareTimer                application::_timer_3           { 3                         };
-int32_t                      application::_avg_sample        = 0;
-size_t                       application::_sample_ix0        = 0;
-size_t                       application::_sample_ix1        = 0;
 
-application::tft             application::_tft(
- application::TFT_CS,
- application::TFT_DC
-);
+SPIClass                     application::_spi_1    { 1        };
+HardwareTimer                application::_timer_1  { 1        };
+Adafruit_ILI9341_STM         application::_tft      { PA4, PB0 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void application::s_rate() {
- voices::mix s = voices::read();
-
- _sample_ix0  ++;
- _sample_ix1  ++;
+void application::sample_rate() {
+ for (size_t ix = 0; ix < 256; ix++)
+  asm("NOP");
 }
  
-////////////////////////////////////////////////////////////////////////////////
-      
-void application::setup_tft() {
- Serial.println("[Setup] Setup TFT...");
+//////////////////////////////////////////////////////////////////////////////////////////
+
+void application::setup() {
+ Serial.begin(115200);
 
  _tft.begin(_spi_1);
  _tft.setRotation(3);
  _tft.setTextColor(ILI9341_WHITE);  
  _tft.setTextSize(2);
  _tft.fillScreen(ILI9341_BLACK);
-}
 
-////////////////////////////////////////////////////////////////////////////////
-
-void application::setup_timers() {
- Serial.println("[Setup] Setup timers...");
-
- device::maple_timer::setup(_timer_1, voices::S_RATE,     s_rate);
-
- Serial.println("Done setup timers.");
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////
-
-void application::setup() {
- delay(5000);
-
- pinMode(LED_BUILTIN, OUTPUT);
- 
- Serial.begin(64000000);
- Serial.println("[Setup] Begin...");
-
- voices::setup();
-
- setup_tft();
- 
- setup_timers();
-
- Serial.println("[Setup] Complete.");
+ device::maple_timer::setup(_timer_1, 48000, sample_rate);
 }
   
 ////////////////////////////////////////////////////////////////////////////////
