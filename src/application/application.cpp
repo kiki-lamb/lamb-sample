@@ -118,26 +118,22 @@ bool application::graph() {
   _tft.setTextSize(2);
   _tft.print(new_time);
 
-  // Serial.print("Time: ");
-  // Serial.println(new_time);
-
   last_time = new_time;
- } /*
- else {
-  Serial.print("No: ");
-  Serial.println(new_time);
-  } */
- 
+ }
  return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 void application::k_rate() {
+ gpio_write_bit(GPIOC, 13, voices::item(0).state);
+  
+#ifdef DISABLE_CONTROLS
+ return;
+#endif
+
  ::controls::poll();
 
- digitalWrite(LED_BUILTIN, voices::item(0).state);
- 
  while(::controls::queue_count() > 0)
  {
   application_event ae = ::controls::dequeue_event();
@@ -277,7 +273,7 @@ void application::setup_timers() {
  Serial.println("[Setup] Setup timers...");
 
  device::maple_timer::setup(_timer_1, voices::S_RATE,     s_rate);
-// device::maple_timer::setup(_timer_2, ::controls::K_RATE, k_rate);
+ device::maple_timer::setup(_timer_2, ::controls::K_RATE, k_rate);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -372,8 +368,7 @@ void application::setup_sd() {
 void application::setup() {
  delay(5000);
 
- 
- pinMode(LED_BUILTIN, OUTPUT);
+ gpio_set_mode (GPIOC, 13, GPIO_OUTPUT_PP); // builtin LED
  
  Serial.begin(64000000);
  Serial.println("[Setup] Begin...");
@@ -455,10 +450,6 @@ void application::loop() {
   Serial.print(F(", "));
   Serial.print(float(avg_draw_operations));
   Serial.print(F(" avg, "));
-  // Serial.print(
-  //  (avg_draw_operations - tmp_avg_draw_operations).value
-  // );
-  Serial.print(F(", "));
   Serial.print(_draw_buffer.count());
   Serial.println();
     
