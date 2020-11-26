@@ -9,7 +9,7 @@ using namespace lamb;
 const uint32_t       voices::S_RATE            { 32768                         };
 voices::voice *      voices::_items            [ voices::COUNT                 ];
 u0q32                voices::_phincrs[120]   = { u0q32(0)                      };
-voices::volume_type  voices::_volume           { 1000                          };
+voices::volume_type  voices::_volume           { 30000                         };
 voices::filter       voices::_lpf;
 
 ////////////////////////////////////////////////////////////////////////////////

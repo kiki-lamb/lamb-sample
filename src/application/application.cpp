@@ -270,8 +270,6 @@ void application::setup_tft() {
 void application::setup_dac() {
  Serial.println("[Setup] Setup DAC...");
 
- _spi_2.begin();
-  
  _dac.setup(application::_spi_2);
 }
 
@@ -319,8 +317,10 @@ void print_directory(File dir, int numTabs = 0, bool recurse = false) {
 
 void application::remap_spi1() {
  Serial.println("[Setup] Remap SPI1...");  
- afio_remap(AFIO_REMAP_USART1);
- afio_cfg_debug_ports (AFIO_DEBUG_SW_ONLY);
+
+ // afio_remap(AFIO_REMAP_USART1);
+ // afio_cfg_debug_ports (AFIO_DEBUG_SW_ONLY);
+
  afio_remap (AFIO_REMAP_SPI1);
  gpio_set_mode (GPIOA, 15, GPIO_AF_OUTPUT_PP);
  gpio_set_mode (GPIOB,  3, GPIO_AF_OUTPUT_PP);
@@ -359,6 +359,9 @@ void application::setup() {
 
 // remap_spi1();
 
+ _spi_1.begin();
+ _spi_2.begin();
+ 
  setup_sd();
 
  setup_tft();
