@@ -4,7 +4,6 @@
 #include <inttypes.h>
 #include <Arduino.h>
 #include "Adafruit_ILI9341_STM.h"
-#include "lamb.h"
 
 class application {
 
