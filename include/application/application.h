@@ -21,6 +21,10 @@
 #define DAC_SPI SPI_2
 #endif
 
+#ifndef SD_SPI
+#define SD_SPI SPI_1
+#endif
+
 class application {
 
 public:
@@ -45,9 +49,9 @@ public:
  
 #if DAC_SPI == SPI_1
  #ifndef REMAP_SPI_1
-  static constexpr  uint32_t             DAC_WS              = PA4;
+  static constexpr  uint32_t            DAC_WS              = PA4;
  #else // remapped
-  static constexpr  uint32_t             DAC_WS              = PA15;
+  static constexpr  uint32_t            DAC_WS              = PA15;
  #endif
 #else // SPI_2
  static constexpr  uint32_t             DAC_WS              = PB12;

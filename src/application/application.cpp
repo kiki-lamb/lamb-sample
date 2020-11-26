@@ -325,28 +325,41 @@ void print_directory(File dir, int numTabs = 0, bool recurse = false) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void application::setup_spis() {
- Serial.println("[Setup] Remap SPI1...");  
+#if ((TFT_SPI == SPI_1) || (DAC_SPI == SPI_1) || (SD_SPI == SPI_1))
+ {
+ #ifndef REMAP_SPI_1 // not remapped
+  gpio_set_mode (GPIOA,  4, GPIO_AF_OUTPUT_PP);   // NSS
+  gpio_set_mode (GPIOA,  5, GPIO_AF_OUTPUT_PP);   // SCK
+  gpio_set_mode (GPIOA,  6, GPIO_INPUT_FLOATING); // MISO
+  gpio_set_mode (GPIOA,  7, GPIO_AF_OUTPUT_PP);   // MOSI
+#else // remapped
+  Serial.println("[Setup] Remap SPI1...");  
 
- _spi_1.begin();
- _spi_2.begin();
+  afio_remap (AFIO_REMAP_SPI1);
  
- // afio_remap(AFIO_REMAP_USART1);
- // afio_cfg_debug_ports (AFIO_DEBUG_SW_ONLY);
+  gpio_set_mode (GPIOA, 15, GPIO_AF_OUTPUT_PP);   // NSS
+  gpio_set_mode (GPIOB,  3, GPIO_AF_OUTPUT_PP);   // SCK
+  gpio_set_mode (GPIOB,  4, GPIO_INPUT_FLOATING); // MISO
+  gpio_set_mode (GPIOB,  5, GPIO_AF_OUTPUT_PP);   // MOSI
+ #endif
 
-#ifdef REMAP_SPI_1
- afio_remap (AFIO_REMAP_SPI1);
+  Serial.println("[Setup] Start SPI1...");
 
- // remapped
- gpio_set_mode (GPIOA, 15, GPIO_AF_OUTPUT_PP);   // NSS
- gpio_set_mode (GPIOB,  3, GPIO_AF_OUTPUT_PP);   // SCK
- gpio_set_mode (GPIOB,  4, GPIO_INPUT_FLOATING); // MISO
- gpio_set_mode (GPIOB,  5, GPIO_AF_OUTPUT_PP);   // MOSI
-#else
- // not remapped
- gpio_set_mode (GPIOA,  4, GPIO_AF_OUTPUT_PP);   // NSS
- gpio_set_mode (GPIOA,  5, GPIO_AF_OUTPUT_PP);   // SCK
- gpio_set_mode (GPIOA,  6, GPIO_INPUT_FLOATING); // MISO
- gpio_set_mode (GPIOA,  7, GPIO_AF_OUTPUT_PP);   // MOSI
+  _spi_1.begin();
+ }
+#endif
+  
+#if ((TFT_SPI == SPI_2) || (DAC_SPI == SPI_2) || (SD_SPI == SPI_2))
+ {
+  Serial.println("[Setup] Start SPI1...");
+
+  gpio_set_mode (GPIOB, 12, GPIO_AF_OUTPUT_PP);   // SPI2 NSS
+  gpio_set_mode (GPIOB, 13, GPIO_AF_OUTPUT_PP);   // SPI2 SCK
+  gpio_set_mode (GPIOB, 14, GPIO_INPUT_FLOATING); // SPI2 MISO
+  gpio_set_mode (GPIOB, 15, GPIO_AF_OUTPUT_PP);   // SPI2 MOSI
+
+  _spi_2.begin();
+ }
 #endif
 }
 
