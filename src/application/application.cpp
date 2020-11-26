@@ -257,7 +257,7 @@ void application::s_rate() {
 void application::setup_tft() {
   Serial.println("[Setup] Setup TFT...");
 
- _tft.begin(_spi_1);
+ _tft.begin(TFT_SPI);
  _tft.setRotation(3);
  _tft.setTextColor(ILI9341_WHITE);  
  _tft.setTextSize(2);
@@ -270,7 +270,7 @@ void application::setup_tft() {
 void application::setup_dac() {
  Serial.println("[Setup] Setup DAC...");
 
- _dac.setup(application::_spi_2);
+ _dac.setup(DAC_SPI);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -315,17 +315,30 @@ void print_directory(File dir, int numTabs = 0, bool recurse = false) {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-void application::remap_spi1() {
+void application::setup_spis() {
  Serial.println("[Setup] Remap SPI1...");  
 
+ _spi_1.begin();
+ _spi_2.begin();
+ 
  // afio_remap(AFIO_REMAP_USART1);
  // afio_cfg_debug_ports (AFIO_DEBUG_SW_ONLY);
 
+#ifdef REMAP_SPI1
  afio_remap (AFIO_REMAP_SPI1);
- gpio_set_mode (GPIOA, 15, GPIO_AF_OUTPUT_PP);
- gpio_set_mode (GPIOB,  3, GPIO_AF_OUTPUT_PP);
- gpio_set_mode (GPIOB,  4, GPIO_INPUT_FLOATING);
- gpio_set_mode (GPIOB,  5, GPIO_AF_OUTPUT_PP);
+
+ // remapped
+ gpio_set_mode (GPIOA, 15, GPIO_AF_OUTPUT_PP);   // NSS
+ gpio_set_mode (GPIOB,  3, GPIO_AF_OUTPUT_PP);   // SCK
+ gpio_set_mode (GPIOB,  4, GPIO_INPUT_FLOATING); // MISO
+ gpio_set_mode (GPIOB,  5, GPIO_AF_OUTPUT_PP);   // MOSI
+#else
+ // not remapped
+ gpio_set_mode (GPIOA,  4, GPIO_AF_OUTPUT_PP);   // NSS
+ gpio_set_mode (GPIOA,  5, GPIO_AF_OUTPUT_PP);   // SCK
+ gpio_set_mode (GPIOA,  6, GPIO_INPUT_FLOATING); // MISO
+ gpio_set_mode (GPIOA,  7, GPIO_AF_OUTPUT_PP);   // MOSI
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -355,22 +368,23 @@ void application::setup() {
 
  voices::setup();
 
-// ::controls::setup();
+#ifndef DISABLE_CONTROLS
+ ::controls::setup();
+#endif
 
-// remap_spi1();
+ setup_spis();
 
- _spi_1.begin();
- _spi_2.begin();
- 
  setup_sd();
 
  setup_tft();
 
  setup_dac();
- 
- // Serial.println("[Setup] Correct PA5 pin mode...");
- // pinMode(PA5, INPUT);
- 
+
+ #ifdef REMAP_SPI1
+   Serial.println("[Setup] Correct PA5 pin mode...");
+   pinMode(PA5, INPUT);
+ #endif
+  
  setup_timers();
 
  Serial.println("[Setup] Complete.");

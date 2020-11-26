@@ -10,6 +10,9 @@
 #include "events/application.h"
 #include "Adafruit_ILI9341_STM.h"
 
+#define TFT_SPI _spi_1
+#define DAC_SPI _spi_2
+
 class application {
 
 public:
@@ -148,7 +151,7 @@ private:
  static            void                 setup_dac();
  static            void                 setup_timers();
  static            void                 setup_sd();
- static            void                 remap_spi1();
+ static            void                 setup_spis();
  
 public:
  static            void                 setup();
