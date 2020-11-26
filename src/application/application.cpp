@@ -23,117 +23,10 @@ application::tft             application::_tft(
  application::TFT_DC
 );
 
-application::draw_buffer     application::_draw_buffer;         
-
-//////////////////////////////////////////////////////////////////////////////
-
-void application::k_rate() {
- ::controls::poll();
-
- digitalWrite(LED_BUILTIN, voices::item(0).state);
- 
- while(::controls::queue_count() > 0)
- {
-  application_event ae = ::controls::dequeue_event();
-
-#ifdef LOG_EVENT_TIMES
-  Serial.print("Dequeue evt ");
-  Serial.print(ae.type);
-  Serial.print(", ");
-  Serial.print(::controls::queue_count());
-  Serial.print(" remain.");
-  Serial.println();
-#endif
-  
-  switch (ae.type) {
-  case application_event_type::EVT_VOLUME:
-  {   
-   voices::volume(voices::volume_type(ae.parameter << 4));
-
-   // Serial.print("Vol: ");
-   // Serial.print(float(voices::volume()));   
-   // Serial.print("Read ");
-   // Serial.print(analogRead(PA3));
-   // Serial.print(" ");
-   // Serial.print(analogRead(PA4));
-   // Serial.print(" ");
-   // Serial.print(analogRead(PA5));
-   // Serial.print(" ");
-   // Serial.print(analogRead(PA6));
-   // Serial.print(" ");
-//   Serial.println();
-   break;
-  }
-  case application_event_type::EVT_TRIGGER:
-  {
-   voices::trigger(ae.parameter);
-      
-   break;
-  }
-  case application_event_type::EVT_PITCH_1:
-  {
-   voices::pitch(3, ae.parameter);
-      
-   break;     
-  }
-  case application_event_type::EVT_PITCH_2:
-  {
-   voices::pitch(4, ae.parameter);
-      
-   break;     
-  }
-  case application_event_type::EVT_PITCH_3:
-  {
-   voices::pitch(5, ae.parameter);
-      
-   break;     
-  }
-  case application_event_type::EVT_FILTER_F_1:
-  {
-   lamb::u0q16 parameter (ae.parameter << 4); // 12 sig bits to 16
-
-   // Serial.print("F: ");
-   // Serial.println(parameter.value);
-   
-   voices::filter_f(parameter);
-     
-   break;     
-  }
-  case application_event_type::EVT_FILTER_Q_1:
-  {
-   lamb::u0q16 parameter (ae.parameter << 4); // 12 sig bits to 16
-     
-   voices::filter_q(parameter);
-     
-   break;     
-  }
-  default:
-  {
-#ifdef LOG_UNRECOGNIZED_EVENTS
-   Serial.print(F("Unrecognized event: "));
-   Serial.print(ae.type);
-   Serial.println();
-#endif
-  }
-  }
- }
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::s_rate() {
- // if (_sample_ix0 == (1 << CAPTURE_RATIO)) {
- //  _avg_sample >>= CAPTURE_RATIO;
-
- //  _sample_ix0 = 0;
- //  _avg_sample = 0;
- // }
-
  voices::mix s = voices::read();
-
- if (_draw_buffer.writable()) {
-  _draw_buffer.enqueue(s);
- }
 
  _sample_ix0  ++;
  _sample_ix1  ++;
@@ -157,40 +50,8 @@ void application::setup_timers() {
  Serial.println("[Setup] Setup timers...");
 
  device::maple_timer::setup(_timer_1, voices::S_RATE,     s_rate);
-// device::maple_timer::setup(_timer_2, ::controls::K_RATE, k_rate);
 
  Serial.println("Done setup timers.");
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-void print_directory(File dir, int numTabs = 0, bool recurse = false) {
- while (true) {
-  File entry { dir.openNextFile() };
-
-  if (! entry) {
-   // no more files
-   break;
-  }
-    
-  for (uint8_t i = 0; i < numTabs; i++) {
-   Serial.print('\t');
-  }
-    
-  Serial.print(entry.name());
-
-  if (entry.isDirectory()) {
-   Serial.println("/");
-   if (recurse) {
-    print_directory(entry, numTabs + 1);
-   }
-  } else {
-   Serial.print("\t\t");
-   Serial.println(entry.size(), DEC);
-  }
-
-  entry.close();
- }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
