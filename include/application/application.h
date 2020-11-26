@@ -8,9 +8,9 @@
 
 class application {
 
- static            Adafruit_ILI9341_STM _tft;
- static            SPIClass             _spi_1;
- static            HardwareTimer        _timer_1; 
+ static            Adafruit_ILI9341_STM tft;
+ static            SPIClass             spi_1;
+ static            HardwareTimer        tim_1; 
 
  static            void                 sample_rate();
  
@@ -20,7 +20,3 @@ public:
 };
 
 #endif
-
-/* Local Variables:  */
-/* fill-column: 100  */
-/* End:              */

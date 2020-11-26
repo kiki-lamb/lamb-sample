@@ -7,9 +7,9 @@ using namespace lamb::tables;
 
 //////////////////////////////////////////////////////////////////////////////
 
-SPIClass                     application::_spi_1    { 1        };
-HardwareTimer                application::_timer_1  { 1        };
-Adafruit_ILI9341_STM         application::_tft      { PA4, PB0 };
+SPIClass                     application::spi_1    { 1        };
+HardwareTimer                application::tim_1  { 1        };
+Adafruit_ILI9341_STM         application::tft      { PA4, PB0 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -23,55 +23,54 @@ void application::sample_rate() {
 void application::setup() {
  Serial.begin(115200);
 
- _tft.begin(_spi_1);
- _tft.setRotation(3);
- _tft.setTextColor(ILI9341_WHITE);  
- _tft.setTextSize(2);
- _tft.fillScreen(ILI9341_BLACK);
+ tft.begin(spi_1);
+ tft.setRotation(3);
+ tft.setTextColor(ILI9341_WHITE);  
+ tft.setTextSize(2);
+ tft.fillScreen(ILI9341_BLACK);
 
- device::maple_timer::setup(_timer_1, 48000, sample_rate);
+ device::maple_timer::setup(tim_1, 48000, sample_rate);
 }
   
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::loop() {
- uint16_t wave_color = ILI9341_YELLOW;
- 
- static const uint16_t    width   = 240;
- static uint16_t          col     = 0; 
+ static const uint16_t    draw_area_width = 240;
+ static uint16_t          column          = 0; 
 
- uint16_t                 tmp_col = col % width;
+ uint16_t                 tmp_col         = column % draw_area_width;
  
- static uint32_t          ctr     = 0;
- static uint32_t          accum   = 0;
- static constexpr uint8_t avging  = 12;
+ constexpr uint8_t        fx_shift        = 8;
+ constexpr size_t         max_count       = 1 << fx_shift;
+ static size_t            counter         = 0;
+ static uint32_t          accum           = 0;
  
- uint32_t                 start   = micros(); 
+ uint32_t                 start           = micros(); 
  
- _tft.drawFastVLine(tmp_col, 1, 128 - 2, ILI9341_BLACK);
+ tft.drawFastVLine(column % draw_area_width, 1, 128 - 2, ILI9341_BLACK);
  
- accum += micros() - start;
- ctr   ++;
+ accum   += micros() - start;
+ counter ++;
  
- if (ctr == (1 << avging)) {
-  accum >>= avging;
+ if (counter == (1 << fx_shift)) {
+  accum >>= fx_shift;
   
   Serial.print("t = ");
   Serial.print(accum);
   Serial.println();
   
   accum = 0;
-  ctr   = 0;
+  counter   = 0;
  }
  
- _tft.drawFastVLine(
-  tmp_col,
+ tft.drawFastVLine(
+  column % draw_area_width,
   0,
-  tmp_col,
-  wave_color
+  column % draw_area_width,
+  ILI9341_YELLOW
  );
  
- col ++; 
+ column ++; 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
