@@ -8,26 +8,19 @@
 #include "voices/voices.h"
 #include "events/control.h"
 #include "events/application.h"
-
-#ifdef USE_GENERIC_ILI9341
 #include "Adafruit_ILI9341_STM.h"
-#endif
 
 class application {
 
 public:
-#ifdef USE_GENERIC_ILI9341
  typedef Adafruit_ILI9341_STM                               tft;
-#else
- typedef lamb::device::Adafruit_ILI9341_STM32F1             tft;
-#endif
  typedef lamb::device::pt8211                               dac;
  typedef lamb::ring_buffer<voices::sample, 256>             draw_buffer;
  typedef controls::application_event                        application_event;
  typedef controls::application_event_type                   application_event_type;
   
- static constexpr  uint32_t             TFT_DC              = PA8;
- static constexpr  uint32_t             TFT_CS              = PB12;
+ static constexpr  uint32_t             TFT_DC              = PB0;
+ static constexpr  uint32_t             TFT_CS              = PA4;
  static constexpr  uint32_t             I2S_WS              = PA15;
  static constexpr  uint32_t             SD_CS               = PB1;
 

@@ -257,7 +257,7 @@ void application::s_rate() {
 void application::setup_tft() {
   Serial.println("[Setup] Setup TFT...");
 
- _tft.begin(_spi_2);
+ _tft.begin(_spi_1);
  _tft.setRotation(3);
  _tft.setTextColor(ILI9341_WHITE);  
  _tft.setTextSize(2);
@@ -270,9 +270,9 @@ void application::setup_tft() {
 void application::setup_dac() {
  Serial.println("[Setup] Setup DAC...");
 
- SPI.begin();
+ _spi_2.begin();
   
- _dac.setup(application::_spi_1);
+ _dac.setup(application::_spi_2);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -281,7 +281,7 @@ void application::setup_timers() {
  Serial.println("[Setup] Setup timers...");
 
  device::maple_timer::setup(_timer_1, voices::S_RATE,     s_rate);
- device::maple_timer::setup(_timer_2, ::controls::K_RATE, k_rate);
+// device::maple_timer::setup(_timer_2, ::controls::K_RATE, k_rate);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -355,9 +355,9 @@ void application::setup() {
 
  voices::setup();
 
- ::controls::setup();
+// ::controls::setup();
 
- remap_spi1();
+// remap_spi1();
 
  setup_sd();
 
@@ -365,8 +365,8 @@ void application::setup() {
 
  setup_dac();
  
- Serial.println("[Setup] Correct PA5 pin mode...");
- pinMode(PA5, INPUT);
+ // Serial.println("[Setup] Correct PA5 pin mode...");
+ // pinMode(PA5, INPUT);
  
  setup_timers();
 
