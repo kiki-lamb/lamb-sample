@@ -14,7 +14,7 @@
 #define SPI2   2
 
 #ifndef TFT_SPI
-#define TFT_SPI SPI1 
+#define TFT_SPI SPI1
 #endif
 
 #ifndef DAC_SPI
@@ -40,6 +40,8 @@ public:
  typedef controls::application_event                        application_event;
  typedef controls::application_event_type                   application_event_type;
 
+ // DAC must be given it's own SPI since it's an I2S device!
+ 
 #if TFT_SPI == SPI1
 #ifndef REMAP_SPI1
  static constexpr  uint32_t            TFT_DC              = PB0; // next to SPI1 MOSI
@@ -50,7 +52,7 @@ public:
 #endif
 #else // SPI2
  static constexpr  uint32_t            TFT_DC              = PA8; // next to SPI2 NSS
- static constexpr  uint32_t            TFT_CS              = BOARD_ALT_SPI2_NSS_PIN;
+ static constexpr  uint32_t            TFT_CS              = BOARD_SPI2_NSS_PIN;
 #endif
  
 #if DAC_SPI == SPI1
@@ -64,15 +66,16 @@ public:
 #endif
 
 #ifndef DISABLE_SD
-#if SD_SPI == SPI1
-#ifndef REMAP_SPI1
- static constexpr  uint32_t            SD_CS               = BOARD_SPI1_NSS_PIN;
-#else // remapped
- static constexpr  uint32_t            SD_CS               = BOARD_SPI1_ALT_NSS_PIN;
-#endif
-#else // SPI2
- static constexpr  uint32_t            SD_CS               = BOARD_SPI2_NSS_PIN;
-#endif
+// #if SD_SPI == SPI1
+// #ifndef REMAP_SPI1
+//  static constexpr  uint32_t            SD_CS               = BOARD_SPI1_NSS_PIN;
+// #else // remapped
+//  static constexpr  uint32_t            SD_CS               = BOARD_SPI1_ALT_NSS_PIN;
+// #endif
+// #else // SPI2
+//  static constexpr  uint32_t            SD_CS               = BOARD_SPI2_NSS_PIN;
+// #endif
+ static constexpr  uint32_t            SD_CS                = PB0;
 #endif
  
 private:
