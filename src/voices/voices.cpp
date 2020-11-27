@@ -127,7 +127,7 @@ void voices::trigger(uint8_t const & ix) {
  Serial.print(ix);
  Serial.println();
 #endif
-
+ 
  if (ix >= 3) {
   voices::item(3).stop();
   voices::item(4).stop();
@@ -190,7 +190,7 @@ bool voices::filter_q(voices::filter::unsigned_internal_t const & x) {
 bool voices::volume(voices::volume_type const & volume) {
  if (volume == _volume) return false;
   
- _volume    = volume;
+ _volume = volume;
   
  return true;
 }
@@ -205,7 +205,7 @@ bool voices::pitch(uint8_t const & voice_ix, u0q16::value_type const & parameter
   0, 2, 3, 5, 7, 8, 10, 12
  };
 
- item(voice_ix).next_phincr = _phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
+ item(voice_ix).next_phincr  = _phincrs[notes[notes_ix] + BASS_ROOT_NOTE];
 
   return true;
 }
@@ -217,23 +217,23 @@ voices::sample voices::read() {
  auto bass_items  = _items;
  bass_items      += 3;
 
- MIX_Q(mixed , bass_items, 3);
+ MIX_Q(mixed, bass_items, 3);
 
  if (mixed >= s15q16::ONE) {
   Serial.println("WARNING, attenuate before processing!");
  };
 
- mixed -= mixed >> 2;
- mixed  =_lpf.process(s0q15(mixed)); 
+ mixed           -= mixed >> 2;
+ mixed            =_lpf.process(s0q15(mixed)); 
  
  MIX_Q(mixed, _items,     3);
 
- mixed *= _volume;
+ mixed           *= _volume;
 
  if (mixed >= s15q16::ONE) {
   Serial.println("WARNING, RED LINE!");
 
-  mixed = s15q16::MAX;
+  mixed           = s15q16::MAX;
  }
  else if (mixed <= -s15q16::ONE) {
   Serial.println("WARNING, RED LINE!");
