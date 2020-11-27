@@ -21,7 +21,7 @@
 #define DAC_SPI SPI2
 #endif
 
-#ifdef  ENABLE_SD
+#ifndef DISABLE_SD
 #ifndef SD_SPI
 #define SD_SPI SPI1
 #endif
@@ -63,7 +63,7 @@ public:
  static constexpr  uint32_t            DAC_WS              = BOARD_SPI2_NSS_PIN;
 #endif
 
-#ifdef ENABLE_SD
+#ifndef DISABLE_SD
 #if SD_SPI == SPI1
 #ifndef REMAP_SPI1
  static constexpr  uint32_t            SD_CS               = BOARD_SPI1_NSS_PIN;

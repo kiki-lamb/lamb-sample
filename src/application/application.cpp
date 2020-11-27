@@ -359,7 +359,7 @@ void application::setup_spis() {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void application::setup_sd() {
-#ifdef ENABLE_SD
+#ifndef DISABLE_SD
  Serial.println("[Setup] Setup SD card...");
 
  if (SD.begin(SD_CS)) {
@@ -395,10 +395,10 @@ void application::setup() {
 
  setup_dac();
 
- // #ifdef REMAP_SPI1
- //   Serial.println("[Setup] Correct PA5 pin mode...");
- //   pinMode(PA5, INPUT);
- // #endif
+ #ifdef REMAP_SPI1
+   Serial.println("[Setup] Correct PA5 pin mode...");
+   pinMode(PA5, INPUT);
+ #endif
   
  setup_timers();
 
@@ -423,7 +423,7 @@ void application::loop() {
   _displayed_vol        .update(voices::volume().value);
  } 
 
-#ifdef ENABLE_SD
+#ifndef DISABLE_SD
  File root = SD.open("/");
  
  print_directory(root);
