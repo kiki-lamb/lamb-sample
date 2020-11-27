@@ -13,17 +13,17 @@
 #define SPI1   1
 #define SPI2   2
 
-#ifndef TFT_SPI
-#define TFT_SPI SPI1
-#endif
-
 #ifndef DAC_SPI
 #define DAC_SPI SPI2  
 #endif
 
+#ifndef TFT_SPI
+#define TFT_SPI SPI1
+#endif
+
 #ifndef DISABLE_SD
 #ifndef SD_SPI
-#define SD_SPI SPI1
+#define SD_SPI TFT_SPI
 #endif
 #endif
 
