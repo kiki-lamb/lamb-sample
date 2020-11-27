@@ -111,15 +111,15 @@ bool application::draw_graph() {
   r = true;
  }
  
- static uint32_t last_time = 0;
+ // static uint32_t last_time = 0;
  
- if ((_sample_ix0 - last_time) > (voices::S_RATE >> 1)) {
-  draw_time();
+ // if ((_sample_ix0 - last_time) > (voices::S_RATE >> 1)) {
+ //  draw_time();
 
-  last_time = _sample_ix0;
+ //  last_time = _sample_ix0;
 
-  r = true;
- }
+ //  r = true;
+ // }
  
  return r;
 }
@@ -405,10 +405,9 @@ void application::setup() {
   
 ////////////////////////////////////////////////////////////////////////////////
 
-bool application::tenth_second() {
- constexpr uint32_t TENTH_SECOND = voices::S_RATE >> 3;
-
- static uint32_t last_tenth_second = 0;
+bool application::sixteenth_second() {
+ constexpr uint32_t TENTH_SECOND      = voices::S_RATE >> 4;
+ static uint32_t    last_tenth_second = 0;
  
  if ((_sample_ix0 - last_tenth_second) < TENTH_SECOND)
   return false;
@@ -425,12 +424,13 @@ bool application::tenth_second() {
 ////////////////////////////////////////////////////////////////////////////////
 
 bool application::half_second() {
- constexpr uint32_t HALF_SECOND = voices::S_RATE >> 1;
-
- static uint32_t last_half_second = 0;
+ constexpr uint32_t HALF_SECOND      = voices::S_RATE >> 1;
+ static uint32_t    last_half_second = 0;
  
  if ((_sample_ix0 - last_half_second) < HALF_SECOND)
   return false;
+ 
+ draw_time();
  
  last_half_second = _sample_ix0;
 
