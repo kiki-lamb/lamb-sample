@@ -208,6 +208,10 @@ private:
  static            void                 setup_timers();
  static            void                 setup_sd();
  static            void                 setup_spis();
+ static            bool                 tenth_second(uint32_t const & now);
+ static            bool                 half_second(uint32_t const & now);
+ static            bool                 one_second();
+ static            bool                 idle();
  
 public:
  static            void                 setup();

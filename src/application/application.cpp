@@ -368,7 +368,7 @@ void application::setup_sd() {
 void application::setup() {
  delay(5000);
 
- gpio_set_mode (GPIOC, 13, GPIO_OUTPUT_PP); // builtin LED
+ gpio_set_mode(GPIOC, 13, GPIO_OUTPUT_PP); // builtin LED
  
  Serial.begin(64000000);
  Serial.println("[Setup] Begin...");
@@ -399,63 +399,93 @@ void application::setup() {
   
 ////////////////////////////////////////////////////////////////////////////////
 
-void application::loop() {
- static u16q16   draw_operations                  { 0 };
+bool application::tenth_second(uint32_t const & now) {
+ static uint32_t last_tenth_second = 0;
+ 
+ if ((now - last_tenth_second) < 100)
+  return false;
+ 
+ last_tenth_second = now;
+ 
+ _displayed_filter_freq.update(voices::filter_f().value);
+ _displayed_filter_res .update(voices::filter_q().value);
+ _displayed_vol        .update(voices::volume().value);
+ 
+ return true;
+}
 
- static uint32_t last_params_draw                 = 0;
- static uint32_t last_auto_trigger                = 0;
+////////////////////////////////////////////////////////////////////////////////
 
- uint32_t now = millis();
-
- if ((now - last_params_draw) > 100) {
-  last_params_draw = now;
-
-  _displayed_filter_freq.update(voices::filter_f().value);
-  _displayed_filter_res .update(voices::filter_q().value);
-  _displayed_vol        .update(voices::volume().value);
- } 
+bool application::half_second(uint32_t const & now) {
+ static uint32_t last_half_second = 0;
+ 
+ if ((now - last_half_second) < 500)
+  return false;
+ 
+ last_half_second = now;
 
 #ifndef DISABLE_SD
  File root = SD.open("/");
  
  print_directory(root);
-
+ 
  root.close();
 #endif
  
- if ((now - last_auto_trigger) > 500) {
-  last_auto_trigger = now;
-
 #ifdef TEST_TRIGGER
   voices::trigger(0);
 #endif
- } 
 
+  return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+#ifdef LOG_DRAW_RATES
+u16q16   draw_operations{ 0 };
+#endif
+
+bool application::one_second() { 
+#ifdef LOG_DRAW_RATES
+ if (_sample_ix1 < voices::S_RATE)
+  return false;
+ 
+ static u16q16        avg_draw_operations       { 0 };
+ static uint32_t      tenth_seconds             = 0;
+ tenth_seconds                                 += 1;
+ _sample_ix1                                    = 0;
+ avg_draw_operations                           *= u16q16(0xe000);
+ avg_draw_operations                           += draw_operations * u16q16(0x1fff);
+ 
+ Serial.print(tenth_seconds);
+ Serial.print(F(", "));
+ Serial.print(float(draw_operations));
+ Serial.print(F(", "));
+ Serial.print(float(avg_draw_operations));
+ Serial.print(F(" avg, "));
+ Serial.print(_draw_buffer.count());
+ Serial.println();
+ 
+ draw_operations.value                          = 0;
+#endif
+ 
+ return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+bool application::idle() {
  if (graph())
   draw_operations += u16q16(1, 0);
 
-#ifdef LOG_DRAW_RATES
- if (_sample_ix1 >= voices::S_RATE) {
-//  static const uint8_t avging                    = 10;      
-  static u16q16        avg_draw_operations       { 0 };
-  static uint32_t      tenth_seconds             = 0;
-  tenth_seconds                                 += 1;
-  _sample_ix1                                    = 0;
-  avg_draw_operations                           *= u16q16(0xe000);
-  avg_draw_operations                           += draw_operations * u16q16(0x1fff);
-    
-  Serial.print(tenth_seconds);
-  Serial.print(F(", "));
-  Serial.print(float(draw_operations));
-  Serial.print(F(", "));
-  Serial.print(float(avg_draw_operations));
-  Serial.print(F(" avg, "));
-  Serial.print(_draw_buffer.count());
-  Serial.println();
-    
-  draw_operations.value                          = 0;
- }
-#endif
+ return true;
+}
+////////////////////////////////////////////////////////////////////////////////
+
+void application::loop() {
+ uint32_t        now                              = millis();
+
+ one_second() || half_second(now) || tenth_second(now) || idle();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
