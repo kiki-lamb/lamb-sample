@@ -9,14 +9,15 @@ using namespace lamb;
 using namespace lamb::tables;
 
 //////////////////////////////////////////////////////////////////////////////
-SPIClass                     application::_spi_1     { 1 };
-SPIClass                     application::_spi_2     { 2 };
-int32_t                      application::_avg_sample{ 0 };
-size_t                       application::_sample_ix0{ 0 };
-size_t                       application::_sample_ix1{ 0 };
-HardwareTimer                application::_timer_1   { 1 };
-HardwareTimer                application::_timer_2   { 2 };
-HardwareTimer                application::_timer_3   { 3 };
+SPIClass                     application::_spi_1      { 1 };
+SPIClass                     application::_spi_2      { 2 };
+int32_t                      application::_avg_sample { 0 };
+size_t                       application::_sample_ix0 { 0 };
+size_t                       application::_sample_ix1 { 0 };
+HardwareTimer                application::_timer_1    { 1 };
+HardwareTimer                application::_timer_2    { 2 };
+HardwareTimer                application::_timer_3    { 3 };
+application::draw_buffer     application::_draw_buffer{   };
 
 #ifndef DISABLE_DAC
 application::dac             application::_dac{ application::DAC_WS };
@@ -24,7 +25,6 @@ application::dac             application::_dac{ application::DAC_WS };
 
 application::tft             application::_tft{ application::TFT_CS, application::TFT_DC };
 
-application::draw_buffer     application::_draw_buffer;         
 
 application::displayed_value<voices::filter::unsigned_internal_t::value_type>
 application::_displayed_filter_freq{ "Freq: ", 184, 5,  10, 64 };
@@ -318,42 +318,34 @@ void print_directory(File dir, int numTabs = 0, bool recurse = false) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void application::setup_spis() {
-#if ((TFT_SPI == SPI1) || (DAC_SPI == SPI1) || (SD_SPI == SPI1))
- {
- #ifndef REMAP_SPI1 // not remapped
-  gpio_set_mode (GPIOA,  4, GPIO_AF_OUTPUT_PP);   // SPI1 NSS
-  gpio_set_mode (GPIOA,  5, GPIO_AF_OUTPUT_PP);   // SPI1 SCK
-  gpio_set_mode (GPIOA,  6, GPIO_INPUT_FLOATING); // SPI1 MISO
-  gpio_set_mode (GPIOA,  7, GPIO_AF_OUTPUT_PP);   // SPI1 MOSI
+#ifndef REMAP_SPI1 // not remapped
+ gpio_set_mode (GPIOA,  4, GPIO_AF_OUTPUT_PP);   // SPI1 NSS
+ gpio_set_mode (GPIOA,  5, GPIO_AF_OUTPUT_PP);   // SPI1 SCK
+ gpio_set_mode (GPIOA,  6, GPIO_INPUT_FLOATING); // SPI1 MISO
+ gpio_set_mode (GPIOA,  7, GPIO_AF_OUTPUT_PP);   // SPI1 MOSI
 #else // remapped
-  Serial.println("[Setup] Remap SPI1...");  
-
-  afio_remap (AFIO_REMAP_SPI1);
+ Serial.println("[Setup] Remap SPI1...");  
  
-  gpio_set_mode (GPIOA, 15, GPIO_AF_OUTPUT_PP);   // Alt SPI1 NSS
-  gpio_set_mode (GPIOB,  3, GPIO_AF_OUTPUT_PP);   // Alt SPI1 SCK
-  gpio_set_mode (GPIOB,  4, GPIO_INPUT_FLOATING); // Alt SPI1 MISO
-  gpio_set_mode (GPIOB,  5, GPIO_AF_OUTPUT_PP);   // Alt SPI1 MOSI
- #endif
-
-  Serial.println("[Setup] Start SPI1...");
-
-  _spi_1.begin();
- }
+ afio_remap (AFIO_REMAP_SPI1);
+ 
+ gpio_set_mode (GPIOA, 15, GPIO_AF_OUTPUT_PP);   // Alt SPI1 NSS
+ gpio_set_mode (GPIOB,  3, GPIO_AF_OUTPUT_PP);   // Alt SPI1 SCK
+ gpio_set_mode (GPIOB,  4, GPIO_INPUT_FLOATING); // Alt SPI1 MISO
+ gpio_set_mode (GPIOB,  5, GPIO_AF_OUTPUT_PP);   // Alt SPI1 MOSI
 #endif
-  
-#if ((TFT_SPI == SPI2) || (DAC_SPI == SPI2) || (SD_SPI == SPI2))
- {
-  Serial.println("[Setup] Start SPI2...");
-
-  gpio_set_mode (GPIOB, 12, GPIO_AF_OUTPUT_PP);   // SPI2 NSS
-  gpio_set_mode (GPIOB, 13, GPIO_AF_OUTPUT_PP);   // SPI2 SCK
-  gpio_set_mode (GPIOB, 14, GPIO_INPUT_FLOATING); // SPI2 MISO
-  gpio_set_mode (GPIOB, 15, GPIO_AF_OUTPUT_PP);   // SPI2 MOSI
-
-  _spi_2.begin();
- }
-#endif
+ 
+ Serial.println("[Setup] Start SPI1...");
+ 
+ _spi_1.begin();
+ 
+ Serial.println("[Setup] Start SPI2...");
+ 
+ gpio_set_mode (GPIOB, 12, GPIO_AF_OUTPUT_PP);   // SPI2 NSS
+ gpio_set_mode (GPIOB, 13, GPIO_AF_OUTPUT_PP);   // SPI2 SCK
+ gpio_set_mode (GPIOB, 14, GPIO_INPUT_FLOATING); // SPI2 MISO
+ gpio_set_mode (GPIOB, 15, GPIO_AF_OUTPUT_PP);   // SPI2 MOSI
+ 
+ _spi_2.begin();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
