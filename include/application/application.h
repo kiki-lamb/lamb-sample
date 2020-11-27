@@ -77,7 +77,7 @@ public:
 // #else // SPI2
 //  static constexpr  uint32_t            SD_CS               = BOARD_SPI2_NSS_PIN;
 // #endif
- static constexpr  uint32_t            SD_CS                = PB0;
+ static constexpr  uint32_t            SD_CS                = PB1;
 #endif
  
 private:
