@@ -11,7 +11,6 @@ using namespace lamb::tables;
 //////////////////////////////////////////////////////////////////////////////
 SPIClass                     application::_spi_1      { 1 };
 SPIClass                     application::_spi_2      { 2 };
-int32_t                      application::_avg_sample { 0 };
 size_t                       application::_sample_ix0 { 0 };
 HardwareTimer                application::_timer_1    { 1 };
 HardwareTimer                application::_timer_2    { 2 };
@@ -23,7 +22,6 @@ application::dac             application::_dac{ application::DAC_WS };
 #endif
 
 application::tft             application::_tft{ application::TFT_CS, application::TFT_DC };
-
 
 application::displayed_value<voices::filter::unsigned_internal_t::value_type>
 application::_displayed_filter_freq{ "Freq: ", 184, 5,  10, 64 };
@@ -393,13 +391,13 @@ void application::setup() {
 ////////////////////////////////////////////////////////////////////////////////
 
 bool application::sixteenth_second() {
- constexpr uint32_t TENTH_SECOND      = voices::S_RATE >> 4;
- static uint32_t    last_tenth_second = 0;
+ constexpr uint32_t SIXTEENTH_SECOND      = voices::S_RATE >> 4;
+ static uint32_t    last_sixteenth_second = 0;
  
- if ((uint32_t)((_sample_ix0 - last_tenth_second)) < TENTH_SECOND)
+ if ((uint32_t)((_sample_ix0 - last_sixteenth_second)) < SIXTEENTH_SECOND)
   return false;
  
- last_tenth_second = _sample_ix0;
+ last_sixteenth_second = _sample_ix0;
  
  _displayed_filter_freq.update(voices::filter_f().value);
  _displayed_filter_res .update(voices::filter_q().value);
