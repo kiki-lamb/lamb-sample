@@ -85,7 +85,6 @@ private:
  static            SPIClass             _spi_2;
  static            int32_t              _avg_sample;
  static            size_t               _sample_ix0;
- static            size_t               _sample_ix1;
  static            HardwareTimer        _timer_1; 
  static            HardwareTimer        _timer_2;
  static            HardwareTimer        _timer_3;

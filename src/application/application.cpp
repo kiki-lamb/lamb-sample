@@ -13,7 +13,6 @@ SPIClass                     application::_spi_1      { 1 };
 SPIClass                     application::_spi_2      { 2 };
 int32_t                      application::_avg_sample { 0 };
 size_t                       application::_sample_ix0 { 0 };
-size_t                       application::_sample_ix1 { 0 };
 HardwareTimer                application::_timer_1    { 1 };
 HardwareTimer                application::_timer_2    { 2 };
 HardwareTimer                application::_timer_3    { 3 };
@@ -240,7 +239,6 @@ void application::s_rate() {
 #endif
 
  _sample_ix0  ++;
- _sample_ix1  ++;
 }
  
 ////////////////////////////////////////////////////////////////////////////////
@@ -447,13 +445,13 @@ u16q16   draw_operations{ 0 };
 
 bool application::one_second() { 
 #ifdef LOG_DRAW_RATES
- if (_sample_ix1 < voices::S_RATE)
+ if (_sample_ix0 < voices::S_RATE)
   return false;
  
  static u16q16        avg_draw_operations       { 0 };
  static uint32_t      tenth_seconds             = 0;
  tenth_seconds                                 += 1;
- _sample_ix1                                    = 0;
+ _sample_ix0                                    = 0;
  avg_draw_operations                           *= u16q16(0xe000);
  avg_draw_operations                           += draw_operations * u16q16(0x1fff);
  
