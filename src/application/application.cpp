@@ -396,7 +396,7 @@ bool application::sixteenth_second() {
  constexpr uint32_t TENTH_SECOND      = voices::S_RATE >> 4;
  static uint32_t    last_tenth_second = 0;
  
- if ((_sample_ix0 - last_tenth_second) < TENTH_SECOND)
+ if ((uint32_t)((_sample_ix0 - last_tenth_second)) < TENTH_SECOND)
   return false;
  
  last_tenth_second = _sample_ix0;
@@ -414,7 +414,7 @@ bool application::half_second() {
  constexpr uint32_t HALF_SECOND      = voices::S_RATE >> 1;
  static uint32_t    last_half_second = 0;
  
- if ((_sample_ix0 - last_half_second) < HALF_SECOND)
+ if ((uint32_t)((_sample_ix0 - last_half_second)) < HALF_SECOND)
   return false;
  
  draw_time();
@@ -446,7 +446,7 @@ bool application::one_second() {
  constexpr uint32_t ONE_SECOND           = voices::S_RATE;
  static uint32_t    last_one_second      = 0;
 
- if ((_sample_ix0 - last_one_second) < voices::S_RATE)
+ if ((uint32_t)((_sample_ix0 - last_one_second)) < voices::S_RATE)
   return false;
 
  last_one_second                         = _sample_ix0;
@@ -483,6 +483,7 @@ bool application::idle() {
 
  return true;
 }
+
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::loop() {
