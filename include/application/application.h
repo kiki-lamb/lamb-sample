@@ -201,7 +201,8 @@ private:
   
  static            void                 k_rate();
  static            void                 s_rate();
- static            bool                 graph();  
+ static            bool                 draw_graph();
+ static            void                 draw_time();  
  static            void                 setup_tft();
  static            void                 setup_dac();
  static            void                 setup_timers();

@@ -36,7 +36,7 @@ application::_displayed_vol        { "Vol:  ", 184, 55, 10, 64 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool application::graph() {
+bool application::draw_graph() {
  bool r = false;
 
  if (_draw_buffer.count() >= 16) {
@@ -73,8 +73,8 @@ bool application::graph() {
    tmp.value = -63;
   }
  
-  static const uint16_t width = 172;
-  static uint16_t       col = 0;
+  static const uint16_t width   = 172;
+  static uint16_t       col     = 0;
   uint16_t              tmp_col = col % width;
   
   _tft.drawFastVLine(tmp_col, 1, 128 - 2, ILI9341_BLACK);
@@ -111,16 +111,10 @@ bool application::graph() {
   r = true;
  }
  
-// col %= col_max;
-
  static uint32_t last_time = 0;
  
  if ((_sample_ix0 - last_time) > (voices::S_RATE >> 1)) {
-  _tft.setCursor(10, 210);
-  _tft.fillRect(10, 210 - 2, 100, 20, ILI9341_BLACK);
-  _tft.setTextColor(ILI9341_GREEN);
-  _tft.setTextSize(2);
-  _tft.print(_sample_ix0 >> 15);
+  draw_time();
 
   last_time = _sample_ix0;
 
@@ -128,6 +122,16 @@ bool application::graph() {
  }
  
  return r;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+void application::draw_time() {
+  _tft.setCursor(10, 210);
+  _tft.fillRect(10, 210 - 2, 100, 20, ILI9341_BLACK);
+  _tft.setTextColor(ILI9341_GREEN);
+  _tft.setTextSize(2);
+  _tft.print(_sample_ix0 >> 15);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -486,7 +490,7 @@ bool application::one_second() {
 ////////////////////////////////////////////////////////////////////////////////
 
 bool application::idle() {
- if (! graph()) return false;
+ if (! draw_graph()) return false;
  
  draw_operations += u16q16(1, 0);
 
