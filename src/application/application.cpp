@@ -231,7 +231,7 @@ void application::s_rate() {
  _dac.write_mono(s);
 #endif
 
- _sample_ix0  ++;
+ _sample_ix0 ++;
 }
  
 ////////////////////////////////////////////////////////////////////////////////
@@ -286,7 +286,7 @@ void print_directory(File dir, int numTabs = 0, bool recurse = false) {
    break;
   }
     
-  for (uint8_t i = 0; i < numTabs; i++) {
+  for (uint8_t i = 0; i < numTabs; i ++) {
    Serial.print('\t');
   }
     

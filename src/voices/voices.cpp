@@ -6,9 +6,9 @@ using namespace lamb;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-voices::voice *      voices::_items            [ voices::COUNT                 ];
-u0q32                voices::_phincrs[120]   = { u0q32(0)                      };
-voices::volume_type  voices::_volume           { 30000                         };
+voices::voice *      voices::_items            [ voices::COUNT ];
+u0q32                voices::_phincrs[120]   = { u0q32(0)      };
+voices::volume_type  voices::_volume           { 30000         };
 voices::filter       voices::_lpf;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -161,24 +161,28 @@ voices::filter::unsigned_internal_t voices::filter_q() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void voices::filter_f(voices::filter::unsigned_internal_t const & x) {
+bool voices::filter_f(voices::filter::unsigned_internal_t const & x) {
   // Serial.print("F: ");
   // Serial.print(x.value);
   // Serial.print(" ");
   // Serial.println();
  
- _lpf.freq(x);
+ _lpf.freq(x);;
+ 
+ return true;
 }
   
 ////////////////////////////////////////////////////////////////////////////////
 
-void voices::filter_q(voices::filter::unsigned_internal_t const & x) {
+bool voices::filter_q(voices::filter::unsigned_internal_t const & x) {
  // Serial.print("Q: ");
  // Serial.print(x.value);
  // Serial.print(" ");
  // Serial.println();
  
  _lpf.res(x);
+ 
+ return true;
 }
   
 //////////////////////////////////////////////////////////////////////////////

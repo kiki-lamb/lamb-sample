@@ -42,8 +42,8 @@ public:
  static            voice &              item(size_t const & ix);  
  static            void                 trigger(uint8_t const & ix);
  static            volume_type          volume();
- static            void                 filter_f(filter_arg const & f_);
- static            void                 filter_q(filter_arg const & q_);
+ static            bool                 filter_f(filter_arg const & f_);
+ static            bool                 filter_q(filter_arg const & q_);
  static            filter_arg           filter_f();
  static            filter_arg           filter_q();  
  static            sample               read();
