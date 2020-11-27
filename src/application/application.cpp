@@ -456,9 +456,8 @@ u16q16   draw_operations{ 0 };
 #endif
 
 bool application::one_second() {
- constexpr uint32_t ONE_SECOND = voices::S_RATE;
-
- static uint32_t last_one_second = 0;
+ constexpr uint32_t ONE_SECOND      = voices::S_RATE;
+ static uint32_t    last_one_second = 0;
 
  if ((_sample_ix0 - last_one_second) < voices::S_RATE)
   return false;
@@ -490,7 +489,7 @@ bool application::one_second() {
 ////////////////////////////////////////////////////////////////////////////////
 
 bool application::idle() {
- if (! draw_graph()) return false;
+ if (! draw_graph()) return true;
  
  draw_operations += u16q16(1, 0);
 
@@ -500,8 +499,8 @@ bool application::idle() {
 
 void application::loop() {
  (
-  one_second() ||
-  half_second() ||
+  one_second()       ||
+  half_second()      ||
   sixteenth_second() ||
   idle()
  );
