@@ -18,8 +18,8 @@ public:
  typedef lamb::u1q15                                         volume_type;
  
  
- static const      uint32_t             S_RATE;
- static const      uint8_t              COUNT              = 6;
+ static constexpr  uint32_t             S_RATE             = 32768;
+ static constexpr  uint8_t              COUNT              = 6;
   
 private:
  voices() = default;

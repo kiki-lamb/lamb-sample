@@ -397,13 +397,15 @@ void application::setup() {
   
 ////////////////////////////////////////////////////////////////////////////////
 
-bool application::tenth_second(uint32_t const & now) {
+bool application::tenth_second() {
+ constexpr uint32_t TENTH_SECOND = voices::S_RATE >> 3;
+
  static uint32_t last_tenth_second = 0;
  
- if ((now - last_tenth_second) < 100)
+ if ((_sample_ix0 - last_tenth_second) < TENTH_SECOND)
   return false;
  
- last_tenth_second = now;
+ last_tenth_second = _sample_ix0;
  
  _displayed_filter_freq.update(voices::filter_f().value);
  _displayed_filter_res .update(voices::filter_q().value);
@@ -414,13 +416,15 @@ bool application::tenth_second(uint32_t const & now) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool application::half_second(uint32_t const & now) {
+bool application::half_second() {
+ constexpr uint32_t HALF_SECOND = voices::S_RATE >> 1;
+
  static uint32_t last_half_second = 0;
  
- if ((now - last_half_second) < 500)
+ if ((_sample_ix0 - last_half_second) < HALF_SECOND)
   return false;
  
- last_half_second = now;
+ last_half_second = _sample_ix0;
 
 #ifndef DISABLE_SD
  File root = SD.open("/");
@@ -443,15 +447,20 @@ bool application::half_second(uint32_t const & now) {
 u16q16   draw_operations{ 0 };
 #endif
 
-bool application::one_second() { 
-#ifdef LOG_DRAW_RATES
- if (_sample_ix0 < voices::S_RATE)
+bool application::one_second() {
+ constexpr uint32_t ONE_SECOND = voices::S_RATE;
+
+ static uint32_t last_one_second = 0;
+
+ if ((_sample_ix0 - last_one_second) < voices::S_RATE)
   return false;
+
+ last_one_second = _sample_ix0;
  
+#ifdef LOG_DRAW_RATES
  static u16q16        avg_draw_operations       { 0 };
  static uint32_t      tenth_seconds             = 0;
  tenth_seconds                                 += 1;
- _sample_ix0                                    = 0;
  avg_draw_operations                           *= u16q16(0xe000);
  avg_draw_operations                           += draw_operations * u16q16(0x1fff);
  
@@ -473,17 +482,16 @@ bool application::one_second() {
 ////////////////////////////////////////////////////////////////////////////////
 
 bool application::idle() {
- if (graph())
-  draw_operations += u16q16(1, 0);
+ if (! graph()) return false;
+ 
+ draw_operations += u16q16(1, 0);
 
  return true;
 }
 ////////////////////////////////////////////////////////////////////////////////
 
 void application::loop() {
- uint32_t        now                              = millis();
-
- one_second() || half_second(now) || tenth_second(now) || idle();
+ one_second() || half_second() || tenth_second() || idle();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
