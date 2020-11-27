@@ -17,7 +17,11 @@ size_t                       application::_sample_ix1{ 0 };
 HardwareTimer                application::_timer_1   { 1 };
 HardwareTimer                application::_timer_2   { 2 };
 HardwareTimer                application::_timer_3   { 3 };
+
+#ifndef DISABLE_DAC
 application::dac             application::_dac{ application::DAC_WS };
+#endif
+
 application::tft             application::_tft{ application::TFT_CS, application::TFT_DC };
 
 application::draw_buffer     application::_draw_buffer;         
@@ -231,7 +235,9 @@ void application::s_rate() {
   _draw_buffer.enqueue(s);
  }
 
+#ifndef DISABLE_DAC
  _dac.write_mono(s);
+#endif
 
  _sample_ix0  ++;
  _sample_ix1  ++;
@@ -242,7 +248,7 @@ void application::s_rate() {
 void application::setup_tft() {
   Serial.println("[Setup] Setup TFT...");
 
-#if TFT_SPI == SPI_1
+#if TFT_SPI == SPI1
   _tft.begin(_spi_1);
 #else
   _tft.begin(_spi_2);
@@ -258,12 +264,14 @@ void application::setup_tft() {
 
 
 void application::setup_dac() {
+#ifndef DISABLE_DAC
  Serial.println("[Setup] Setup DAC...");
 
-#if DAC_SPI == SPI_1
+#if DAC_SPI == SPI1
  _dac.setup(_spi_1);
 #else
  _dac.setup(_spi_2);
+#endif
 #endif
 }
 
@@ -310,9 +318,9 @@ void print_directory(File dir, int numTabs = 0, bool recurse = false) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void application::setup_spis() {
-#if ((TFT_SPI == SPI_1) || (DAC_SPI == SPI_1) || (SD_SPI == SPI_1))
+#if ((TFT_SPI == SPI1) || (DAC_SPI == SPI1) || (SD_SPI == SPI1))
  {
- #ifndef REMAP_SPI_1 // not remapped
+ #ifndef REMAP_SPI1 // not remapped
   gpio_set_mode (GPIOA,  4, GPIO_AF_OUTPUT_PP);   // SPI1 NSS
   gpio_set_mode (GPIOA,  5, GPIO_AF_OUTPUT_PP);   // SPI1 SCK
   gpio_set_mode (GPIOA,  6, GPIO_INPUT_FLOATING); // SPI1 MISO
@@ -334,9 +342,9 @@ void application::setup_spis() {
  }
 #endif
   
-#if ((TFT_SPI == SPI_2) || (DAC_SPI == SPI_2) || (SD_SPI == SPI_2))
+#if ((TFT_SPI == SPI2) || (DAC_SPI == SPI2) || (SD_SPI == SPI2))
  {
-  Serial.println("[Setup] Start SPI1...");
+  Serial.println("[Setup] Start SPI2...");
 
   gpio_set_mode (GPIOB, 12, GPIO_AF_OUTPUT_PP);   // SPI2 NSS
   gpio_set_mode (GPIOB, 13, GPIO_AF_OUTPUT_PP);   // SPI2 SCK
@@ -387,10 +395,10 @@ void application::setup() {
 
  setup_dac();
 
- #ifdef REMAP_SPI1
-   Serial.println("[Setup] Correct PA5 pin mode...");
-   pinMode(PA5, INPUT);
- #endif
+ // #ifdef REMAP_SPI1
+ //   Serial.println("[Setup] Correct PA5 pin mode...");
+ //   pinMode(PA5, INPUT);
+ // #endif
   
  setup_timers();
 

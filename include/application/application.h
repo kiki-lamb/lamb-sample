@@ -10,20 +10,20 @@
 #include "events/application.h"
 #include "Adafruit_ILI9341_STM.h"
 
-#define SPI_1   1
-#define SPI_2   2
+#define SPI1   1
+#define SPI2   2
 
 #ifndef TFT_SPI
-#define TFT_SPI SPI_1 
+#define TFT_SPI SPI1 
 #endif
 
 #ifndef DAC_SPI
-#define DAC_SPI SPI_2
+#define DAC_SPI SPI2
 #endif
 
 #ifdef  ENABLE_SD
 #ifndef SD_SPI
-#define SD_SPI SPI_1
+#define SD_SPI SPI1
 #endif
 #endif
 
@@ -31,42 +31,46 @@ class application {
 
 public:
  typedef Adafruit_ILI9341_STM                               tft;
+
+#ifndef DISABLE_DAC
  typedef lamb::device::pt8211                               dac;
+#endif
+ 
  typedef lamb::ring_buffer<voices::sample, 256>             draw_buffer;
  typedef controls::application_event                        application_event;
  typedef controls::application_event_type                   application_event_type;
 
-#if TFT_SPI == SPI_1
-#ifndef REMAP_SPI_1
+#if TFT_SPI == SPI1
+#ifndef REMAP_SPI1
  static constexpr  uint32_t            TFT_DC              = PB0; // next to SPI1 MOSI
  static constexpr  uint32_t            TFT_CS              = BOARD_SPI1_NSS_PIN; 
 #else // remapped
  static constexpr  uint32_t            TFT_DC              = PA8; // next to SPI2 NSS
- static constexpr  uint32_t            TFT_CS              = BOARD_ALT_SPI1_NSS_PIN;
+ static constexpr  uint32_t            TFT_CS              = BOARD_SPI1_ALT_NSS_PIN;
 #endif
-#else // SPI_2
+#else // SPI2
  static constexpr  uint32_t            TFT_DC              = PA8; // next to SPI2 NSS
  static constexpr  uint32_t            TFT_CS              = BOARD_ALT_SPI2_NSS_PIN;
 #endif
  
-#if DAC_SPI == SPI_1
-#ifndef REMAP_SPI_1
+#if DAC_SPI == SPI1
+#ifndef REMAP_SPI1
  static constexpr  uint32_t            DAC_WS              = BOARD_SPI1_NSS_PIN;
 #else // remapped
  static constexpr  uint32_t            DAC_WS              = BOARD_SPI1_ALT_NSS_PIN;
 #endif
-#else // SPI_2
+#else // SPI2
  static constexpr  uint32_t            DAC_WS              = BOARD_SPI2_NSS_PIN;
 #endif
 
 #ifdef ENABLE_SD
-#if SD_SPI == SPI_1
-#ifndef REMAP_SPI_1
+#if SD_SPI == SPI1
+#ifndef REMAP_SPI1
  static constexpr  uint32_t            SD_CS               = BOARD_SPI1_NSS_PIN;
 #else // remapped
  static constexpr  uint32_t            SD_CS               = BOARD_SPI1_ALT_NSS_PIN;
 #endif
-#else // SPI_2
+#else // SPI2
  static constexpr  uint32_t            SD_CS               = BOARD_SPI2_NSS_PIN;
 #endif
 #endif
@@ -80,7 +84,11 @@ private:
  static            HardwareTimer        _timer_1; 
  static            HardwareTimer        _timer_2;
  static            HardwareTimer        _timer_3;
+
+#ifndef DISABLE_DAC
  static            dac                  _dac;
+#endif
+ 
  static            tft                  _tft;
  static            draw_buffer          _draw_buffer;
 
