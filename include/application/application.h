@@ -18,13 +18,17 @@
 #endif
 
 #ifndef DAC_SPI
-#define DAC_SPI SPI2
+#define DAC_SPI SPI2  
 #endif
 
 #ifndef DISABLE_SD
 #ifndef SD_SPI
 #define SD_SPI SPI1
 #endif
+#endif
+
+#if (DAC_SPI == TFT_SPI) || (DAC_SPI == SD_SPI)
+#error "DAC must not share it's SPI with other devices as it is an I2S device."
 #endif
 
 class application {
@@ -40,8 +44,6 @@ public:
  typedef controls::application_event                        application_event;
  typedef controls::application_event_type                   application_event_type;
 
- // DAC must be given it's own SPI since it's an I2S device!
- 
 #if TFT_SPI == SPI1
 #ifndef REMAP_SPI1
  static constexpr  uint32_t            TFT_DC              = PB0; // next to SPI1 MOSI
